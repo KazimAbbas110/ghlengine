@@ -25,7 +25,17 @@
   background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%);
 
 }
+/* ------------------------------
+   Sidebar Header Color Styling
+------------------------------ */
 
+.sidebar-v2-location .hl_header .container-fluid {
+          background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%);
+    }
+     .notification-banner-top-bar {
+              background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%);
+        }
+           
 /* ===============================
    General Text Colors
 ================================= */
