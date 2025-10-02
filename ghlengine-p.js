@@ -94,6 +94,47 @@
 .flex-page-bar { background: #ffffff; border-bottom: 1px solid #ddd; }
 .breadcrumb { font-size: 14px; color: #666; }
 
+/* ===============================
+   General Text Colors
+================================= */
+.crm-opportunities-status .hl-text,
+.notification-title-message,
+.sidebar-v2-location .hl_force-block,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-placeholder,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-icon,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-shortcut {
+    color: #fff;
+}
+
+.sidebar-v2-location .hl_force-block {
+    font-weight: 100;
+}
+
+/* ===============================
+   Sidebar Navigation Titles
+================================= */
+.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
+.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title {
+    color: #fff;
+    font-weight: 400;
+    font-family: Roboto, sans-serif;
+    font-size: 15px;
+}
+
+/* ===============================
+   Sidebar Backgrounds
+================================= */
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener,
+.sidebar-v2-location #sidebar-v2 #quickActions,
+.sidebar-v2-location #sidebar-v2 #backButtonv2,
+#sb_conversation_ai_settings_v2 .hl_new_badge,
+#sb_knowledge-base-settings .hl_new_badge,
+#sb_objects .hl_new_badge,
+#sb_labs .hl_new_badge,
+#sb_brand-boards .hl_new_badge {
+    background-color: rgba(255, 255, 255, 0.33);
+}
 
   `;
 
