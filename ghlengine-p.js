@@ -18,6 +18,9 @@
     width: 180px;   /* adjust */
     height: 80px;  /* adjust */
 }
+image {
+    display: none;
+}
 
 
 /* ===============================
