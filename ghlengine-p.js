@@ -7,6 +7,18 @@
 /* purple Background Only */
 
 
+/* ===============================
+   Brand Logo
+================================= */
+.agency-logo-container {
+    background-image: url("https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/6bQ0UXNQbjMpjlWrd45K/media/61dd8af27535c96de9824bf8.png");
+    background-size: contain;  /* or cover */
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 180px;   /* adjust */
+    height: 80px;  /* adjust */
+}
+
 
 /* ===============================
    Variables (for easy maintenance)
