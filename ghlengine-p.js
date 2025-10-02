@@ -10,18 +10,16 @@
 /* ===============================
    Brand Logo
 ================================= */
-.agency-logo-container {
+/*.agency-logo-container {
     background-image: url("https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/6bQ0UXNQbjMpjlWrd45K/media/61dd8af27535c96de9824bf8.png");
-    background-size: contain;  /* or cover */
+    background-size: contain;  
     background-repeat: no-repeat;
     background-position: center;
-    width: 180px;   /* adjust */
-    height: 80px;  /* adjust */
-}
-image {
-    display: none;
+    width: 180px;   
+    height: 80px;  
 }
 
+*/
 
 /* ===============================
    Variables (for easy maintenance)
