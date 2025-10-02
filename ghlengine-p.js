@@ -1,13 +1,10 @@
-(function() {
-  const css = `
-   /* Blue Background Only */
-/* Blue Background Only */
+
 
 
 (function() {
   const css = `
  
-/* yellow Background Only */
+/* purple Background Only */
 
 /* ------------------------------
    Global Card Styling
@@ -106,9 +103,3 @@
 })();
 
 
-  `;
-
-  const style = document.createElement("style");
-  style.textContent = css;
-  document.head.appendChild(style);
-})();
