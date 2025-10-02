@@ -6,15 +6,25 @@
  
 /* purple Background Only */
 
+
+
+/* ===============================
+   Variables (for easy maintenance)
+================================= */
+:root {
+    --text-white: #fff;
+    --bg-white-light: rgba(255, 255, 255, 0.33);
+    --font-main: Roboto, sans-serif;
+}
+
 /* ------------------------------
-   Global Card Styling
+   Sidebar Color Styling
 ------------------------------ */
 
 .transition-slowest .flex-col > .overflow-hidden {
   background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%);
 
 }
-
 
 /* ===============================
    General Text Colors
@@ -30,7 +40,7 @@
 .sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
 .sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title,
 .sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title {
-    color: #fff;
+    color: var(--text-white);
 }
 
 .sidebar-v2-location .hl_force-block {
@@ -45,8 +55,8 @@
 .sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
 .sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title,
 .sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title {
+    font-family: var(--font-main);
     font-weight: 400;
-    font-family: Roboto, sans-serif;
 }
 
 .hl_switcher-loc-name,
@@ -68,19 +78,20 @@
 #sb_objects .hl_new_badge,
 #sb_labs .hl_new_badge,
 #sb_brand-boards .hl_new_badge {
-    background-color: rgba(255, 255, 255, 0.33);
+    background-color: var(--bg-white-light);
 }
 
 /* ===============================
    Notification Banner
 ================================= */
 .notification-banner-top-bar {
-    /* Add styles here if needed */
+    /* Add custom styles if needed */
 }
 
 #notification_banner-btn-close .h-5 {
-    background-color: #fff;
+    background-color: var(--text-white);
 }
+
   `;
 
   const style = document.createElement("style");
