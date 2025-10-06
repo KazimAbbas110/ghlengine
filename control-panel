@@ -1,5 +1,5 @@
 (async function(){
-  const API_BASE = "";
+  const API_BASE = "https://ghle-theme-builder.vercel.app/api";
   const agencyCompanyId = window.agencyCompanyId; // must be set in GHL context
 
   if(!agencyCompanyId) return console.error("Agency Company ID missing");
