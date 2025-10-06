@@ -1,9 +1,7 @@
-<script>
 (function () {
   const BTN_ID = "ghl-theme-switcher-btn";
   const POPUP_ID = "ghl-theme-popup";
 
-  // ✅ Backend endpoints
   const API_URL = "https://ghle-backend.vercel.app/api/themes";
   const BACKEND_API = "https://ghle-backend.vercel.app/api/subaccount";
 
@@ -11,7 +9,7 @@
   let popupRef = null;
   let btnRef = null;
 
-  /* ------------------------------ Helpers ------------------------------ */
+  // ------------------- UI Helpers -------------------
   function showToast(msg, isError = false) {
     const el = document.createElement("div");
     Object.assign(el.style, {
@@ -30,14 +28,16 @@
     setTimeout(() => el.remove(), 3000);
   }
 
-  async function fetchSubAccounts() {
+  // ------------------- API Calls -------------------
+  async function fetchSubAccounts(companyId) {
     try {
-      const res = await fetch(`${BACKEND_API}/YOUR_COMPANY_ID`);
+      const res = await fetch(`${BACKEND_API}/${companyId}`);
       if (!res.ok) throw new Error("Failed to fetch subaccounts");
       const data = await res.json();
       return data.subAccounts || [];
     } catch (err) {
       console.error(err);
+      showToast("Failed to load subaccounts", true);
       return [];
     }
   }
@@ -45,10 +45,8 @@
   async function fetchThemes() {
     try {
       const res = await fetch(API_URL);
-      if (!res.ok) throw new Error("Failed to fetch themes");
       return await res.json();
-    } catch (err) {
-      console.error(err);
+    } catch {
       return [];
     }
   }
@@ -77,28 +75,29 @@
     }
   }
 
+  // ------------------- Theme Injection -------------------
   function injectTheme(cdnUrl) {
     if (!cdnUrl) return;
     const old = document.getElementById("dynamic-theme-script");
     if (old) old.remove();
+
     const s = document.createElement("script");
     s.id = "dynamic-theme-script";
     s.src = cdnUrl + "?v=" + Date.now();
+    s.onerror = () => showToast("Failed to load theme script", true);
     document.head.appendChild(s);
   }
 
-  async function loadAndApplyTheme(locationId) {
+  async function loadSavedTheme(locationId) {
     const theme = await fetchSubAccountTheme(locationId);
     if (theme?.cdnUrl) {
       injectTheme(theme.cdnUrl);
-      console.log("✅ Loaded saved theme:", theme.cdnUrl);
-    } else {
-      console.log("ℹ️ No saved theme found for this subaccount");
+      console.log("Loaded saved theme:", theme.cdnUrl);
     }
   }
 
-  /* ------------------------------ Popup ------------------------------ */
-  async function makePopup() {
+  // ------------------- Popup -------------------
+  async function makePopup(themes) {
     if (popupRef) return popupRef;
 
     const div = document.createElement("div");
@@ -113,7 +112,7 @@
       padding: "20px",
       borderRadius: "12px",
       boxShadow: "0 8px 20px rgba(0,0,0,0.25)",
-      zIndex: "99999",
+      zIndex: 99999,
       maxWidth: "320px",
       textAlign: "center",
       fontFamily: "system-ui, sans-serif",
@@ -124,36 +123,29 @@
     title.style.marginBottom = "15px";
     div.appendChild(title);
 
-    const themes = await fetchThemes();
-    if (!themes.length) {
-      const msg = document.createElement("p");
-      msg.textContent = "No themes available.";
-      div.appendChild(msg);
-    } else {
-      themes.forEach((theme) => {
-        const btn = document.createElement("button");
-        btn.textContent = theme.name;
-        Object.assign(btn.style, {
-          display: "block",
-          width: "100%",
-          margin: "5px 0",
-          padding: "8px 10px",
-          borderRadius: "8px",
-          border: "none",
-          cursor: "pointer",
-          background: theme.primaryColor || "#4F46E5",
-          color: "#fff",
-          fontWeight: "600",
-        });
-        btn.onclick = async () => {
-          injectTheme(theme.cdnUrl);
-          const ok = await saveTheme(SUBACCOUNT_LOCATION_ID, theme._id);
-          showToast(ok ? "Theme saved ✅" : "Failed to save theme", !ok);
-          closePopup();
-        };
-        div.appendChild(btn);
+    themes.forEach((theme) => {
+      const btn = document.createElement("button");
+      btn.textContent = theme.name;
+      Object.assign(btn.style, {
+        display: "block",
+        width: "100%",
+        margin: "5px 0",
+        padding: "8px 10px",
+        borderRadius: "8px",
+        border: "none",
+        cursor: "pointer",
+        background: theme.primaryColor || "#4F46E5",
+        color: "#fff",
+        fontWeight: "600",
       });
-    }
+      btn.onclick = async () => {
+        injectTheme(theme.cdnUrl);
+        const ok = await saveTheme(SUBACCOUNT_LOCATION_ID, theme._id);
+        showToast(ok ? "Theme saved ✅" : "Failed to save theme", !ok);
+        closePopup();
+      };
+      div.appendChild(btn);
+    });
 
     const closeBtn = document.createElement("button");
     closeBtn.textContent = "Close";
@@ -175,16 +167,17 @@
   }
 
   function openPopup() {
-    makePopup().then((p) => (p.style.display = "block"));
+    makePopup([]).then((p) => (p.style.display = "block"));
   }
 
   function closePopup() {
     if (popupRef) popupRef.style.display = "none";
   }
 
-  /* ------------------------------ Floating Button ------------------------------ */
+  // ------------------- Floating Button -------------------
   function makeBtn() {
     if (btnRef) return btnRef;
+
     const btn = document.createElement("div");
     btn.id = BTN_ID;
     btn.textContent = "Change Theme";
@@ -205,20 +198,24 @@
     btnRef = btn;
   }
 
-  /* ------------------------------ Initialize ------------------------------ */
+  // ------------------- Initialize -------------------
   document.addEventListener("DOMContentLoaded", async () => {
     makeBtn();
 
-    // Fetch subaccounts
-    const subs = await fetchSubAccounts();
-    if (!subs.length) return showToast("No subaccounts found", true);
+    // 1️⃣ Fetch subaccounts
+    const subAccounts = await fetchSubAccounts(COMPANY_ID);
+    if (!subAccounts.length) return showToast("No subaccounts found", true);
 
-    // Pick first subaccount
-    SUBACCOUNT_LOCATION_ID = subs[0].locationId;
-    console.log("📍 Using location:", SUBACCOUNT_LOCATION_ID);
+    // Pick first subaccount (or add selector later)
+    SUBACCOUNT_LOCATION_ID = subAccounts[0].locationId;
 
-    // Load saved theme
-    await loadAndApplyTheme(SUBACCOUNT_LOCATION_ID);
+    // 2️⃣ Fetch themes
+    const themes = await fetchThemes();
+
+    // 3️⃣ Render popup with themes
+    await makePopup(themes);
+
+    // 4️⃣ Load saved theme
+    await loadSavedTheme(SUBACCOUNT_LOCATION_ID);
   });
 })();
-</script>
