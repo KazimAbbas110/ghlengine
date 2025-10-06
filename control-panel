@@ -2,11 +2,11 @@
   const BTN_ID = "ghl-theme-switcher-btn";
   const POPUP_ID = "ghl-theme-popup";
 
-  // 🔧 CONFIG — update backend base URL only
-  const API_URL = "https://ghle-theme-builder.vercel.app/api/themes";
-  const BACKEND_API = "https://ghle-theme-builder.vercel.app/api/subaccount";
+  // 🔧 BACKEND ENDPOINTS (updated to your deployed backend)
+  const API_URL = "https://ghle-backend.vercel.app/api/themes";
+  const BACKEND_API = "https://ghle-backend.vercel.app/api/subaccount";
 
-  // 🧩 Auto-detect subaccount ID
+  // 🧩 Auto-detect subaccount ID (from URL or storage)
   const urlParams = new URLSearchParams(window.location.search);
   let SUBACCOUNT_LOCATION_ID =
     urlParams.get("locationId") ||
