@@ -1,7 +1,7 @@
 (async function() {
   const BTN_ID = "ghl-theme-switcher-btn";
   const POPUP_ID = "ghl-theme-popup";
-  const API_BASE = "https://ghle-theme-builder.vercel.app/api";
+  const API_BASE = "https://ghle-theme-builder.vercel.app/api/themes";
   const agencyCompanyId = window.agencyCompanyId; // must be set in GHL context
 
   if (!agencyCompanyId) return console.error("Agency Company ID missing");
