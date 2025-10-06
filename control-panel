@@ -5,7 +5,7 @@
   // ✅ Backend endpoints
   const API_URL = "https://ghle-backend.vercel.app/api/themes";
   const BACKEND_API = "https://ghle-backend.vercel.app/api/subaccount";
-  const COMPANY_ID = "your-company-id-here"; // 👈 replace with your actual companyId
+  const COMPANY_ID = "uomZrOy5NrTiYDHZojm4"; // 👈 replace with your actual companyId
 
   let SUBACCOUNT_LOCATION_ID = null;
   let popupRef = null;
