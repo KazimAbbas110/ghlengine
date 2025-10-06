@@ -1,5 +1,5 @@
 (function(){
-  const API_URL = "https://unadducible-abbigail-knitted.ngrok-free.dev/api/themes";
+  const API_URL = "https://ghle-theme-builder.vercel.app/api/themes";
   const CONTAINER_ID = "ghl-theme-selector";
   const HB_MS = 500;
 
