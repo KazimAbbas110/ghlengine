@@ -2,24 +2,25 @@
   const BTN_ID = "ghl-theme-switcher-btn";
   const POPUP_ID = "ghl-theme-popup";
   const API_URL = "https://ghle-theme-builder.vercel.app/api/themes";
-  const SUBACCOUNT_LOCATION_ID = "uomZrOy5NrTiYDHZojm4"; // manually set subaccount locationId
+  const SUBACCOUNT_LOCATION_ID = "uomZrOy5NrTiYDHZojm4"; // set your subaccount locationId
   const BACKEND_API = "https://ghle-theme-builder.vercel.app/api/subaccount";
 
   let popupRef = null;
   let btnRef = null;
 
+  // Load and apply a theme
   async function loadTheme(themeId, cdnUrl){
     localStorage.setItem(`theme-${SUBACCOUNT_LOCATION_ID}`, themeId);
 
     const old = document.getElementById("dynamic-theme-script");
-    if (old) old.remove();
+    if(old) old.remove();
 
     const s = document.createElement("script");
     s.id = "dynamic-theme-script";
     s.src = cdnUrl + "?v=" + Date.now();
     document.head.appendChild(s);
 
-    // save selected theme to backend
+    // Save theme selection to backend
     try {
       await fetch(`${BACKEND_API}/${SUBACCOUNT_LOCATION_ID}/theme`, {
         method: "PUT",
@@ -33,9 +34,10 @@
     closePopup();
   }
 
+  // Create theme selection popup
   async function makePopup(){
-    if (popupRef) return popupRef;
-    if (!document.body) return null;
+    if(popupRef) return popupRef;
+    if(!document.body) return null;
 
     const div = document.createElement("div");
     div.id = POPUP_ID;
@@ -87,10 +89,11 @@
   }
 
   function openPopup(){ makePopup().then(p => { if(p) p.style.display="block"; }); }
-  function closePopup(){ if (popupRef) popupRef.style.display = "none"; }
+  function closePopup(){ if(popupRef) popupRef.style.display="none"; }
 
+  // Create floating button
   function makeBtn(){
-    if (btnRef) return btnRef;
+    if(btnRef) return btnRef;
 
     const btn = document.createElement("div");
     btn.id = BTN_ID;
@@ -106,30 +109,33 @@
     btn.onclick = openPopup;
     btnRef = btn;
 
-    if (document.body) document.body.appendChild(btn);
+    if(document.body) document.body.appendChild(btn);
     return btn;
   }
 
-  // Heartbeat to keep button mounted
+  // Keep button mounted
   const interval = setInterval(() => {
-    if (!document.getElementById(BTN_ID) && document.body){
+    if(!document.getElementById(BTN_ID) && document.body){
       makeBtn();
     }
   }, 300);
 
   const observer = new MutationObserver(() => {
-    if (!document.getElementById(BTN_ID) && document.body){
+    if(!document.getElementById(BTN_ID) && document.body){
       makeBtn();
     }
   });
   observer.observe(document.body, { childList: true, subtree: true });
 
-  // Auto-load saved theme
+  // Auto-load saved theme from backend for subaccount
   document.addEventListener("DOMContentLoaded", async ()=>{
     try {
       const res = await fetch(`${BACKEND_API}/by-location/${SUBACCOUNT_LOCATION_ID}`);
       const sub = await res.json();
-      if(sub.themeId && sub.themeId.cdnUrl) loadTheme(sub.themeId._id, sub.themeId.cdnUrl);
+
+      if(sub.themeId && sub.themeId.cdnUrl){
+        loadTheme(sub.themeId._id, sub.themeId.cdnUrl);
+      }
     } catch(e){
       console.error("Failed to load saved theme:", e);
     }
