@@ -1,34 +1,60 @@
-(async function(){
+(function waitForGHL() {
   const API_BASE = "https://ghle-theme-builder.vercel.app/api";
   const agencyCompanyId = window.agencyCompanyId; // must be set in GHL context
 
-  if(!agencyCompanyId) return console.error("Agency Company ID missing");
+  if (!agencyCompanyId) return console.error("Agency Company ID missing");
 
-  try {
-    const res = await fetch(`${API_BASE}/subaccount/agency/${agencyCompanyId}`);
-    const data = await res.json();
+  // Check if GHL dashboard DOM is ready
+  const dashboardReady = document.querySelector('body'); // or change to a more specific GHL container
+  if (!dashboardReady) return setTimeout(waitForGHL, 500);
 
-    if(!data.success) return console.error("Failed to load subaccounts");
+  // Create floating control panel
+  (async function createControlPanel() {
+    try {
+      const res = await fetch(`${API_BASE}/subaccount/agency/${agencyCompanyId}`);
+      const data = await res.json();
+      if (!data.success) return console.error("Failed to load subaccounts");
 
-    const container = document.createElement('div');
-    container.style.padding = "20px";
-    container.style.background = "#f9f9f9";
-    container.style.border = "1px solid #ddd";
-    container.style.borderRadius = "12px";
+      // Remove old panel if exists
+      const oldPanel = document.getElementById("agency-control-panel");
+      if (oldPanel) oldPanel.remove();
 
-    data.subAccounts.forEach(sub => {
-      const div = document.createElement('div');
-      div.style.marginBottom = "10px";
-      div.innerHTML = `
-        <strong>${sub.locationName}</strong> (ID: ${sub.locationId}) <br>
-        Access: ${sub.access ? '✅' : '❌'} <br>
-        Theme: ${sub.themeId ? sub.themeId.name : 'None'}
+      const panel = document.createElement("div");
+      panel.id = "agency-control-panel";
+      panel.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        width: 320px;
+        max-height: 500px;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        padding: 15px;
+        z-index: 99999;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        font-family: sans-serif;
       `;
-      container.appendChild(div);
-    });
+      panel.innerHTML = `<h4 style="margin-bottom:10px;">Agency Control Panel</h4>`;
 
-    document.body.appendChild(container);
-  } catch(e){
-    console.error("Failed to fetch agency subaccounts:", e);
-  }
+      data.subAccounts.forEach(sub => {
+        const div = document.createElement("div");
+        div.style.marginBottom = "12px";
+        div.style.padding = "8px";
+        div.style.borderBottom = "1px solid #eee";
+        div.innerHTML = `
+          <strong>${sub.locationName}</strong> (ID: ${sub.locationId})<br>
+          Access: ${sub.access ? '✅' : '❌'}<br>
+          Theme: ${sub.themeId ? sub.themeId.name : 'None'}
+        `;
+        panel.appendChild(div);
+      });
+
+      document.body.appendChild(panel);
+
+    } catch (e) {
+      console.error("Failed to fetch agency subaccounts:", e);
+    }
+  })();
 })();
