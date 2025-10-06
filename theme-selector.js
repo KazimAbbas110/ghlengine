@@ -1,13 +1,18 @@
-document.addEventListener("DOMContentLoaded", () => {
-  (async () => {
-    const API_URL = "https://unadducible-abbigail-knitted.ngrok-free.dev/api/themes";
+(function(){
+  const API_URL = "https://unadducible-abbigail-knitted.ngrok-free.dev/api/themes";
+  const CONTAINER_ID = "ghl-theme-selector";
+  const HB_MS = 500;
 
+  async function createSelector() {
     try {
       const res = await fetch(API_URL);
       const themes = await res.json();
 
-      // Create floating panel
+      // Avoid duplicates
+      if (document.getElementById(CONTAINER_ID)) return;
+
       const container = document.createElement("div");
+      container.id = CONTAINER_ID;
       Object.assign(container.style, {
         position: "fixed",
         bottom: "20px",
@@ -42,14 +47,11 @@ document.addEventListener("DOMContentLoaded", () => {
           background: theme.primaryColor || "#888",
           color: "#fff",
         });
-
         btn.onclick = () => {
           const script = document.createElement("script");
           script.src = theme.cdnUrl;
           document.body.appendChild(script);
-          alert(`✅ ${theme.name} applied!`);
         };
-
         container.appendChild(btn);
       });
 
@@ -58,5 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       console.error("❌ Error loading themes:", err);
     }
-  })();
-});
+  }
+
+  // Heartbeat to remount if GHL re-renders the DOM
+  setInterval(createSelector, HB_MS);
+})();
