@@ -3,7 +3,7 @@
   const POPUP_ID = "ghl-theme-popup";
   const API_URL = "https://ghle-theme-builder.vercel.app/api/themes";
   const SUBACCOUNT_LOCATION_ID = "uomZrOy5NrTiYDHZojm4"; // set your subaccount locationId
-  const BACKEND_API = "https://ghle-theme-builder.vercel.app/api/subaccount";
+  const BACKEND_API = "https://custom-kazim-abbas-projects.vercel.app";
 
   let popupRef = null;
   let btnRef = null;
