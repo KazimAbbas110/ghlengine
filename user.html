@@ -101,8 +101,8 @@ body { font-family:'Segoe UI',sans-serif; background:#f5f7fa; color:var(--dark);
     <div class="location-info">
       <div class="location-name" id="locationName">Theme Settings</div>
       <div class="location-status">
-        <div class="status-dot active"></div>
-        <span id="locationStatus">Ready</span>
+        <div class="status-dot" id="statusDot"></div>
+        <span id="locationStatus">Checking status...</span>
       </div>
     </div>
 
@@ -167,6 +167,9 @@ const THEME_URLS = {
   yellow: 'https://ghlengine.vercel.app/ghlengine-y.js'
 };
 
+// ====== DOM Element References ======
+let statusDotEl, locationStatusEl, locationNameEl, currentThemeNameEl, backgroundColorPickerEl, colorPreviewEl;
+
 // ====== Generic API call ======
 async function apiCall(endpoint, options = {}) {
     // Using your existing API endpoint
@@ -197,12 +200,23 @@ async function apiCall(endpoint, options = {}) {
 // ====== Notifications ======
 function showNotification(msg, type='info', duration=4000){
     const container = document.getElementById('notificationsContainer');
+    if (!container) return;
+    
     const notif = document.createElement('div');
     notif.className = `notification ${type}`;
     notif.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-circle':'info-circle'}"></i><span>${msg}</span>`;
     container.appendChild(notif);
     setTimeout(()=>notif.classList.add('show'),50);
     setTimeout(()=>{notif.classList.remove('show'); setTimeout(()=>notif.remove(),300);}, duration);
+}
+
+// ====== Safe DOM Element Access ======
+function getElementSafe(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.warn(`Element with ID '${id}' not found`);
+    }
+    return element;
 }
 
 // ====== Load User Location ======
@@ -212,28 +226,29 @@ async function loadUserLocation(){
         const response = await apiCall('/locations/real-time');
         if(response.success && response.data && response.data.length){
             currentLocation = response.data[0];
-            document.getElementById('locationName').textContent = currentLocation.name;
-            document.getElementById('locationStatus').textContent = 'Active';
-            document.getElementById('statusDot').className = 'status-dot';
+            
+            // Safe DOM updates
+            if (locationNameEl) locationNameEl.textContent = currentLocation.name;
+            if (locationStatusEl) locationStatusEl.textContent = 'Active';
+            if (statusDotEl) statusDotEl.className = 'status-dot';
             
             // Check if location has saved theme
             if(currentLocation.currentTheme){
-                document.getElementById('currentThemeName').textContent = currentLocation.currentTheme.name;
+                if (currentThemeNameEl) currentThemeNameEl.textContent = currentLocation.currentTheme.name;
                 currentTheme = currentLocation.currentTheme;
                 
                 // Apply the saved theme
                 applyTheme(currentLocation.currentTheme.id || currentLocation.currentTheme._id, false);
             } else {
-                document.getElementById('currentThemeName').textContent = 'No theme applied';
+                if (currentThemeNameEl) currentThemeNameEl.textContent = 'No theme applied';
             }
             
-            // Check localStorage for background color
-            const savedBgColor = localStorage.getItem(`bgColor-${currentLocation.id}`);
-            if(savedBgColor){
-                currentBackgroundColor = savedBgColor;
-                document.getElementById('backgroundColorPicker').value = savedBgColor;
-                document.getElementById('colorPreview').style.backgroundColor = savedBgColor;
-                document.body.style.backgroundColor = savedBgColor;
+            // Check if location has saved background color
+            if(currentLocation.backgroundColor){
+                currentBackgroundColor = currentLocation.backgroundColor;
+                if (backgroundColorPickerEl) backgroundColorPickerEl.value = currentBackgroundColor;
+                if (colorPreviewEl) colorPreviewEl.style.backgroundColor = currentBackgroundColor;
+                document.body.style.backgroundColor = currentBackgroundColor;
             }
         } else {
             // If no location data, create a default location object
@@ -242,16 +257,7 @@ async function loadUserLocation(){
                 name: 'Default Location',
                 active: true
             };
-            document.getElementById('locationName').textContent = currentLocation.name;
-            
-            // Check localStorage for background color for default location
-            const savedBgColor = localStorage.getItem(`bgColor-${currentLocation.id}`);
-            if(savedBgColor){
-                currentBackgroundColor = savedBgColor;
-                document.getElementById('backgroundColorPicker').value = savedBgColor;
-                document.getElementById('colorPreview').style.backgroundColor = savedBgColor;
-                document.body.style.backgroundColor = savedBgColor;
-            }
+            if (locationNameEl) locationNameEl.textContent = currentLocation.name;
         }
         showNotification('Location loaded', 'success', 2000);
     } catch(e){
@@ -262,19 +268,9 @@ async function loadUserLocation(){
             name: 'Default Location',
             active: true
         };
-        document.getElementById('locationName').textContent = currentLocation.name;
-        document.getElementById('locationStatus').textContent = 'Ready';
-        document.getElementById('statusDot').className = 'status-dot';
-        
-        // Check localStorage for background color
-        const savedBgColor = localStorage.getItem(`bgColor-${currentLocation.id}`);
-        if(savedBgColor){
-            currentBackgroundColor = savedBgColor;
-            document.getElementById('backgroundColorPicker').value = savedBgColor;
-            document.getElementById('colorPreview').style.backgroundColor = savedBgColor;
-            document.body.style.backgroundColor = savedBgColor;
-        }
-        
+        if (locationNameEl) locationNameEl.textContent = currentLocation.name;
+        if (locationStatusEl) locationStatusEl.textContent = 'Ready';
+        if (statusDotEl) statusDotEl.className = 'status-dot';
         showNotification('Using default location', 'info');
     }
 }
@@ -303,7 +299,7 @@ function loadThemes(){
 }
 
 function populateThemeOptions(){
-    const container = document.getElementById('themeOptions');
+    const container = getElementSafe('themeOptions');
     if(!container) return;
     
     if(!themes.length){
@@ -376,7 +372,7 @@ async function applyTheme(themeId, saveToDB = true){
         }
         
         currentTheme = theme;
-        document.getElementById('currentThemeName').textContent = currentTheme.name;
+        if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
         populateThemeOptions();
         
     } catch(e){ 
@@ -436,7 +432,7 @@ async function removeTheme(){
         }
         
         currentTheme = null;
-        document.getElementById('currentThemeName').textContent = 'No theme applied';
+        if (currentThemeNameEl) currentThemeNameEl.textContent = 'No theme applied';
         populateThemeOptions();
         
     } catch(e){ 
@@ -447,27 +443,32 @@ async function removeTheme(){
 
 // ====== Background Color Functions ======
 function initBackgroundColorPicker() {
-    const colorPicker = document.getElementById('backgroundColorPicker');
-    const colorPreview = document.getElementById('colorPreview');
-    const applyColorBtn = document.getElementById('applyColorBtn');
-    const resetColorBtn = document.getElementById('resetColorBtn');
+    backgroundColorPickerEl = getElementSafe('backgroundColorPicker');
+    colorPreviewEl = getElementSafe('colorPreview');
+    const applyColorBtn = getElementSafe('applyColorBtn');
+    const resetColorBtn = getElementSafe('resetColorBtn');
     const colorPresets = document.querySelectorAll('.color-preset');
     
+    if (!backgroundColorPickerEl || !colorPreviewEl || !applyColorBtn || !resetColorBtn) {
+        console.error('Background color picker elements not found');
+        return;
+    }
+    
     // Update preview when color picker changes
-    colorPicker.addEventListener('input', (e) => {
-        colorPreview.style.backgroundColor = e.target.value;
+    backgroundColorPickerEl.addEventListener('input', (e) => {
+        colorPreviewEl.style.backgroundColor = e.target.value;
     });
     
     // Apply background color
     applyColorBtn.addEventListener('click', async () => {
-        const color = colorPicker.value;
+        const color = backgroundColorPickerEl.value;
         await applyBackgroundColor(color);
     });
     
     // Reset to default
     resetColorBtn.addEventListener('click', async () => {
-        colorPicker.value = '#ffffff';
-        colorPreview.style.backgroundColor = '#ffffff';
+        backgroundColorPickerEl.value = '#ffffff';
+        colorPreviewEl.style.backgroundColor = '#ffffff';
         await applyBackgroundColor('#ffffff');
     });
     
@@ -475,8 +476,8 @@ function initBackgroundColorPicker() {
     colorPresets.forEach(preset => {
         preset.addEventListener('click', async () => {
             const color = preset.getAttribute('data-color');
-            colorPicker.value = color;
-            colorPreview.style.backgroundColor = color;
+            backgroundColorPickerEl.value = color;
+            colorPreviewEl.style.backgroundColor = color;
             await applyBackgroundColor(color);
             
             // Update active state
@@ -508,22 +509,31 @@ async function applyBackgroundColor(color) {
 
 // ====== Drag Widget ======
 function initDrag(){
-    const widget=document.getElementById('themeWidget');
-    const header=document.getElementById('widgetHeader');
+    const widget = getElementSafe('themeWidget');
+    const header = getElementSafe('widgetHeader');
+    
+    if (!widget || !header) {
+        console.error('Widget elements not found for drag initialization');
+        return;
+    }
+    
     header.addEventListener('mousedown', startDrag);
     header.addEventListener('touchstart', startDrag);
 
     function startDrag(e){
-        e.preventDefault(); isDragging=true;
+        e.preventDefault(); 
+        isDragging=true;
         const clientX=e.clientX||e.touches[0].clientX;
         const clientY=e.clientY||e.touches[0].clientY;
         const rect=widget.getBoundingClientRect();
-        dragOffset.x=clientX-rect.left; dragOffset.y=clientY-rect.top;
+        dragOffset.x=clientX-rect.left; 
+        dragOffset.y=clientY-rect.top;
         document.addEventListener('mousemove', onDrag);
         document.addEventListener('touchmove', onDrag);
         document.addEventListener('mouseup', stopDrag);
         document.addEventListener('touchend', stopDrag);
     }
+    
     function onDrag(e){
         if(!isDragging) return;
         const clientX=e.clientX||e.touches[0].clientX;
@@ -539,15 +549,27 @@ function initDrag(){
         widget.style.right='auto';
         widget.style.bottom='auto';
     }
-    function stopDrag(){isDragging=false;document.removeEventListener('mousemove',onDrag);document.removeEventListener('touchmove',onDrag);document.removeEventListener('mouseup',stopDrag);document.removeEventListener('touchend',stopDrag);}
+    
+    function stopDrag(){
+        isDragging=false;
+        document.removeEventListener('mousemove',onDrag);
+        document.removeEventListener('touchmove',onDrag);
+        document.removeEventListener('mouseup',stopDrag);
+        document.removeEventListener('touchend',stopDrag);
+    }
 }
 
 // ====== Controls ======
 function initControls(){
-    const widget=document.getElementById('themeWidget');
-    const minimizeBtn=document.getElementById('minimizeBtn');
-    const closeBtn=document.getElementById('closeBtn');
-    const removeBtn=document.getElementById('removeThemeBtn');
+    const widget = getElementSafe('themeWidget');
+    const minimizeBtn = getElementSafe('minimizeBtn');
+    const closeBtn = getElementSafe('closeBtn');
+    const removeBtn = getElementSafe('removeThemeBtn');
+
+    if (!widget || !minimizeBtn || !closeBtn || !removeBtn) {
+        console.error('Control elements not found');
+        return;
+    }
 
     minimizeBtn.addEventListener('click', e=>{
         e.stopPropagation();
@@ -565,8 +587,22 @@ function initControls(){
     removeBtn.addEventListener('click', removeTheme);
 }
 
+// ====== Initialize DOM References ======
+function initializeDomReferences() {
+    statusDotEl = getElementSafe('statusDot');
+    locationStatusEl = getElementSafe('locationStatus');
+    locationNameEl = getElementSafe('locationName');
+    currentThemeNameEl = getElementSafe('currentThemeName');
+    backgroundColorPickerEl = getElementSafe('backgroundColorPicker');
+    colorPreviewEl = getElementSafe('colorPreview');
+}
+
 // ====== Initialize ======
 document.addEventListener('DOMContentLoaded', async ()=>{
+    // Initialize DOM references first
+    initializeDomReferences();
+    
+    // Then initialize functionality
     initDrag();
     initControls();
     initBackgroundColorPicker();
