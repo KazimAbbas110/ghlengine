@@ -342,168 +342,628 @@
 
 
 
-(function(){
-  const BTN_ID = "ghl-theme-switcher-btn";
-  const POPUP_ID = "ghl-theme-popup";
+// (function(){
+//   const BTN_ID = "ghl-theme-switcher-btn";
+//   const POPUP_ID = "ghl-theme-popup";
   
-  // =========================
-  // CONFIG
-  // =========================
-  const BACKEND_API = "https://custom-kazim-abbas-projects.vercel.app/api";
-  const SUBACCOUNT_LOCATION_ID = "PUT_YOUR_SUBACCOUNT_LOCATION_ID_HERE"; // replace with dynamic locationId
+//   // =========================
+//   // CONFIG
+//   // =========================
+//   const BACKEND_API = "https://custom-kazim-abbas-projects.vercel.app/api";
+//   const SUBACCOUNT_LOCATION_ID = "PUT_YOUR_SUBACCOUNT_LOCATION_ID_HERE"; // replace with dynamic locationId
 
-  let popupRef = null;
-  let btnRef = null;
+//   let popupRef = null;
+//   let btnRef = null;
 
-  // =========================
-  // Load & apply theme
-  // =========================
-  async function loadTheme(themeId, cdnUrl){
-    localStorage.setItem(`theme-${SUBACCOUNT_LOCATION_ID}`, themeId);
+//   // =========================
+//   // Load & apply theme
+//   // =========================
+//   async function loadTheme(themeId, cdnUrl){
+//     localStorage.setItem(`theme-${SUBACCOUNT_LOCATION_ID}`, themeId);
 
-    // Remove old theme script if exists
-    const old = document.getElementById("dynamic-theme-script");
-    if(old) old.remove();
+//     // Remove old theme script if exists
+//     const old = document.getElementById("dynamic-theme-script");
+//     if(old) old.remove();
 
-    // Add new theme script
-    const s = document.createElement("script");
-    s.id = "dynamic-theme-script";
-    s.src = cdnUrl + "?v=" + Date.now();
-    document.head.appendChild(s);
+//     // Add new theme script
+//     const s = document.createElement("script");
+//     s.id = "dynamic-theme-script";
+//     s.src = cdnUrl + "?v=" + Date.now();
+//     document.head.appendChild(s);
 
-    // Save theme selection to backend
-    try {
-      await fetch(`${BACKEND_API}/themes/apply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          locationId: SUBACCOUNT_LOCATION_ID,
-          themeId: themeId
-        })
-      });
-    } catch(e){
-      console.error("❌ Failed to save theme:", e);
+//     // Save theme selection to backend
+//     try {
+//       await fetch(`${BACKEND_API}/themes/apply`, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({
+//           locationId: SUBACCOUNT_LOCATION_ID,
+//           themeId: themeId
+//         })
+//       });
+//     } catch(e){
+//       console.error("❌ Failed to save theme:", e);
+//     }
+
+//     closePopup();
+//   }
+
+//   // =========================
+//   // Create Theme Popup
+//   // =========================
+//   async function makePopup(){
+//     if(popupRef) return popupRef;
+//     if(!document.body) return null;
+
+//     const div = document.createElement("div");
+//     div.id = POPUP_ID;
+//     Object.assign(div.style, {
+//       display:"none", position:"fixed", top:"50%", left:"50%",
+//       transform:"translate(-50%, -50%)", background:"#fff",
+//       padding:"20px", borderRadius:"12px", boxShadow:"0 8px 20px rgba(0,0,0,0.25)",
+//       zIndex:"99999", maxWidth:"300px", textAlign:"center"
+//     });
+
+//     const title = document.createElement("h3");
+//     title.textContent = "🎨 Select a Theme";
+//     title.style.marginBottom = "15px";
+//     div.appendChild(title);
+
+//     try {
+//       const res = await fetch(`${BACKEND_API}/themes`);
+//       const themes = await res.json();
+
+//       themes.data.forEach(theme => {
+//         const btn = document.createElement("button");
+//         btn.textContent = theme.name;
+//         Object.assign(btn.style, {
+//           display:"block", width:"100%", margin:"5px 0",
+//           padding:"8px 10px", borderRadius:"8px", border:"none",
+//           cursor:"pointer", background: theme.primaryColor||"#888", color:"#fff"
+//         });
+//         btn.onclick = () => loadTheme(theme._id, theme.cdnUrl);
+//         div.appendChild(btn);
+//       });
+
+//     } catch(e){
+//       console.error("❌ Failed to fetch themes:", e);
+//       const msg = document.createElement("div");
+//       msg.textContent = "Failed to load themes.";
+//       div.appendChild(msg);
+//     }
+
+//     const closeBtn = document.createElement("button");
+//     closeBtn.textContent = "Close";
+//     Object.assign(closeBtn.style, {
+//       marginTop:"10px", padding:"6px 14px",
+//       border:"none", borderRadius:"8px",
+//       background:"#e74c3c", color:"#fff", cursor:"pointer"
+//     });
+//     closeBtn.onclick = closePopup;
+//     div.appendChild(closeBtn);
+
+//     document.body.appendChild(div);
+//     popupRef = div;
+//     return div;
+//   }
+
+//   function openPopup(){ makePopup().then(p => { if(p) p.style.display="block"; }); }
+//   function closePopup(){ if(popupRef) popupRef.style.display="none"; }
+
+//   // =========================
+//   // Create floating button
+//   // =========================
+//   function makeBtn(){
+//     if(btnRef) return btnRef;
+
+//     const btn = document.createElement("div");
+//     btn.id = BTN_ID;
+//     btn.textContent = "Change Theme";
+//     Object.assign(btn.style, {
+//       cursor:"pointer",
+//       margin:"12px", padding:"6px 12px",
+//       background:"#2563EB", color:"#fff",
+//       borderRadius:"6px", fontSize:"13px", fontWeight:"600",
+//       whiteSpace:"nowrap", userSelect:"none",
+//       position:"fixed", top:"20px", right:"20px", zIndex:"99999"
+//     });
+//     btn.onclick = openPopup;
+//     btnRef = btn;
+
+//     if(document.body) document.body.appendChild(btn);
+//     return btn;
+//   }
+
+//   // =========================
+//   // Keep button mounted
+//   // =========================
+//   const interval = setInterval(() => {
+//     if(!document.getElementById(BTN_ID) && document.body){
+//       makeBtn();
+//     }
+//   }, 300);
+
+//   const observer = new MutationObserver(() => {
+//     if(!document.getElementById(BTN_ID) && document.body){
+//       makeBtn();
+//     }
+//   });
+//   observer.observe(document.body, { childList: true, subtree: true });
+
+//   // =========================
+//   // Auto-load saved theme from backend
+//   // =========================
+//   document.addEventListener("DOMContentLoaded", async ()=>{
+//     try {
+//       const res = await fetch(`${BACKEND_API}/themes/by-location/${SUBACCOUNT_LOCATION_ID}`);
+//       const sub = await res.json();
+
+//       if(sub.success && sub.data && sub.data.themeId && sub.data.themeId.cdnUrl){
+//         loadTheme(sub.data.themeId._id, sub.data.themeId.cdnUrl);
+//       }
+//     } catch(e){
+//       console.error("❌ Failed to load saved theme:", e);
+//     }
+//   });
+
+// })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ <script>
+
+(function() {
+  // Inject CSS
+  const style = document.createElement('style');
+  style.textContent = `
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --success: #06d6a0;
+      --danger: #ef476f;
+      --dark: #2b2d42;
+      --light: #f8f9fa;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
+      --border-radius: 12px;
+      --box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI',sans-serif;background:#f5f7fa;color:var(--dark);}
+    .theme-widget{position:fixed;bottom:30px;right:30px;width:350px;background:white;border-radius:var(--border-radius);box-shadow:var(--box-shadow);z-index:10000;overflow:hidden;user-select:none;}
+    .theme-widget.minimized{width:60px;height:60px;}
+    .widget-header{background:var(--primary);color:white;padding:15px;cursor:move;display:flex;justify-content:space-between;align-items:center;}
+    .widget-title{display:flex;align-items:center;gap:10px;font-weight:600;}
+    .widget-actions{display:flex;gap:10px;}
+    .widget-action-btn{background:none;border:none;color:white;cursor:pointer;font-size:16px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:background 0.2s;}
+    .widget-action-btn:hover{background:rgba(255,255,255,0.2);}
+    .widget-body{padding:20px;max-height:400px;overflow-y:auto;}
+    .location-info{background:var(--light);padding:15px;border-radius:8px;margin-bottom:20px;text-align:center;}
+    .location-name{font-weight:600;font-size:18px;margin-bottom:5px;}
+    .location-status{display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;color:var(--gray);}
+    .status-dot{width:10px;height:10px;border-radius:50%;background:var(--success);}
+    .status-dot.inactive{background:var(--gray);}
+    .current-theme{background:white;border:1px solid var(--gray-light);border-radius:8px;padding:15px;margin-bottom:20px;text-align:center;}
+    .current-theme h3{font-size:16px;margin-bottom:10px;color:var(--dark);}
+    .theme-name{font-weight:600;color:var(--primary);font-size:18px;margin-bottom:15px;}
+    .theme-actions{display:flex;gap:10px;justify-content:center;}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:6px;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s ease;}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.1);}
+    .btn-primary{background:var(--primary);color:white;}
+    .btn-primary:hover{background:var(--primary-dark);}
+    .btn-danger{background:var(--danger);color:white;}
+    .btn-outline{background:transparent;border:1px solid var(--gray-light);color:var(--dark);}
+    .btn-outline:hover{background:var(--gray-light);}
+    .btn-sm{padding:8px 16px;font-size:14px;}
+    .theme-selector{margin-bottom:20px;}
+    .theme-selector h3{font-size:16px;margin-bottom:10px;color:var(--dark);}
+    .theme-options{display:flex;flex-direction:column;gap:10px;max-height:200px;overflow-y:auto;}
+    .theme-option{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--gray-light);border-radius:6px;cursor:pointer;transition:all 0.2s;}
+    .theme-option:hover{border-color:var(--primary);background:rgba(67,97,238,0.05);}
+    .theme-option.active{border-color:var(--primary);background:rgba(67,97,238,0.1);}
+    .theme-preview{width:40px;height:40px;border-radius:6px;background:linear-gradient(135deg,var(--primary) 0%,#7209b7 100%);display:flex;align-items:center;justify-content:center;color:white;font-size:18px;}
+    .theme-details{flex:1;}
+    .theme-details h4{font-size:14px;margin-bottom:4px;}
+    .theme-details p{font-size:12px;color:var(--gray);}
+    .notification{position:fixed;top:20px;right:20px;padding:12px 18px;border-radius:var(--border-radius);color:white;font-weight:600;z-index:1000;box-shadow:var(--box-shadow);transform:translateX(150%);transition:transform 0.3s ease;display:flex;align-items:center;gap:10px;}
+    .notification.show{transform:translateX(0);}
+    .notification.success{background:var(--success);}
+    .notification.error{background:var(--danger);}
+    .notification.info{background:var(--primary);}
+    .minimized .widget-body{display:none;}
+    .widget-footer{padding:15px;border-top:1px solid var(--gray-light);text-align:center;font-size:12px;color:var(--gray);}
+    .loading{display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:white;animation:spin 1s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .background-color-picker{margin-bottom:20px;}
+    .background-color-picker h3{font-size:16px;margin-bottom:10px;color:var(--dark);}
+    .color-picker-controls{display:flex;gap:10px;align-items:center;margin-bottom:15px;}
+    .color-input-group{display:flex;flex:1;gap:8px;}
+    .color-input{flex:1;height:40px;border:1px solid var(--gray-light);border-radius:6px;cursor:pointer;}
+    .color-preview{width:40px;height:40px;border-radius:6px;border:1px solid var(--gray-light);}
+    .color-actions{display:flex;gap:8px;}
+    .preset-colors{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+    .color-preset{width:100%;aspect-ratio:1;border-radius:6px;border:1px solid var(--gray-light);cursor:pointer;transition:transform 0.2s;}
+    .color-preset:hover{transform:scale(1.05);}
+    .color-preset.active{border:2px solid var(--primary);box-shadow:0 0 0 2px rgba(67,97,238,0.2);}
+    @media(max-width:480px){.theme-widget{width:calc(100vw-40px);right:20px;bottom:20px;}}
+  `;
+  document.head.appendChild(style);
 
-    closePopup();
+  // Inject HTML
+  const widget = document.createElement('div');
+  widget.innerHTML = `
+    <div class="theme-widget" id="themeWidget">
+      <div class="widget-header" id="widgetHeader">
+        <div class="widget-title"><i class="fas fa-palette"></i><span>Theme Manager</span></div>
+        <div class="widget-actions">
+          <button class="widget-action-btn" id="minimizeBtn"><i class="fas fa-minus"></i></button>
+          <button class="widget-action-btn" id="closeBtn"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+      <div class="widget-body">
+        <div class="location-info">
+          <div class="location-name" id="locationName">Loading...</div>
+          <div class="location-status">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="locationStatus">Checking status...</span>
+          </div>
+        </div>
+        <div class="current-theme">
+          <h3>Current Theme</h3>
+          <div class="theme-name" id="currentThemeName">No theme applied</div>
+          <div class="theme-actions">
+            <button class="btn btn-danger btn-sm" id="removeThemeBtn" disabled><i class="fas fa-trash-alt"></i> Remove Theme</button>
+          </div>
+        </div>
+        <div class="background-color-picker">
+          <h3>Background Color</h3>
+          <div class="color-picker-controls">
+            <div class="color-input-group">
+              <input type="color" id="backgroundColorPicker" class="color-input" value="#ffffff">
+              <div id="colorPreview" class="color-preview" style="background-color:#ffffff;"></div>
+            </div>
+            <div class="color-actions">
+              <button class="btn btn-primary btn-sm" id="applyColorBtn"><i class="fas fa-check"></i> Apply</button>
+              <button class="btn btn-outline btn-sm" id="resetColorBtn"><i class="fas fa-undo"></i> Reset</button>
+            </div>
+          </div>
+          <div class="preset-colors">
+            <div class="color-preset" style="background-color:#ffffff;" data-color="#ffffff"></div>
+            <div class="color-preset" style="background-color:#f8f9fa;" data-color="#f8f9fa"></div>
+            <div class="color-preset" style="background-color:#e9ecef;" data-color="#e9ecef"></div>
+            <div class="color-preset" style="background-color:#dee2e6;" data-color="#dee2e6"></div>
+            <div class="color-preset" style="background-color:#4361ee;" data-color="#4361ee"></div>
+            <div class="color-preset" style="background-color:#3a56d4;" data-color="#3a56d4"></div>
+            <div class="color-preset" style="background-color:#7209b7;" data-color="#7209b7"></div>
+            <div class="color-preset" style="background-color:#06d6a0;" data-color="#06d6a0"></div>
+          </div>
+        </div>
+        <div class="theme-selector">
+          <h3>Available Themes</h3>
+          <div class="theme-options" id="themeOptions"></div>
+        </div>
+      </div>
+      <div class="widget-footer">Drag to move • Click to interact</div>
+    </div>
+    <div id="notificationsContainer"></div>
+  `;
+  document.body.appendChild(widget);
+
+  // Load Font Awesome
+  if (!document.querySelector('link[href*="font-awesome"]')) {
+    const fa = document.createElement('link');
+    fa.rel = 'stylesheet';
+    fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+    document.head.appendChild(fa);
   }
 
-  // =========================
-  // Create Theme Popup
-  // =========================
-  async function makePopup(){
-    if(popupRef) return popupRef;
-    if(!document.body) return null;
 
-    const div = document.createElement("div");
-    div.id = POPUP_ID;
-    Object.assign(div.style, {
-      display:"none", position:"fixed", top:"50%", left:"50%",
-      transform:"translate(-50%, -50%)", background:"#fff",
-      padding:"20px", borderRadius:"12px", boxShadow:"0 8px 20px rgba(0,0,0,0.25)",
-      zIndex:"99999", maxWidth:"300px", textAlign:"center"
-    });
+let currentLocation = null;
+let themes = [];
+let isDragging = false;
+let dragOffset = {x:0,y:0};
+let currentPosition = {x:30,y:30};
+let currentBackgroundColor = '#ffffff';
 
-    const title = document.createElement("h3");
-    title.textContent = "🎨 Select a Theme";
-    title.style.marginBottom = "15px";
-    div.appendChild(title);
+async function apiCall(endpoint, options={}) {
+    const baseUrl = 'https://ghlengine-production.up.railway.app/api';
+    const url = `${baseUrl}${endpoint}`;
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': '110',
+        ...options.headers
+    };
+
+    const config = {
+        method: options.method || 'GET',
+        headers,
+        body: options.body
+    };
 
     try {
-      const res = await fetch(`${BACKEND_API}/themes`);
-      const themes = await res.json();
-
-      themes.data.forEach(theme => {
-        const btn = document.createElement("button");
-        btn.textContent = theme.name;
-        Object.assign(btn.style, {
-          display:"block", width:"100%", margin:"5px 0",
-          padding:"8px 10px", borderRadius:"8px", border:"none",
-          cursor:"pointer", background: theme.primaryColor||"#888", color:"#fff"
-        });
-        btn.onclick = () => loadTheme(theme._id, theme.cdnUrl);
-        div.appendChild(btn);
-      });
-
-    } catch(e){
-      console.error("❌ Failed to fetch themes:", e);
-      const msg = document.createElement("div");
-      msg.textContent = "Failed to load themes.";
-      div.appendChild(msg);
+        const response = await fetch(url, config);
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
     }
+}
 
-    const closeBtn = document.createElement("button");
-    closeBtn.textContent = "Close";
-    Object.assign(closeBtn.style, {
-      marginTop:"10px", padding:"6px 14px",
-      border:"none", borderRadius:"8px",
-      background:"#e74c3c", color:"#fff", cursor:"pointer"
-    });
-    closeBtn.onclick = closePopup;
-    div.appendChild(closeBtn);
+function showNotification(msg, type='info', duration=4000){
+  const container = document.getElementById('notificationsContainer');
+  const notif = document.createElement('div');
+  notif.className = `notification ${type}`;
+  notif.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-circle':'info-circle'}"></i><span>${msg}</span>`;
+  container.appendChild(notif);
+  setTimeout(()=>notif.classList.add('show'),50);
+  setTimeout(()=>{notif.classList.remove('show'); setTimeout(()=>notif.remove(),300);}, duration);
+}
 
-    document.body.appendChild(div);
-    popupRef = div;
-    return div;
-  }
-
-  function openPopup(){ makePopup().then(p => { if(p) p.style.display="block"; }); }
-  function closePopup(){ if(popupRef) popupRef.style.display="none"; }
-
-  // =========================
-  // Create floating button
-  // =========================
-  function makeBtn(){
-    if(btnRef) return btnRef;
-
-    const btn = document.createElement("div");
-    btn.id = BTN_ID;
-    btn.textContent = "Change Theme";
-    Object.assign(btn.style, {
-      cursor:"pointer",
-      margin:"12px", padding:"6px 12px",
-      background:"#2563EB", color:"#fff",
-      borderRadius:"6px", fontSize:"13px", fontWeight:"600",
-      whiteSpace:"nowrap", userSelect:"none",
-      position:"fixed", top:"20px", right:"20px", zIndex:"99999"
-    });
-    btn.onclick = openPopup;
-    btnRef = btn;
-
-    if(document.body) document.body.appendChild(btn);
-    return btn;
-  }
-
-  // =========================
-  // Keep button mounted
-  // =========================
-  const interval = setInterval(() => {
-    if(!document.getElementById(BTN_ID) && document.body){
-      makeBtn();
-    }
-  }, 300);
-
-  const observer = new MutationObserver(() => {
-    if(!document.getElementById(BTN_ID) && document.body){
-      makeBtn();
-    }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  // =========================
-  // Auto-load saved theme from backend
-  // =========================
-  document.addEventListener("DOMContentLoaded", async ()=>{
-    try {
-      const res = await fetch(`${BACKEND_API}/themes/by-location/${SUBACCOUNT_LOCATION_ID}`);
-      const sub = await res.json();
-
-      if(sub.success && sub.data && sub.data.themeId && sub.data.themeId.cdnUrl){
-        loadTheme(sub.data.themeId._id, sub.data.themeId.cdnUrl);
+async function loadUserLocation(){
+  try{
+    showNotification('Loading location...','info');
+    const response = await apiCall('/locations/real-time');
+    if(response.success && response.data){
+      currentLocation = response.data;
+      document.getElementById('locationName').textContent = currentLocation.name;
+      document.getElementById('locationStatus').textContent = 'Active';
+      document.getElementById('statusDot').className = 'status-dot';
+      
+      // Load current background color if available
+      if (currentLocation.backgroundColor) {
+        currentBackgroundColor = currentLocation.backgroundColor;
+        document.getElementById('backgroundColorPicker').value = currentBackgroundColor;
+        document.getElementById('colorPreview').style.backgroundColor = currentBackgroundColor;
       }
-    } catch(e){
-      console.error("❌ Failed to load saved theme:", e);
+      
+      loadCurrentTheme();
+    }else{
+      throw new Error(response.message||'No location data');
+    }
+  }catch(e){
+    console.error('Load location error:', e);
+    document.getElementById('locationStatus').textContent = 'Error';
+    document.getElementById('statusDot').className = 'status-dot inactive';
+    showNotification('Failed to load location','error');
+  }
+}
+
+async function loadCurrentTheme(){
+  try{
+    if(!currentLocation) return;
+    const response = await apiCall(`/themes/location/${currentLocation.id}`);
+    if(response.success && response.data){
+      currentLocation.currentTheme = response.data;
+      document.getElementById('currentThemeName').textContent = response.data.name;
+      document.getElementById('removeThemeBtn').disabled = false;
+    } else {
+      currentLocation.currentTheme = null;
+      document.getElementById('currentThemeName').textContent = 'No theme applied';
+      document.getElementById('removeThemeBtn').disabled = true;
+    }
+  } catch(e){
+    console.error('Load theme error:', e);
+    currentLocation.currentTheme = null;
+    document.getElementById('currentThemeName').textContent = 'No theme applied';
+    document.getElementById('removeThemeBtn').disabled = true;
+  }
+}
+
+async function loadThemes(){
+  try{
+    const response = await apiCall('/themes');
+    if(response.success){
+      themes = response.data;
+      populateThemeOptions();
+    }
+  }catch(e){
+    console.error('Load themes error:', e);
+    showNotification('Failed to load themes','error');
+  }
+}
+
+function populateThemeOptions(){
+  const container = document.getElementById('themeOptions');
+  if(!container) return;
+  if(!themes.length) { container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray)">No themes available</div>'; return; }
+  const currentId = currentLocation?.currentTheme?._id || '';
+  container.innerHTML = themes.map(t => `
+    <div class="theme-option ${t._id===currentId?'active':''}" data-theme-id="${t._id}">
+      <div class="theme-preview" style="background:${t.color||'linear-gradient(135deg, #4361ee 0%, #7209b7 100%)'}"><i class="fas fa-paint-brush"></i></div>
+      <div class="theme-details"><h4>${t.name}</h4><p>${t.description||'Professional theme'}</p></div>
+      <button class="btn btn-primary btn-sm apply-theme-btn" data-theme-id="${t._id}"><i class="fas fa-check"></i> Apply</button>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.apply-theme-btn').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      applyTheme(btn.getAttribute('data-theme-id'));
+    });
+  });
+  document.querySelectorAll('.theme-option').forEach(opt=>{
+    opt.addEventListener('click',()=>applyTheme(opt.getAttribute('data-theme-id')));
+  });
+}
+
+async function applyTheme(themeId){
+  if(!currentLocation) return showNotification('No location selected','error');
+  try{
+    showNotification('Applying theme...','info');
+    const res = await apiCall('/themes/apply',{ method:'POST', body: JSON.stringify({ locationId: currentLocation.id, themeId }) });
+    if(res.success){ showNotification('Theme applied!','success'); await loadCurrentTheme(); await loadThemes(); }
+    else showNotification(`Failed: ${res.message}`,'error');
+  }catch(e){ console.error(e); showNotification('Error applying theme','error'); }
+}
+
+async function removeTheme(){
+  if(!currentLocation || !currentLocation.currentTheme) return showNotification('No theme to remove','error');
+  if(!confirm('Are you sure to remove current theme?')) return;
+  try{
+    showNotification('Removing theme...','info');
+    const res = await apiCall('/themes/remove',{ method:'POST', body: JSON.stringify({ locationId: currentLocation.id }) });
+    if(res.success){ showNotification('Theme removed!','success'); await loadCurrentTheme(); await loadThemes(); }
+    else showNotification(`Failed: ${res.message}`,'error');
+  }catch(e){ console.error(e); showNotification('Error removing theme','error'); }
+}
+
+// Background Color Functions
+function initColorPicker() {
+  const colorPicker = document.getElementById('backgroundColorPicker');
+  const colorPreview = document.getElementById('colorPreview');
+  const applyColorBtn = document.getElementById('applyColorBtn');
+  const resetColorBtn = document.getElementById('resetColorBtn');
+  const colorPresets = document.querySelectorAll('.color-preset');
+  
+  // Update preview when color picker changes
+  colorPicker.addEventListener('input', function() {
+    colorPreview.style.backgroundColor = this.value;
+  });
+  
+  // Apply background color
+  applyColorBtn.addEventListener('click', async function() {
+    if (!currentLocation) return showNotification('No location selected', 'error');
+    
+    try {
+      showNotification('Applying background color...', 'info');
+      const newColor = colorPicker.value;
+      
+      // Update the background color via API
+      const res = await apiCall(`/locations/${currentLocation.id}/background-color`, {
+        method: 'PUT',
+        body: JSON.stringify({ backgroundColor: newColor })
+      });
+      
+      if (res.success) {
+        currentBackgroundColor = newColor;
+        showNotification('Background color applied!', 'success');
+        
+        // Apply the color to the current page for preview
+        document.body.style.backgroundColor = newColor;
+      } else {
+        showNotification(`Failed: ${res.message}`, 'error');
+      }
+    } catch (e) {
+      console.error('Apply color error:', e);
+      showNotification('Error applying background color', 'error');
     }
   });
+  
+  // Reset background color
+  resetColorBtn.addEventListener('click', async function() {
+    if (!currentLocation) return showNotification('No location selected', 'error');
+    
+    try {
+      showNotification('Resetting background color...', 'info');
+      
+      // Reset the background color via API
+      const res = await apiCall(`/locations/${currentLocation.id}/background-color`, {
+        method: 'DELETE'
+      });
+      
+      if (res.success) {
+        currentBackgroundColor = '#ffffff';
+        colorPicker.value = '#ffffff';
+        colorPreview.style.backgroundColor = '#ffffff';
+        document.body.style.backgroundColor = '#f5f7fa'; // Reset to default
+        showNotification('Background color reset!', 'success');
+      } else {
+        showNotification(`Failed: ${res.message}`, 'error');
+      }
+    } catch (e) {
+      console.error('Reset color error:', e);
+      showNotification('Error resetting background color', 'error');
+    }
+  });
+  
+  // Color presets
+  colorPresets.forEach(preset => {
+    preset.addEventListener('click', function() {
+      const color = this.getAttribute('data-color');
+      colorPicker.value = color;
+      colorPreview.style.backgroundColor = color;
+      
+      // Remove active class from all presets
+      colorPresets.forEach(p => p.classList.remove('active'));
+      // Add active class to clicked preset
+      this.classList.add('active');
+    });
+  });
+}
+
+// Drag widget
+function initDrag(){
+  const widget = document.getElementById('themeWidget');
+  const header = document.getElementById('widgetHeader');
+  header.addEventListener('mousedown',startDrag); header.addEventListener('touchstart',startDrag);
+  function startDrag(e){
+    e.preventDefault(); isDragging=true;
+    const clientX=e.clientX||e.touches[0].clientX;
+    const clientY=e.clientY||e.touches[0].clientY;
+    const rect = widget.getBoundingClientRect();
+    dragOffset.x = clientX-rect.left; dragOffset.y = clientY-rect.top;
+    document.addEventListener('mousemove',onDrag); document.addEventListener('touchmove',onDrag);
+    document.addEventListener('mouseup',stopDrag); document.addEventListener('touchend',stopDrag);
+  }
+  function onDrag(e){
+    if(!isDragging) return;
+    const clientX=e.clientX||e.touches[0].clientX;
+    const clientY=e.clientY||e.touches[0].clientY;
+    currentPosition.x = clientX - dragOffset.x;
+    currentPosition.y = clientY - dragOffset.y;
+    const maxX = window.innerWidth-widget.offsetWidth;
+    const maxY = window.innerHeight-widget.offsetHeight;
+    currentPosition.x=Math.max(0,Math.min(currentPosition.x,maxX));
+    currentPosition.y=Math.max(0,Math.min(currentPosition.y,maxY));
+    widget.style.left=currentPosition.x+'px'; widget.style.top=currentPosition.y+'px'; widget.style.right='auto'; widget.style.bottom='auto';
+  }
+  function stopDrag(){ isDragging=false; document.removeEventListener('mousemove',onDrag); document.removeEventListener('touchmove',onDrag); document.removeEventListener('mouseup',stopDrag); document.removeEventListener('touchend',stopDrag); }
+}
+
+// Widget buttons
+function initControls(){
+  const widget = document.getElementById('themeWidget');
+  const minimizeBtn = document.getElementById('minimizeBtn');
+  const closeBtn = document.getElementById('closeBtn');
+  const removeBtn = document.getElementById('removeThemeBtn');
+
+  minimizeBtn.addEventListener('click',e=>{
+    e.stopPropagation(); widget.classList.toggle('minimized');
+    minimizeBtn.innerHTML = widget.classList.contains('minimized')?'<i class="fas fa-plus"></i>':'<i class="fas fa-minus"></i>';
+  });
+
+  closeBtn.addEventListener('click',e=>{
+    e.stopPropagation(); widget.style.display='none';
+    setTimeout(()=>widget.style.display='block',5000);
+    showNotification('Widget hidden. Reappears in 5s','info');
+  });
+
+  removeBtn.addEventListener('click',removeTheme);
+}
+
+// Init
+document.addEventListener('DOMContentLoaded',async()=>{
+  initDrag(); 
+  initControls(); 
+  initColorPicker();
+  await loadUserLocation(); 
+  await loadThemes();
+});
 
 })();
+</script>
