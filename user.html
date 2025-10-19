@@ -164,7 +164,7 @@ async function apiCall(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = {
         'Content-Type': 'application/json',
-        'Authorization': '110',
+        'Authorization': 'Bearer 110',
         ...options.headers
     };
     const config = {
