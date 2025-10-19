@@ -150,17 +150,14 @@ body { font-family:'Segoe UI',sans-serif; background:#f5f7fa; color:var(--dark);
 <div id="notificationsContainer"></div>
 
 <script>
-// ====== JS Functions ======
 let currentLocation = null;
 let themes = [];
 let isDragging = false;
 let dragOffset = {x:0,y:0};
 let currentPosition = {x:30,y:30};
 let currentBackgroundColor = '#ffffff';
-
 const API_BASE_URL = 'https://ghlengine-production.up.railway.app/api';
 
-// Generic API call with Bearer token
 async function apiCall(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = {
@@ -183,7 +180,6 @@ async function apiCall(endpoint, options = {}) {
     }
 }
 
-// Notification helper
 function showNotification(msg, type='info', duration=4000){
     const container = document.getElementById('notificationsContainer');
     const notif = document.createElement('div');
@@ -194,7 +190,6 @@ function showNotification(msg, type='info', duration=4000){
     setTimeout(()=>{notif.classList.remove('show'); setTimeout(()=>notif.remove(),300);}, duration);
 }
 
-// ====== Load User Location ======
 async function loadUserLocation(){
     try{
         showNotification('Loading location...', 'info');
@@ -205,14 +200,10 @@ async function loadUserLocation(){
             document.getElementById('locationStatus').textContent = 'Active';
             document.getElementById('statusDot').className = 'status-dot';
 
-            // Use backend's currentTheme if available
             if(currentLocation.currentTheme){
                 document.getElementById('currentThemeName').textContent = currentLocation.currentTheme.name;
-            } else {
-                document.getElementById('currentThemeName').textContent = 'No theme applied';
             }
 
-            // Background color if backend provides
             if(currentLocation.backgroundColor){
                 currentBackgroundColor = currentLocation.backgroundColor;
                 document.getElementById('backgroundColorPicker').value = currentBackgroundColor;
@@ -220,6 +211,7 @@ async function loadUserLocation(){
                 document.body.style.backgroundColor = currentBackgroundColor;
             }
 
+            updateRemoveButton();
         } else throw new Error(response.message || 'No location data');
     } catch(e){
         console.error('Load location error:', e);
@@ -229,7 +221,6 @@ async function loadUserLocation(){
     }
 }
 
-// ====== Theme Functions ======
 async function loadThemes(){
     try{
         const response = await apiCall('/themes');
@@ -274,7 +265,6 @@ function populateThemeOptions(){
     });
 }
 
-// Apply theme via /themes/apply
 async function applyTheme(themeId){
     if(!currentLocation) return showNotification('No location selected','error');
     try{
@@ -285,11 +275,8 @@ async function applyTheme(themeId){
         });
         if(res.success){
             showNotification('Theme applied!','success');
-
-            // Update currentTheme in frontend without another API call
             currentLocation.currentTheme = themes.find(t=>t._id===themeId) || null;
-            document.getElementById('currentThemeName').textContent = currentLocation.currentTheme?.name || 'No theme applied';
-            populateThemeOptions();
+            updateCurrentThemeUI();
         } else showNotification(`Failed: ${res.message}`,'error');
     } catch(e){
         console.error(e);
@@ -297,7 +284,6 @@ async function applyTheme(themeId){
     }
 }
 
-// Remove theme via /themes/remove
 async function removeTheme(){
     if(!currentLocation || !currentLocation.currentTheme) return showNotification('No theme to remove','error');
     if(!confirm('Are you sure you want to remove the current theme?')) return;
@@ -310,8 +296,7 @@ async function removeTheme(){
         if(res.success){
             showNotification('Theme removed!','success');
             currentLocation.currentTheme = null;
-            document.getElementById('currentThemeName').textContent = 'No theme applied';
-            populateThemeOptions();
+            updateCurrentThemeUI();
         } else showNotification(`Failed: ${res.message}`,'error');
     } catch(e){
         console.error(e);
@@ -319,13 +304,54 @@ async function removeTheme(){
     }
 }
 
-// ====== Drag Widget ======
+function updateRemoveButton(){
+    const btn = document.getElementById('removeThemeBtn');
+    if(currentLocation?.currentTheme) btn.removeAttribute('disabled');
+    else btn.setAttribute('disabled', true);
+}
+
+function updateCurrentThemeUI(){
+    const themeNameEl = document.getElementById('currentThemeName');
+    themeNameEl.textContent = currentLocation?.currentTheme?.name || 'No theme applied';
+    populateThemeOptions();
+    updateRemoveButton();
+}
+
+// ===== Background Color Picker =====
+document.getElementById('applyColorBtn').addEventListener('click', ()=>{
+    const color = document.getElementById('backgroundColorPicker').value;
+    document.body.style.backgroundColor = color;
+    currentBackgroundColor = color;
+    showNotification('Background color applied','success');
+});
+
+document.getElementById('resetColorBtn').addEventListener('click', ()=>{
+    currentBackgroundColor = '#ffffff';
+    document.getElementById('backgroundColorPicker').value = currentBackgroundColor;
+    document.getElementById('colorPreview').style.backgroundColor = currentBackgroundColor;
+    document.body.style.backgroundColor = currentBackgroundColor;
+    showNotification('Background color reset','info');
+});
+
+document.querySelectorAll('.color-preset').forEach(el=>{
+    el.addEventListener('click', ()=>{
+        const color = el.getAttribute('data-color');
+        document.getElementById('backgroundColorPicker').value = color;
+        document.getElementById('colorPreview').style.backgroundColor = color;
+        document.body.style.backgroundColor = color;
+        currentBackgroundColor = color;
+        document.querySelectorAll('.color-preset').forEach(p=>p.classList.remove('active'));
+        el.classList.add('active');
+        showNotification('Preset color applied','success');
+    });
+});
+
+// ===== Drag =====
 function initDrag(){
     const widget=document.getElementById('themeWidget');
     const header=document.getElementById('widgetHeader');
     header.addEventListener('mousedown', startDrag);
     header.addEventListener('touchstart', startDrag);
-
     function startDrag(e){
         e.preventDefault(); isDragging=true;
         const clientX=e.clientX||e.touches[0].clientX;
@@ -355,7 +381,7 @@ function initDrag(){
     function stopDrag(){isDragging=false;document.removeEventListener('mousemove',onDrag);document.removeEventListener('touchmove',onDrag);document.removeEventListener('mouseup',stopDrag);document.removeEventListener('touchend',stopDrag);}
 }
 
-// ====== Controls ======
+// ===== Controls =====
 function initControls(){
     const widget=document.getElementById('themeWidget');
     const minimizeBtn=document.getElementById('minimizeBtn');
@@ -378,7 +404,7 @@ function initControls(){
     removeBtn.addEventListener('click', removeTheme);
 }
 
-// ====== Initialize ======
+// ===== Init =====
 document.addEventListener('DOMContentLoaded', async ()=>{
     initDrag();
     initControls();
