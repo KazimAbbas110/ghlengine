@@ -3,413 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Theme Widget</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-:root {
-  --primary: #4361ee;
-  --primary-dark: #3a56d4;
-  --success: #06d6a0;
-  --danger: #ef476f;
-  --dark: #2b2d42;
-  --light: #f8f9fa;
-  --gray: #6c757d;
-  --gray-light: #e9ecef;
-  --border-radius: 12px;
-  --box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Segoe UI',sans-serif; background:#f5f7fa; color:var(--dark); transition: background-color 0.3s ease; }
-.theme-widget {
-  position: fixed; bottom:30px; right:30px; width:350px;
-  background:white; border-radius:var(--border-radius);
-  box-shadow:var(--box-shadow); z-index:10000; overflow:hidden;
-  user-select:none;
-}
-.theme-widget.minimized { width:60px; height:60px; }
-.widget-header { background:var(--primary); color:white; padding:15px; cursor:move; display:flex; justify-content:space-between; align-items:center; }
-.widget-title { display:flex; align-items:center; gap:10px; font-weight:600; }
-.widget-actions { display:flex; gap:10px; }
-.widget-action-btn { background:none; border:none; color:white; cursor:pointer; font-size:16px; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:4px; transition:background 0.2s; }
-.widget-action-btn:hover { background: rgba(255,255,255,0.2); }
-.widget-body { padding:20px; max-height:400px; overflow-y:auto; }
-.location-info { background:var(--light); padding:15px; border-radius:8px; margin-bottom:20px; text-align:center; }
-.location-name { font-weight:600; font-size:18px; margin-bottom:5px; }
-.location-status { display:flex; align-items:center; justify-content:center; gap:8px; font-size:14px; color:var(--gray); }
-.status-dot { width:10px; height:10px; border-radius:50%; background:var(--success); }
-.status-dot.inactive { background:var(--gray); }
-.current-theme { background:white; border:1px solid var(--gray-light); border-radius:8px; padding:15px; margin-bottom:20px; text-align:center; }
-.current-theme h3 { font-size:16px; margin-bottom:10px; color:var(--dark); }
-.theme-name { font-weight:600; color:var(--primary); font-size:18px; margin-bottom:15px; }
-.theme-actions { display:flex; gap:10px; justify-content:center; }
-.btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border:none; border-radius:6px; font-weight:600; font-size:14px; cursor:pointer; transition:all 0.2s ease; }
-.btn:hover { transform:translateY(-2px); box-shadow:0 4px 8px rgba(0,0,0,0.1); }
-.btn-primary { background:var(--primary); color:white; }
-.btn-primary:hover { background:var(--primary-dark); }
-.btn-danger { background:var(--danger); color:white; }
-.btn-outline { background:transparent; border:1px solid var(--gray-light); color:var(--dark); }
-.btn-outline:hover { background:var(--gray-light); }
-.btn-sm { padding:8px 16px; font-size:14px; }
-.theme-selector { margin-bottom:20px; }
-.theme-selector h3 { font-size:16px; margin-bottom:10px; color:var(--dark); }
-.theme-options { display:flex; flex-direction:column; gap:10px; max-height:200px; overflow-y:auto; }
-.theme-option { display:flex; align-items:center; gap:10px; padding:12px; border:1px solid var(--gray-light); border-radius:6px; cursor:pointer; transition:all 0.2s; }
-.theme-option:hover { border-color:var(--primary); background: rgba(67,97,238,0.05); }
-.theme-option.active { border-color:var(--primary); background: rgba(67,97,238,0.1); }
-.theme-preview { width:40px; height:40px; border-radius:6px; background:linear-gradient(135deg, var(--primary) 0%, #7209b7 100%); display:flex; align-items:center; justify-content:center; color:white; font-size:18px; }
-.theme-details { flex:1; }
-.theme-details h4 { font-size:14px; margin-bottom:4px; }
-.theme-details p { font-size:12px; color:var(--gray); }
-.notification { position:fixed; top:20px; right:20px; padding:12px 18px; border-radius:var(--border-radius); color:white; font-weight:600; z-index:1000; box-shadow:var(--box-shadow); transform:translateX(150%); transition:transform 0.3s ease; display:flex; align-items:center; gap:10px; }
-.notification.show { transform:translateX(0); }
-.notification.success { background:var(--success); }
-.notification.error { background:var(--danger); }
-.notification.info { background:var(--primary); }
-.minimized .widget-body { display:none; }
-.widget-footer { padding:15px; border-top:1px solid var(--gray-light); text-align:center; font-size:12px; color:var(--gray); }
-.loading { display:inline-block; width:20px; height:20px; border:2px solid rgba(255,255,255,0.3); border-radius:50%; border-top-color:white; animation:spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Background Color Picker Styles */
-.background-color-picker { margin-bottom:20px; }
-.background-color-picker h3 { font-size:16px; margin-bottom:10px; color:var(--dark); }
-.color-picker-controls { display:flex; gap:10px; align-items:center; margin-bottom:15px; }
-.color-input-group { display:flex; flex:1; gap:8px; }
-.color-input { flex:1; height:40px; border:1px solid var(--gray-light); border-radius:6px; cursor:pointer; }
-.color-preview { width:40px; height:40px; border-radius:6px; border:1px solid var(--gray-light); }
-.color-actions { display:flex; gap:8px; }
-.preset-colors { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-.color-preset { width:100%; aspect-ratio:1; border-radius:6px; border:1px solid var(--gray-light); cursor:pointer; transition:transform 0.2s; }
-.color-preset:hover { transform:scale(1.05); }
-.color-preset.active { border:2px solid var(--primary); box-shadow:0 0 0 2px rgba(67,97,238,0.2); }
-
-@media (max-width:480px){.theme-widget{width:calc(100vw-40px); right:20px; bottom:20px;}}
-</style>
+<title>Widget Test</title>
 </head>
 <body>
 
-<!-- Floating Theme Widget -->
-<div class="theme-widget" id="themeWidget">
-  <div class="widget-header" id="widgetHeader">
-    <div class="widget-title"><i class="fas fa-palette"></i><span>Theme Manager</span></div>
-    <div class="widget-actions">
-      <button class="widget-action-btn" id="minimizeBtn"><i class="fas fa-minus"></i></button>
-      <button class="widget-action-btn" id="closeBtn"><i class="fas fa-times"></i></button>
-    </div>
-  </div>
-  <div class="widget-body">
-    <div class="location-info">
-      <div class="location-name" id="locationName">Loading...</div>
-      <div class="location-status">
-        <div class="status-dot" id="statusDot"></div>
-        <span id="locationStatus">Checking status...</span>
-      </div>
-    </div>
-
-    <div class="current-theme">
-      <h3>Current Theme</h3>
-      <div class="theme-name" id="currentThemeName">No theme applied</div>
-      <div class="theme-actions">
-        <button class="btn btn-danger btn-sm" id="removeThemeBtn" disabled><i class="fas fa-trash-alt"></i> Remove Theme</button>
-      </div>
-    </div>
-
-    <!-- Background Color Picker Section -->
-    <div class="background-color-picker">
-      <h3>Background Color</h3>
-      <div class="color-picker-controls">
-        <div class="color-input-group">
-          <input type="color" id="backgroundColorPicker" class="color-input" value="#ffffff">
-          <div id="colorPreview" class="color-preview" style="background-color: #ffffff;"></div>
-        </div>
-        <div class="color-actions">
-          <button class="btn btn-primary btn-sm" id="applyColorBtn"><i class="fas fa-check"></i> Apply</button>
-          <button class="btn btn-outline btn-sm" id="resetColorBtn"><i class="fas fa-undo"></i> Reset</button>
-        </div>
-      </div>
-      <div class="preset-colors">
-        <div class="color-preset" style="background-color:#ffffff;" data-color="#ffffff"></div>
-        <div class="color-preset" style="background-color:#f8f9fa;" data-color="#f8f9fa"></div>
-        <div class="color-preset" style="background-color:#e9ecef;" data-color="#e9ecef"></div>
-        <div class="color-preset" style="background-color:#dee2e6;" data-color="#dee2e6"></div>
-        <div class="color-preset" style="background-color:#4361ee;" data-color="#4361ee"></div>
-        <div class="color-preset" style="background-color:#3a56d4;" data-color="#3a56d4"></div>
-        <div class="color-preset" style="background-color:#7209b7;" data-color="#7209b7"></div>
-        <div class="color-preset" style="background-color:#06d6a0;" data-color="#06d6a0"></div>
-      </div>
-    </div>
-
-    <div class="theme-selector">
-      <h3>Available Themes</h3>
-      <div class="theme-options" id="themeOptions"></div>
-    </div>
-  </div>
-  <div class="widget-footer">Drag to move • Click to interact</div>
+<div id="themeWidget" style="position:fixed;bottom:30px;right:30px;width:300px;padding:20px;background:#eee;border:1px solid #ccc;">
+    <h3>Widget Test</h3>
+    <div id="locationName">Loading location...</div>
+    <div id="currentThemeName">Loading theme...</div>
 </div>
 
-<div id="notificationsContainer"></div>
-
 <script>
-let currentLocation = null;
-let themes = [];
-let isDragging = false;
-let dragOffset = {x:0,y:0};
-let currentPosition = {x:30,y:30};
-let currentBackgroundColor = '#ffffff';
-const API_BASE_URL = 'https://ghlengine-production.up.railway.app/api';
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM loaded'); // Check 1
 
-async function apiCall(endpoint, options = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer 110',
-        ...options.headers
-    };
-    const config = {
-        method: options.method || 'GET',
-        headers,
-        ...(options.body && { body: JSON.stringify(options.body) })
-    };
+    // Minimal API call test
     try {
-        const response = await fetch(url, config);
-        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        return await response.json();
-    } catch (error) {
-        console.error('API Error:', error);
-        throw error;
-    }
-}
+        console.log('Calling API...');
+        const res = await fetch('https://ghlengine-production.up.railway.app/api/locations/real-time', {
+            headers: { 'Authorization': 'Bearer 110' }
+        });
+        const data = await res.json();
+        console.log('API response:', data); // Check 2
 
-function showNotification(msg, type='info', duration=4000){
-    const container = document.getElementById('notificationsContainer');
-    const notif = document.createElement('div');
-    notif.className = `notification ${type}`;
-    notif.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-circle':'info-circle'}"></i><span>${msg}</span>`;
-    container.appendChild(notif);
-    setTimeout(()=>notif.classList.add('show'),50);
-    setTimeout(()=>{notif.classList.remove('show'); setTimeout(()=>notif.remove(),300);}, duration);
-}
-
-async function loadUserLocation(){
-    try{
-        showNotification('Loading location...', 'info');
-        const response = await apiCall('/locations/real-time');
-        if(response.success && response.data && response.data.length){
-            currentLocation = response.data[0];
-            document.getElementById('locationName').textContent = currentLocation.name;
-            document.getElementById('locationStatus').textContent = 'Active';
-            document.getElementById('statusDot').className = 'status-dot';
-
-            if(currentLocation.currentTheme){
-                document.getElementById('currentThemeName').textContent = currentLocation.currentTheme.name;
-            }
-
-            if(currentLocation.backgroundColor){
-                currentBackgroundColor = currentLocation.backgroundColor;
-                document.getElementById('backgroundColorPicker').value = currentBackgroundColor;
-                document.getElementById('colorPreview').style.backgroundColor = currentBackgroundColor;
-                document.body.style.backgroundColor = currentBackgroundColor;
-            }
-
-            updateRemoveButton();
-        } else throw new Error(response.message || 'No location data');
-    } catch(e){
-        console.error('Load location error:', e);
-        document.getElementById('locationStatus').textContent = 'Error';
-        document.getElementById('statusDot').className = 'status-dot inactive';
-        showNotification('Failed to load location', 'error');
-    }
-}
-
-async function loadThemes(){
-    try{
-        const response = await apiCall('/themes');
-        if(response.success){
-            themes = response.data;
-            populateThemeOptions();
+        if(data.success && data.data && data.data.length){
+            const location = data.data[0];
+            console.log('Location loaded:', location); // Check 3
+            document.getElementById('locationName').textContent = location.name || 'No name';
+            document.getElementById('currentThemeName').textContent = location.currentTheme?.name || 'No theme applied';
+        } else {
+            console.warn('No location data found');
         }
+
     } catch(e){
-        console.error('Load themes error:', e);
-        showNotification('Failed to load themes', 'error');
+        console.error('API fetch failed:', e); // Check 4
+        document.getElementById('locationName').textContent = 'Error loading location';
+        document.getElementById('currentThemeName').textContent = 'Error loading theme';
     }
-}
 
-function populateThemeOptions(){
-    const container = document.getElementById('themeOptions');
-    if(!container) return;
-    if(!themes.length){
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray)">No themes available</div>';
-        return;
-    }
-    const currentId = currentLocation?.currentTheme?._id || '';
-    container.innerHTML = themes.map(t=>`
-        <div class="theme-option ${t._id===currentId?'active':''}" data-theme-id="${t._id}">
-            <div class="theme-preview" style="background:${t.color || 'linear-gradient(135deg, #4361ee 0%, #7209b7 100%)'}">
-                <i class="fas fa-paint-brush"></i>
-            </div>
-            <div class="theme-details">
-                <h4>${t.name}</h4>
-                <p>${t.description || 'Professional theme'}</p>
-            </div>
-            <button class="btn btn-primary btn-sm apply-theme-btn" data-theme-id="${t._id}">
-                <i class="fas fa-check"></i> Apply
-            </button>
-        </div>
-    `).join('');
-
-    document.querySelectorAll('.apply-theme-btn').forEach(btn=>{
-        btn.addEventListener('click', e=>{
-            e.stopPropagation();
-            applyTheme(btn.getAttribute('data-theme-id'));
-        });
-    });
-}
-
-async function applyTheme(themeId){
-    if(!currentLocation) return showNotification('No location selected','error');
-    try{
-        showNotification('Applying theme...','info');
-        const res = await apiCall('/themes/apply',{
-            method:'POST',
-            body:{ locationId: currentLocation.id, themeId }
-        });
-        if(res.success){
-            showNotification('Theme applied!','success');
-            currentLocation.currentTheme = themes.find(t=>t._id===themeId) || null;
-            updateCurrentThemeUI();
-        } else showNotification(`Failed: ${res.message}`,'error');
-    } catch(e){
-        console.error(e);
-        showNotification('Error applying theme','error');
-    }
-}
-
-async function removeTheme(){
-    if(!currentLocation || !currentLocation.currentTheme) return showNotification('No theme to remove','error');
-    if(!confirm('Are you sure you want to remove the current theme?')) return;
-    try{
-        showNotification('Removing theme...','info');
-        const res = await apiCall('/themes/remove',{
-            method:'POST',
-            body:{ locationId: currentLocation.id }
-        });
-        if(res.success){
-            showNotification('Theme removed!','success');
-            currentLocation.currentTheme = null;
-            updateCurrentThemeUI();
-        } else showNotification(`Failed: ${res.message}`,'error');
-    } catch(e){
-        console.error(e);
-        showNotification('Error removing theme','error');
-    }
-}
-
-function updateRemoveButton(){
-    const btn = document.getElementById('removeThemeBtn');
-    if(currentLocation?.currentTheme) btn.removeAttribute('disabled');
-    else btn.setAttribute('disabled', true);
-}
-
-function updateCurrentThemeUI(){
-    const themeNameEl = document.getElementById('currentThemeName');
-    themeNameEl.textContent = currentLocation?.currentTheme?.name || 'No theme applied';
-    populateThemeOptions();
-    updateRemoveButton();
-}
-
-// ===== Background Color Picker =====
-document.getElementById('applyColorBtn').addEventListener('click', ()=>{
-    const color = document.getElementById('backgroundColorPicker').value;
-    document.body.style.backgroundColor = color;
-    currentBackgroundColor = color;
-    showNotification('Background color applied','success');
-});
-
-document.getElementById('resetColorBtn').addEventListener('click', ()=>{
-    currentBackgroundColor = '#ffffff';
-    document.getElementById('backgroundColorPicker').value = currentBackgroundColor;
-    document.getElementById('colorPreview').style.backgroundColor = currentBackgroundColor;
-    document.body.style.backgroundColor = currentBackgroundColor;
-    showNotification('Background color reset','info');
-});
-
-document.querySelectorAll('.color-preset').forEach(el=>{
-    el.addEventListener('click', ()=>{
-        const color = el.getAttribute('data-color');
-        document.getElementById('backgroundColorPicker').value = color;
-        document.getElementById('colorPreview').style.backgroundColor = color;
-        document.body.style.backgroundColor = color;
-        currentBackgroundColor = color;
-        document.querySelectorAll('.color-preset').forEach(p=>p.classList.remove('active'));
-        el.classList.add('active');
-        showNotification('Preset color applied','success');
-    });
-});
-
-// ===== Drag =====
-function initDrag(){
-    const widget=document.getElementById('themeWidget');
-    const header=document.getElementById('widgetHeader');
-    header.addEventListener('mousedown', startDrag);
-    header.addEventListener('touchstart', startDrag);
-    function startDrag(e){
-        e.preventDefault(); isDragging=true;
-        const clientX=e.clientX||e.touches[0].clientX;
-        const clientY=e.clientY||e.touches[0].clientY;
-        const rect=widget.getBoundingClientRect();
-        dragOffset.x=clientX-rect.left; dragOffset.y=clientY-rect.top;
-        document.addEventListener('mousemove', onDrag);
-        document.addEventListener('touchmove', onDrag);
-        document.addEventListener('mouseup', stopDrag);
-        document.addEventListener('touchend', stopDrag);
-    }
-    function onDrag(e){
-        if(!isDragging) return;
-        const clientX=e.clientX||e.touches[0].clientX;
-        const clientY=e.clientY||e.touches[0].clientY;
-        currentPosition.x=clientX-dragOffset.x;
-        currentPosition.y=clientY-dragOffset.y;
-        const maxX=window.innerWidth-widget.offsetWidth;
-        const maxY=window.innerHeight-widget.offsetHeight;
-        currentPosition.x=Math.max(0,Math.min(currentPosition.x,maxX));
-        currentPosition.y=Math.max(0,Math.min(currentPosition.y,maxY));
-        widget.style.left=currentPosition.x+'px';
-        widget.style.top=currentPosition.y+'px';
-        widget.style.right='auto';
-        widget.style.bottom='auto';
-    }
-    function stopDrag(){isDragging=false;document.removeEventListener('mousemove',onDrag);document.removeEventListener('touchmove',onDrag);document.removeEventListener('mouseup',stopDrag);document.removeEventListener('touchend',stopDrag);}
-}
-
-// ===== Controls =====
-function initControls(){
-    const widget=document.getElementById('themeWidget');
-    const minimizeBtn=document.getElementById('minimizeBtn');
-    const closeBtn=document.getElementById('closeBtn');
-    const removeBtn=document.getElementById('removeThemeBtn');
-
-    minimizeBtn.addEventListener('click', e=>{
-        e.stopPropagation();
-        widget.classList.toggle('minimized');
-        minimizeBtn.innerHTML = widget.classList.contains('minimized') ? '<i class="fas fa-plus"></i>' : '<i class="fas fa-minus"></i>';
-    });
-
-    closeBtn.addEventListener('click', e=>{
-        e.stopPropagation();
-        widget.style.display='none';
-        setTimeout(()=>widget.style.display='block',5000);
-        showNotification('Widget hidden. Will reappear in 5 seconds','info');
-    });
-
-    removeBtn.addEventListener('click', removeTheme);
-}
-
-// ===== Init =====
-document.addEventListener('DOMContentLoaded', async ()=>{
-    initDrag();
-    initControls();
-    await loadUserLocation();
-    await loadThemes();
+    console.log('Widget init done'); // Check 5
 });
 </script>
 
