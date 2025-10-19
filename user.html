@@ -236,10 +236,12 @@ async function loadUserLocation(){
             if (locationStatusEl) locationStatusEl.textContent = 'Active';
             if (statusDotEl) statusDotEl.className = 'status-dot';
             
+            // ✅ Load saved theme from sub-account
             if(currentLocation.currentTheme){
                 if (currentThemeNameEl) currentThemeNameEl.textContent = currentLocation.currentTheme.name;
                 currentTheme = currentLocation.currentTheme;
                 
+                // Apply the saved theme from previewImage field
                 if (currentLocation.currentTheme.previewImage) {
                     await loadThemeScript(currentLocation.currentTheme.previewImage);
                     showNotification('Theme loaded from database', 'success', 2000);
@@ -402,10 +404,13 @@ async function applyTheme(themeId, saveToDB = true) {
           return showNotification('Missing location ID – cannot save theme.', 'error');
         }
 
+        // ✅ Make theme name unique by including location ID to avoid duplicate key errors
+        const uniqueThemeName = `${theme.name} - ${safeLocationId.substring(0, 8)}`;
+
         const themeData = {
-          name: theme.name,
+          name: uniqueThemeName, // ✅ Unique name to avoid duplicate key errors
           description: theme.description,
-          locationId: safeLocationId, // ✅ FIXED
+          locationId: safeLocationId,
           userId: '110',
           companyId: currentLocation.companyId || 'default-company',
           previewImage: theme.scriptUrl,
@@ -441,16 +446,26 @@ async function applyTheme(themeId, saveToDB = true) {
         if (res.success) {
           showNotification('Theme applied and saved!', 'success');
           currentTheme = theme;
-          if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
+          if (currentThemeNameEl) currentThemeNameEl.textContent = theme.name; // Show original name, not unique one
           populateThemeOptions();
         } else {
           showNotification(`Theme applied but failed to save: ${res.message || 'Unknown error'}`, 'warning');
         }
       } catch (apiError) {
         console.error('Failed to save theme to DB:', apiError);
-        showNotification('Theme applied but failed to save to database', 'warning');
+        // Check if it's a duplicate key error and handle gracefully
+        if (apiError.message.includes('duplicate key error')) {
+          showNotification('Theme already exists for this location', 'warning');
+        } else {
+          showNotification('Theme applied but failed to save to database', 'warning');
+        }
+        // Still update UI even if DB save fails
+        currentTheme = theme;
+        if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
+        populateThemeOptions();
       }
     } else {
+      // Just update UI without saving to DB
       currentTheme = theme;
       if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
       populateThemeOptions();
@@ -484,7 +499,7 @@ async function removeTheme() {
     try {
       const res = await apiCall('/themes/remove', {
         method: 'POST',
-        body: { locationId: safeLocationId } // ✅ FIXED
+        body: { locationId: safeLocationId }
       });
 
       if (res.success) {
