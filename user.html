@@ -172,7 +172,6 @@ let statusDotEl, locationStatusEl, locationNameEl, currentThemeNameEl, backgroun
 
 // ====== Generic API call ======
 async function apiCall(endpoint, options = {}) {
-    // Using your existing API endpoint
     const API_BASE_URL = 'https://ghlengine-production.up.railway.app/api';
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = { 
@@ -189,7 +188,10 @@ async function apiCall(endpoint, options = {}) {
     
     try {
         const response = await fetch(url, config);
-        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+        }
         return await response.json();
     } catch (error) { 
         console.error('API Error:', error); 
@@ -237,8 +239,11 @@ async function loadUserLocation(){
                 if (currentThemeNameEl) currentThemeNameEl.textContent = currentLocation.currentTheme.name;
                 currentTheme = currentLocation.currentTheme;
                 
-                // Apply the saved theme
-                applyTheme(currentLocation.currentTheme.id || currentLocation.currentTheme._id, false);
+                // Apply the saved theme from previewImage field
+                if (currentLocation.currentTheme.previewImage) {
+                    await loadThemeScript(currentLocation.currentTheme.previewImage);
+                    showNotification('Theme loaded from database', 'success', 2000);
+                }
             } else {
                 if (currentThemeNameEl) currentThemeNameEl.textContent = 'No theme applied';
             }
@@ -253,7 +258,7 @@ async function loadUserLocation(){
         } else {
             // If no location data, create a default location object
             currentLocation = {
-                id: 'default-location',
+                locationId: 'default-location',
                 name: 'Default Location',
                 active: true
             };
@@ -264,7 +269,7 @@ async function loadUserLocation(){
         console.error('Load location error:', e);
         // Create a default location if API fails
         currentLocation = {
-            id: 'default-location',
+            locationId: 'default-location',
             name: 'Default Location',
             active: true
         };
@@ -282,16 +287,44 @@ function loadThemes(){
         {
             id: 'purple',
             name: 'Purple Theme',
-            description: 'Professional purple theme',
+            description: 'Professional purple theme with modern gradient design',
             color: 'linear-gradient(135deg, #7209b7 0%, #4361ee 100%)',
-            scriptUrl: THEME_URLS.purple
+            scriptUrl: THEME_URLS.purple,
+            // Theme properties that match your model
+            addBarColor: '#7209b7',
+            gradientColor: 'linear-gradient(135deg, #7209b7 0%, #4361ee 100%)',
+            hoverColor: '#5a08a5',
+            textColor: '#FFFFFF',
+            backgroundColor: '#FFFFFF',
+            buttonBgColor: '#7209b7',
+            buttonTextColor: '#FFFFFF',
+            buttonHoverColor: '#5a08a5',
+            fontFamily: 'Arial, sans-serif',
+            headingFontSize: '14px',
+            bodyFontSize: '12px',
+            borderRadius: '8px',
+            transitionSpeed: '0.3s'
         },
         {
             id: 'yellow',
             name: 'Yellow Theme',
-            description: 'Bright yellow theme',
+            description: 'Bright and energetic yellow theme',
             color: 'linear-gradient(135deg, #ffd166 0%, #ff9e00 100%)',
-            scriptUrl: THEME_URLS.yellow
+            scriptUrl: THEME_URLS.yellow,
+            // Theme properties that match your model
+            addBarColor: '#ff9e00',
+            gradientColor: 'linear-gradient(135deg, #ffd166 0%, #ff9e00 100%)',
+            hoverColor: '#e68a00',
+            textColor: '#000000',
+            backgroundColor: '#FFFFFF',
+            buttonBgColor: '#ff9e00',
+            buttonTextColor: '#000000',
+            buttonHoverColor: '#e68a00',
+            fontFamily: 'Arial, sans-serif',
+            headingFontSize: '14px',
+            bodyFontSize: '12px',
+            borderRadius: '8px',
+            transitionSpeed: '0.3s'
         }
     ];
     
@@ -351,29 +384,76 @@ async function applyTheme(themeId, saveToDB = true){
         // Save theme to database if requested
         if(saveToDB) {
             try {
+                // Create theme data that matches your Theme model
+                const themeData = {
+                    name: theme.name,
+                    description: theme.description,
+                    locationId: currentLocation.locationId,
+                    userId: '110', // Using your bearer token as userId
+                    companyId: currentLocation.companyId || 'default-company',
+                    
+                    // Store script URL in previewImage field
+                    previewImage: theme.scriptUrl,
+                    
+                    // Theme color properties
+                    addBarColor: theme.addBarColor,
+                    gradientColor: theme.gradientColor,
+                    hoverColor: theme.hoverColor,
+                    textColor: theme.textColor,
+                    backgroundColor: theme.backgroundColor,
+                    buttonBgColor: theme.buttonBgColor,
+                    buttonTextColor: theme.buttonTextColor,
+                    buttonHoverColor: theme.buttonHoverColor,
+                    
+                    // Typography
+                    fontFamily: theme.fontFamily,
+                    headingFontSize: theme.headingFontSize,
+                    bodyFontSize: theme.bodyFontSize,
+                    
+                    // UI Elements
+                    borderRadius: theme.borderRadius,
+                    transitionSpeed: theme.transitionSpeed,
+                    
+                    // Default settings
+                    category: 'dashboard',
+                    isActive: true,
+                    isGlobal: false,
+                    version: 1
+                };
+
+                console.log('Sending theme data:', themeData);
+
                 const res = await apiCall('/themes/apply',{ 
                     method:'POST', 
-                    body:{ 
-                        locationId: currentLocation.id, 
-                        themeId: theme.id,
-                        themeName: theme.name
-                    } 
+                    body: {
+                        locationId: currentLocation.locationId,
+                        themeData: themeData
+                    }
                 });
                 
                 if(res.success){
                     showNotification('Theme applied and saved!','success');
+                    currentTheme = theme;
+                    if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
+                    populateThemeOptions();
                 } else {
-                    showNotification(`Theme applied but failed to save: ${res.message}`,'warning');
+                    showNotification(`Theme applied but failed to save: ${res.message || 'Unknown error'}`,'warning');
                 }
             } catch(apiError) {
                 console.error('Failed to save theme to DB:', apiError);
                 showNotification('Theme applied but failed to save to database','warning');
+                // Still update UI even if DB save fails
+                currentTheme = theme;
+                if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
+                populateThemeOptions();
             }
+        } else {
+            // Just update UI without saving to DB
+            currentTheme = theme;
+            if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
+            populateThemeOptions();
+            showNotification('Theme applied!','success');
         }
-        
-        currentTheme = theme;
-        if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
-        populateThemeOptions();
         
     } catch(e){ 
         console.error(e); 
@@ -392,8 +472,14 @@ function loadThemeScript(url) {
         const script = document.createElement('script');
         script.src = url;
         script.setAttribute('data-theme-script', 'true');
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Failed to load theme script: ${url}`));
+        script.onload = () => {
+            console.log('Theme script loaded successfully:', url);
+            resolve();
+        };
+        script.onerror = () => {
+            console.error('Failed to load theme script:', url);
+            reject(new Error(`Failed to load theme script: ${url}`));
+        };
         document.head.appendChild(script);
     });
 }
@@ -418,13 +504,15 @@ async function removeTheme(){
         try {
             const res = await apiCall('/themes/remove',{ 
                 method:'POST', 
-                body:{ locationId: currentLocation.id } 
+                body:{ 
+                    locationId: currentLocation.locationId 
+                } 
             });
             
             if(res.success){
                 showNotification('Theme removed!','success');
             } else {
-                showNotification(`Theme removed but failed to update database: ${res.message}`,'warning');
+                showNotification(`Theme removed but failed to update database: ${res.message || 'Unknown error'}`,'warning');
             }
         } catch(apiError) {
             console.error('Failed to remove theme from DB:', apiError);
@@ -498,7 +586,7 @@ async function applyBackgroundColor(color) {
         currentBackgroundColor = color;
         
         // Save to localStorage since we don't have the API endpoint
-        localStorage.setItem(`bgColor-${currentLocation.id}`, color);
+        localStorage.setItem(`bgColor-${currentLocation.locationId}`, color);
         showNotification('Background color saved locally!', 'success');
         
     } catch (e) {
