@@ -395,6 +395,110 @@ async function applyTheme(themeId, saveToDB = true){
                     // Store script URL in previewImage field
                     previewImage: theme.scriptUrl,
                     
+                    // Theme color properties - ONLY HEX COLORS
+                    addBarColor: theme.addBarColor,
+                    gradientColor: theme.gradientColor, // This should be hex or empty
+                    hoverColor: theme.hoverColor,
+                    textColor: theme.textColor,
+                    backgroundColor: theme.backgroundColor,
+                    buttonBgColor: theme.buttonBgColor,
+                    buttonTextColor: theme.buttonTextColor,
+                    buttonHoverColor: theme.buttonHoverColor,
+                    
+                    // Typography
+                    fontFamily: theme.fontFamily,
+                    headingFontSize: theme.headingFontSize,
+                    bodyFontSize: theme.bodyFontSize,
+                    
+                    // UI Elements
+                    borderRadius: theme.borderRadius,
+                    transitionSpeed: theme.transitionSpeed,
+                    
+                    // Default settings
+                    category: 'dashboard',
+                    isActive: true,
+                    isGlobal: false,
+                    version: 1
+                };
+
+                console.log('Sending theme data:', themeData);
+
+                const res = await apiCall('/themes/apply',{ 
+                    method:'POST', 
+                    body: {
+                        locationId: currentLocation.locationId,
+                        themeData: themeData
+                    }
+                });
+                
+                if(res.success){
+                    showNotification('Theme applied and saved!','success');
+                    currentTheme = theme;
+                    if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
+                    populateThemeOptions();
+                } else {
+                    showNotification(`Theme applied but failed to save: ${res.message || 'Unknown error'}`,'warning');
+                }
+            } catch(apiError) {
+                console.error('Failed to save theme to DB:', apiError);
+                // Extract the actual error message from the response
+                let errorMessage = 'Theme applied but failed to save to database';
+                try {
+                    const errorData = JSON.parse(apiError.message.replace('HTTP 500: ', ''));
+                    errorMessage = `Theme applied but: ${errorData.error}`;
+                } catch (e) {
+                    // If parsing fails, use the original error
+                    errorMessage = `Theme applied but: ${apiError.message}`;
+                }
+                showNotification(errorMessage, 'warning');
+                
+                // Still update UI even if DB save fails
+                currentTheme = theme;
+                if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
+                populateThemeOptions();
+            }
+        } else {
+            // Just update UI without saving to DB
+            currentTheme = theme;
+            if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
+            populateThemeOptions();
+            showNotification('Theme applied!','success');
+        }
+        
+    } catch(e){ 
+        console.error(e); 
+        showNotification('Error applying theme','error'); 
+    }
+}
+    if(!currentLocation) return showNotification('No location selected','error');
+    
+    try{
+        showNotification('Applying theme...','info');
+        
+        // Find the theme
+        const theme = themes.find(t => t.id === themeId);
+        if(!theme) {
+            showNotification('Theme not found','error');
+            return;
+        }
+        
+        // Load and execute the theme script
+        await loadThemeScript(theme.scriptUrl);
+        
+        // Save theme to database if requested
+        if(saveToDB) {
+            try {
+                // Create theme data that matches your Theme model
+                const themeData = {
+                    name: theme.name,
+                    description: theme.description,
+                    locationId: currentLocation.locationId,
+                    userId: '110', // Using your bearer token as userId
+                    companyId: currentLocation.companyId || 'default-company',
+                    
+                    // Store script URL in previewImage field
+                    previewImage: theme.scriptUrl,
+                    
                     // Theme color properties
                     addBarColor: theme.addBarColor,
                     gradientColor: theme.gradientColor,
@@ -459,7 +563,7 @@ async function applyTheme(themeId, saveToDB = true){
         console.error(e); 
         showNotification('Error applying theme','error'); 
     }
-}
+
 
 // ====== Load Theme Script ======
 function loadThemeScript(url) {
