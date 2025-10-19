@@ -222,17 +222,18 @@ async function loadUserLocation(){
                 currentTheme = currentLocation.currentTheme;
                 
                 // Apply the saved theme
-                applyTheme(currentLocation.currentTheme.id || currentLocation.currentTheme._id);
+                applyTheme(currentLocation.currentTheme.id || currentLocation.currentTheme._id, false);
             } else {
                 document.getElementById('currentThemeName').textContent = 'No theme applied';
             }
             
-            // Check if location has saved background color
-            if(currentLocation.backgroundColor){
-                currentBackgroundColor = currentLocation.backgroundColor;
-                document.getElementById('backgroundColorPicker').value = currentBackgroundColor;
-                document.getElementById('colorPreview').style.backgroundColor = currentBackgroundColor;
-                document.body.style.backgroundColor = currentBackgroundColor;
+            // Check localStorage for background color
+            const savedBgColor = localStorage.getItem(`bgColor-${currentLocation.id}`);
+            if(savedBgColor){
+                currentBackgroundColor = savedBgColor;
+                document.getElementById('backgroundColorPicker').value = savedBgColor;
+                document.getElementById('colorPreview').style.backgroundColor = savedBgColor;
+                document.body.style.backgroundColor = savedBgColor;
             }
         } else {
             // If no location data, create a default location object
@@ -242,6 +243,15 @@ async function loadUserLocation(){
                 active: true
             };
             document.getElementById('locationName').textContent = currentLocation.name;
+            
+            // Check localStorage for background color for default location
+            const savedBgColor = localStorage.getItem(`bgColor-${currentLocation.id}`);
+            if(savedBgColor){
+                currentBackgroundColor = savedBgColor;
+                document.getElementById('backgroundColorPicker').value = savedBgColor;
+                document.getElementById('colorPreview').style.backgroundColor = savedBgColor;
+                document.body.style.backgroundColor = savedBgColor;
+            }
         }
         showNotification('Location loaded', 'success', 2000);
     } catch(e){
@@ -255,6 +265,16 @@ async function loadUserLocation(){
         document.getElementById('locationName').textContent = currentLocation.name;
         document.getElementById('locationStatus').textContent = 'Ready';
         document.getElementById('statusDot').className = 'status-dot';
+        
+        // Check localStorage for background color
+        const savedBgColor = localStorage.getItem(`bgColor-${currentLocation.id}`);
+        if(savedBgColor){
+            currentBackgroundColor = savedBgColor;
+            document.getElementById('backgroundColorPicker').value = savedBgColor;
+            document.getElementById('colorPreview').style.backgroundColor = savedBgColor;
+            document.body.style.backgroundColor = savedBgColor;
+        }
+        
         showNotification('Using default location', 'info');
     }
 }
@@ -310,13 +330,13 @@ function populateThemeOptions(){
     document.querySelectorAll('.apply-theme-btn').forEach(btn=>{
         btn.addEventListener('click', e=>{
             e.stopPropagation();
-            applyTheme(btn.getAttribute('data-theme-id'));
+            applyTheme(btn.getAttribute('data-theme-id'), true);
         });
     });
 }
 
 // ====== Apply Theme ======
-async function applyTheme(themeId){
+async function applyTheme(themeId, saveToDB = true){
     if(!currentLocation) return showNotification('No location selected','error');
     
     try{
@@ -332,24 +352,33 @@ async function applyTheme(themeId){
         // Load and execute the theme script
         await loadThemeScript(theme.scriptUrl);
         
-        // Save theme to database
-        const res = await apiCall('/themes/apply',{ 
-            method:'POST', 
-            body:{ 
-                locationId: currentLocation.id, 
-                themeId: theme.id,
-                themeName: theme.name
-            } 
-        });
-        
-        if(res.success){
-            showNotification('Theme applied and saved!','success');
-            currentTheme = theme;
-            document.getElementById('currentThemeName').textContent = currentTheme.name;
-            populateThemeOptions();
-        } else {
-            showNotification(`Failed to save: ${res.message}`,'error');
+        // Save theme to database if requested
+        if(saveToDB) {
+            try {
+                const res = await apiCall('/themes/apply',{ 
+                    method:'POST', 
+                    body:{ 
+                        locationId: currentLocation.id, 
+                        themeId: theme.id,
+                        themeName: theme.name
+                    } 
+                });
+                
+                if(res.success){
+                    showNotification('Theme applied and saved!','success');
+                } else {
+                    showNotification(`Theme applied but failed to save: ${res.message}`,'warning');
+                }
+            } catch(apiError) {
+                console.error('Failed to save theme to DB:', apiError);
+                showNotification('Theme applied but failed to save to database','warning');
+            }
         }
+        
+        currentTheme = theme;
+        document.getElementById('currentThemeName').textContent = currentTheme.name;
+        populateThemeOptions();
+        
     } catch(e){ 
         console.error(e); 
         showNotification('Error applying theme','error'); 
@@ -390,19 +419,26 @@ async function removeTheme(){
         existingScripts.forEach(script => script.remove());
         
         // Save removal to database
-        const res = await apiCall('/themes/remove',{ 
-            method:'POST', 
-            body:{ locationId: currentLocation.id } 
-        });
-        
-        if(res.success){
-            showNotification('Theme removed!','success');
-            currentTheme = null;
-            document.getElementById('currentThemeName').textContent = 'No theme applied';
-            populateThemeOptions();
-        } else {
-            showNotification(`Failed: ${res.message}`,'error');
+        try {
+            const res = await apiCall('/themes/remove',{ 
+                method:'POST', 
+                body:{ locationId: currentLocation.id } 
+            });
+            
+            if(res.success){
+                showNotification('Theme removed!','success');
+            } else {
+                showNotification(`Theme removed but failed to update database: ${res.message}`,'warning');
+            }
+        } catch(apiError) {
+            console.error('Failed to remove theme from DB:', apiError);
+            showNotification('Theme removed but failed to update database','warning');
         }
+        
+        currentTheme = null;
+        document.getElementById('currentThemeName').textContent = 'No theme applied';
+        populateThemeOptions();
+        
     } catch(e){ 
         console.error(e); 
         showNotification('Error removing theme','error'); 
@@ -460,23 +496,13 @@ async function applyBackgroundColor(color) {
         document.body.style.backgroundColor = color;
         currentBackgroundColor = color;
         
-        // Save to database
-        const res = await apiCall('/locations/update-background', {
-            method: 'POST',
-            body: {
-                locationId: currentLocation.id,
-                backgroundColor: color
-            }
-        });
+        // Save to localStorage since we don't have the API endpoint
+        localStorage.setItem(`bgColor-${currentLocation.id}`, color);
+        showNotification('Background color saved locally!', 'success');
         
-        if (res.success) {
-            showNotification('Background color saved!', 'success');
-        } else {
-            showNotification(`Failed to save: ${res.message}`, 'error');
-        }
     } catch (e) {
         console.error('Error applying background color:', e);
-        showNotification('Error saving background color', 'error');
+        showNotification('Error applying background color', 'error');
     }
 }
 
