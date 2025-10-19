@@ -152,7 +152,6 @@ body { font-family:'Segoe UI',sans-serif; background:#f5f7fa; color:var(--dark);
 <div id="notificationsContainer"></div>
 
 <script>
-<script>
 // ====== JS Variables ======
 let currentLocation = null;
 let themes = [];
@@ -326,7 +325,63 @@ function loadThemes(){
     populateThemeOptions();
 }
 
-// ====== Apply Theme ======
+// ====== Populate Theme Options ======
+function populateThemeOptions(){
+    const container = getElementSafe('themeOptions');
+    if(!container) return;
+    
+    if(!themes.length){
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray)">No themes available</div>';
+        return;
+    }
+    
+    const currentId = currentTheme ? currentTheme.id : '';
+    container.innerHTML = themes.map(t=>`
+        <div class="theme-option ${t.id===currentId?'active':''}" data-theme-id="${t.id}">
+            <div class="theme-preview" style="background:${t.color}">
+                <i class="fas fa-paint-brush"></i>
+            </div>
+            <div class="theme-details">
+                <h4>${t.name}</h4>
+                <p>${t.description}</p>
+            </div>
+            <button class="btn btn-primary btn-sm apply-theme-btn" data-theme-id="${t.id}">
+                <i class="fas fa-check"></i> Apply
+            </button>
+        </div>
+    `).join('');
+
+    document.querySelectorAll('.apply-theme-btn').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+            e.stopPropagation();
+            applyTheme(btn.getAttribute('data-theme-id'), true);
+        });
+    });
+}
+
+// ====== Load Theme Script ======
+function loadThemeScript(url) {
+    return new Promise((resolve, reject) => {
+        // Remove any existing theme scripts
+        const existingScripts = document.querySelectorAll('script[data-theme-script]');
+        existingScripts.forEach(script => script.remove());
+        
+        // Create new script element
+        const script = document.createElement('script');
+        script.src = url;
+        script.setAttribute('data-theme-script', 'true');
+        script.onload = () => {
+            console.log('Theme script loaded successfully:', url);
+            resolve();
+        };
+        script.onerror = () => {
+            console.error('Failed to load theme script:', url);
+            reject(new Error(`Failed to load theme script: ${url}`));
+        };
+        document.head.appendChild(script);
+    });
+}
+
 // ====== Apply Theme ======
 async function applyTheme(themeId, saveToDB = true) {
   if (!currentLocation) return showNotification('No location selected', 'error');
@@ -373,11 +428,14 @@ async function applyTheme(themeId, saveToDB = true) {
           version: 1
         };
 
-        console.log('📤 Sending theme data:', themeData);
+        console.log('📤 Sending theme data:', { locationId: safeLocationId, themeData });
 
         const res = await apiCall('/themes/apply', {
           method: 'POST',
-          body: themeData
+          body: {
+            locationId: safeLocationId,
+            themeData: themeData
+          }
         });
 
         if (res.success) {
@@ -447,8 +505,6 @@ async function removeTheme() {
     showNotification('Error removing theme', 'error');
   }
 }
-
-// ====== (rest of your color picker, drag, controls, etc. remain unchanged) ======
 
 // ====== Background Color Functions ======
 function initBackgroundColorPicker() {
