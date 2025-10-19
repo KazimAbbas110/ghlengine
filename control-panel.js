@@ -232,113 +232,1207 @@
 
 
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHL Theme Builder</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --success: #06d6a0;
+            --danger: #ef476f;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 10px;
+        }
 
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
+        .panel {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
 
+        .panel-header {
+            background: var(--primary);
+            color: white;
+            padding: 12px 16px;
+        }
 
-(function() {
-    const LOCATION_ID = '9DFET0sGvLGqfeRXA2Gt'; // replace dynamically if needed
-    const API_BASE = 'http://localhost:5000/api'; // keep your existing backend URL
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    const container = document.createElement('div');
-    container.style.width = '100%';
-    container.style.height = '650px';
-    container.style.border = '1px solid #ccc';
-    container.style.borderRadius = '8px';
-    container.style.overflow = 'hidden';
-    document.body.appendChild(container);
+        .panel-title h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
 
-    const iframe = document.createElement('iframe');
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = '0';
-    container.appendChild(iframe);
+        .panel-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
 
-    const doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open();
-    doc.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body{font-family:Arial,sans-serif;padding:20px;background:#f9f9f9;}
-                select,button{padding:6px 10px;margin:5px 0;}
-                #previewIframe{width:100%;height:300px;border:1px solid #ccc;margin-top:10px;}
-            </style>
-        </head>
-        <body>
-            <h3>🎨 Theme Builder</h3>
-            <div id="accessMessage"></div>
-            <div id="builderUI" style="display:none">
-                <label>Select Theme:</label>
-                <select id="themeSelect"><option value="">-- Select Theme --</option></select><br>
-                <button id="applyBtn">Apply Theme</button>
-                <button id="removeBtn">Remove Theme</button>
-                <h4>Preview:</h4>
-                <iframe id="previewIframe"></iframe>
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--gray-light);
+            color: var(--dark);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            padding: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--success);
+        }
+
+        .stat-card.danger {
+            border-left-color: var(--danger);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 12px;
+        }
+
+        .controls-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--light);
+            border-bottom: 1px solid var(--gray-light);
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 6px 10px 6px 28px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .filter-select {
+            padding: 6px 10px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            font-size: 12px;
+            background: white;
+            min-width: 130px;
+        }
+
+        .locations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            padding: 15px;
+        }
+
+        .location-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+        }
+
+        .location-card.has-theme {
+            border-left-color: var(--success);
+        }
+
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .location-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .location-id {
+            font-size: 10px;
+            color: var(--gray);
+            background: var(--gray-light);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .location-details {
+            margin-bottom: 12px;
+        }
+
+        .detail {
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .location-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 5px 8px;
+            font-size: 11px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: var(--box-shadow);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            font-size: 13px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        .notification.info {
+            background: var(--primary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 420px;
+            max-width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            padding: 16px;
+        }
+
+        .modal-footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 12px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gray-light);
+            transition: .2s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: .2s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: var(--success);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(16px);
+        }
+
+        .bulk-section {
+            padding: 12px 16px;
+            background: var(--light);
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .bulk-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+            color: var(--gray);
+        }
+
+        @media (max-width: 768px) {
+            .locations-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Notification System -->
+        <div id="notificationsContainer"></div>
+
+        <!-- Main Panel -->
+        <div class="panel">
+            <!-- Header -->
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-palette"></i>
+                    <h1>GHL Theme Builder</h1>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-primary" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh Data
+                    </button>
+                </div>
             </div>
-            <script>
-                const LOCATION_ID = '${LOCATION_ID}';
-                const API_BASE = '${API_BASE}';
 
-                async function apiCall(endpoint, options={}) {
-                    const res = await fetch(API_BASE+endpoint, {
-                        method: options.method||'GET',
-                        headers: {'Content-Type':'application/json', ...options.headers},
-                        body: options.body
-                    });
-                    return await res.json();
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalLocations">0</div>
+                    <div class="stat-label">Total Locations</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value" id="themedLocations">0</div>
+                    <div class="stat-label">Themed Locations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="themeAccess">0</div>
+                    <div class="stat-label">Theme Access Enabled</div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-value" id="customCssLocations">0</div>
+                    <div class="stat-label">Custom CSS Active</div>
+                </div>
+            </div>
+
+            <!-- Controls Bar -->
+            <div class="controls-bar">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchLocations" placeholder="Search locations...">
+                </div>
+               
+            </div>
+    <!-- Sub-Accounts Section -->
+            <div class="sub-accounts-section">
+                <div class="panel-title" style="margin-bottom: 10px;">
+                    <i class="fas fa-sitemap"></i>
+                    <h3 style="font-size: 16px;">Sub-Accounts</h3>
+                </div>
+                <div class="sub-accounts-row" id="realTimeLocationsContainer">
+                    <!-- Sub-accounts will be populated here -->
+                    <div class="empty-state" style="padding: 15px; width: 100%;">
+                        <p>No sub-accounts loaded</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Real-time Locations Container -->
+            <!-- <div id="realTimeLocationsContainer" class="locations-grid">
+                <div class="empty-state">
+                    <h3>📍 No Locations Loaded</h3>
+                    <p>Click "Refresh Locations" to load your GHL locations</p>
+                    <button class="btn btn-primary" onclick="loadRealTimeLocations()">
+                        <i class="fas fa-sync-alt"></i>
+                        Load Locations
+                    </button>
+                </div>
+            </div> -->
+
+            <!-- Bulk Theme Management -->
+            <div class="bulk-section">
+                <div class="bulk-header">
+                    <div>
+                        <strong id="locationCount">0 locations</strong>
+                        <div style="font-size: 11px; color: var(--gray);" id="selectedCount">0 selected</div>
+                    </div>
+                    <div class="toggle-container" style="margin: 0;">
+                        <label class="toggle">
+                            <input type="checkbox" id="selectAllLocations" onchange="toggleSelectAllLocations()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span style="font-size: 12px;">Select All</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="clearBulkSelection()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <select class="form-control" id="bulkThemeSelect" style="flex: 1; min-width: 180px;">
+                        <option value="">Select a theme to apply...</option>
+                    </select>
+                    <button class="btn btn-primary" id="bulkApplyBtn" onclick="applyBulkThemeToRealLocations()">
+                        <i class="fas fa-layer-group"></i>
+                        Apply to Selected
+                    </button>
+                    <button class="btn btn-danger" id="bulkRemoveBtn" onclick="removeThemeFromAllSelected()">
+                        <i class="fas fa-trash-alt"></i>
+                        Remove from Selected
+                    </button>
+                </div>
+                <div style="margin-top: 12px; max-height: 180px; overflow-y: auto;">
+                    <div id="bulkLocationCheckboxes">
+                        <!-- Checkboxes will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Modal -->
+    <div class="modal" id="themeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Apply Theme</h3>
+                <button class="close-modal" onclick="closeThemeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Theme</label>
+                    <select class="form-control" id="modalThemeSelect">
+                        <option value="">Choose a theme...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Target Location</label>
+                    <div id="modalLocationInfo" style="padding: 10px; background: var(--light); border-radius: 4px; font-size: 12px;">
+                        Location information will appear here
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeThemeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="applyThemeFromModal()">Apply Theme</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permissions Modal -->
+    <div class="modal" id="permissionsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Manage Permissions</h3>
+                <button class="close-modal" onclick="closePermissionsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="toggle-container">
+                    <span style="min-width: 120px;">Theme Builder Access</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="perm-themes">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span id="perm-themes-status" style="font-size: 12px;">Disabled</span>
+                </div>
+                <div class="toggle-container">
+                    <span style="min-width: 120px;">Chat Widget</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="perm-chat">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span id="perm-chat-status" style="font-size: 12px;">Disabled</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closePermissionsModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="savePermissions()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===========================
+        // Global Variables
+        // ===========================
+        let realTimeLocations = [];
+        let themes = [];
+        let currentModalLocationId = null;
+        const ADMIN_KEY = '110';
+
+        // ===========================
+        // API Call Function
+        // ===========================
+        async function apiCall(endpoint, options = {}) {
+            const baseUrl = 'https://ghlengine-production.up.railway.app/api';
+            const url = `${baseUrl}${endpoint}`;
+
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers,
+                'Authorization': `Bearer ${ADMIN_KEY}`
+            };
+
+            const config = {
+                method: options.method || 'GET',
+                headers,
+                body: options.body
+            };
+
+            try {
+                console.log(`🔄 API Call: ${endpoint}`, config);
+                const response = await fetch(url, config);
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                const data = await response.json();
+                console.log(`✅ API Response:`, data);
+                return data;
+            } catch (error) {
+                console.error(`❌ API Error:`, error);
+                throw error;
+            }
+        }
+
+        // ===========================
+        // Notifications
+        // ===========================
+        function showNotification(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('notificationsContainer');
+            if (!container) return;
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(notification);
+
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) notification.parentNode.removeChild(notification);
+                }, 300);
+            }, duration);
+        }
+
+        // ===========================
+        // Load Real-Time Locations
+        // ===========================
+        async function loadRealTimeLocations() {
+            try {
+                showNotification('🔄 Loading your GHL locations...', 'info');
+                const response = await apiCall('/locations/real-time');
+                if (response.success) {
+                    realTimeLocations = response.data;
+                    displayRealTimeLocations();
+                    updateLocationDropdowns();
+                    updateGlobalStats();
+                    showNotification(`✅ Loaded ${realTimeLocations.length} locations`, 'success');
+                } else {
+                    throw new Error(response.message);
                 }
+            } catch (error) {
+                console.error('❌ Failed to load locations:', error);
+                showNotification(`❌ Error: ${error.message}`, 'error');
+                const container = document.getElementById('realTimeLocationsContainer');
+                if (container) container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>❌ Failed to Load Locations</h3>
+                        <p>${error.message}</p>
+                        <button class="btn btn-primary" onclick="loadRealTimeLocations()">Try Again</button>
+                    </div>
+                `;
+            }
+        }
 
-                async function checkAccess() {
-                    const res = await apiCall('/access/status/'+LOCATION_ID);
-                    if(res.success && res.data.themeBuilderAccess){
-                        document.getElementById('builderUI').style.display='block';
-                        loadThemes();
-                    } else {
-                        document.getElementById('accessMessage').textContent='⚠️ No access to Theme Builder';
+        // ===========================
+        // Display Locations Grid
+        // ===========================
+        function displayRealTimeLocations() {
+            const container = document.getElementById('realTimeLocationsContainer');
+            if (!container) return;
+
+            if (realTimeLocations.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>📍 No Locations Found</h3>
+                        <p>No GHL locations were found. Check API key/permissions.</p>
+                        <button class="btn btn-primary" onclick="loadRealTimeLocations()">Try Again</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="locations-grid">
+                    ${realTimeLocations.map(location => `
+                        <div class="location-card ${location.currentTheme ? 'has-theme' : ''}">
+                            <div class="location-header">
+                                <h3>${location.name || 'Unnamed Location'}</h3>
+                                <span class="location-id">${location.id ? location.id.substring(0, 8) : 'N/A'}...</span>
+                            </div>
+                            <div class="location-details">
+                                <div class="detail"><strong>📍 Address:</strong> ${location.address || 'N/A'}</div>
+                                <div class="detail"><strong>📞 Phone:</strong> ${location.phone || 'N/A'}</div>
+                                <div class="detail"><strong>📧 Email:</strong> ${location.email || 'N/A'}</div>
+                                <div class="detail"><strong>🎨 Theme:</strong> ${location.currentTheme ? '✅ Applied' : '❌ None'}</div>
+                                <div class="detail"><strong>🔄 Custom CSS:</strong> ${location.hasCustomCSS ? '✅ Yes' : '❌ No'}</div>
+                            </div>
+                            <div class="location-actions">
+                                <button class="btn btn-primary btn-sm" onclick="openThemeModal('${location.id}')">🎨 Apply Theme</button>
+                                <button class="btn btn-outline btn-sm" onclick="managePermissions('${location.id}')">⚙️ Permissions</button>
+                                ${location.currentTheme ? `<button class="btn btn-danger btn-sm" onclick="removeThemeFromRealLocation('${location.id}')">🗑️ Remove</button>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // ===========================
+        // Search Functionality
+        // ===========================
+        function setupSearch() {
+            const searchInput = document.getElementById('searchLocations');
+            const filterSelect = document.getElementById('themeStatusFilter');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', filterLocations);
+            }
+            
+            if (filterSelect) {
+                filterSelect.addEventListener('change', filterLocations);
+            }
+        }
+
+        function filterLocations() {
+            const searchTerm = document.getElementById('searchLocations').value.toLowerCase();
+            const filterValue = document.getElementById('themeStatusFilter').value;
+            
+            const filteredLocations = realTimeLocations.filter(location => {
+                const matchesSearch = 
+                    location.name?.toLowerCase().includes(searchTerm) ||
+                    location.address?.toLowerCase().includes(searchTerm) ||
+                    location.phone?.includes(searchTerm) ||
+                    location.email?.toLowerCase().includes(searchTerm);
+                
+                let matchesFilter = true;
+                if (filterValue === 'themed') {
+                    matchesFilter = location.currentTheme;
+                } else if (filterValue === 'notheme') {
+                    matchesFilter = !location.currentTheme;
+                }
+                
+                return matchesSearch && matchesFilter;
+            });
+            
+            displayFilteredLocations(filteredLocations);
+        }
+
+        function displayFilteredLocations(filteredLocations) {
+            const container = document.getElementById('realTimeLocationsContainer');
+            if (!container) return;
+
+            if (filteredLocations.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>🔍 No Matching Locations</h3>
+                        <p>No locations match your search criteria</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="locations-grid">
+                    ${filteredLocations.map(location => `
+                        <div class="location-card ${location.currentTheme ? 'has-theme' : ''}">
+                            <div class="location-header">
+                                <h3>${location.name || 'Unnamed Location'}</h3>
+                                <span class="location-id">${location.id ? location.id.substring(0, 8) : 'N/A'}...</span>
+                            </div>
+                            <div class="location-details">
+                                <div class="detail"><strong>📍 Address:</strong> ${location.address || 'N/A'}</div>
+                                <div class="detail"><strong>📞 Phone:</strong> ${location.phone || 'N/A'}</div>
+                                <div class="detail"><strong>📧 Email:</strong> ${location.email || 'N/A'}</div>
+                                <div class="detail"><strong>🎨 Theme:</strong> ${location.currentTheme ? '✅ Applied' : '❌ None'}</div>
+                                <div class="detail"><strong>🔄 Custom CSS:</strong> ${location.hasCustomCSS ? '✅ Yes' : '❌ No'}</div>
+                            </div>
+                            <div class="location-actions">
+                                <button class="btn btn-primary btn-sm" onclick="openThemeModal('${location.id}')">🎨 Apply Theme</button>
+                                <button class="btn btn-outline btn-sm" onclick="managePermissions('${location.id}')">⚙️ Permissions</button>
+                                ${location.currentTheme ? `<button class="btn btn-danger btn-sm" onclick="removeThemeFromRealLocation('${location.id}')">🗑️ Remove</button>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // ===========================
+        // Dropdowns & Bulk Selection
+        // ===========================
+        function updateLocationDropdowns() {
+            updateBulkLocationCheckboxes();
+            updateLocationCount();
+        }
+
+        function updateBulkLocationCheckboxes() {
+            const bulkContainer = document.getElementById('bulkLocationCheckboxes');
+            if (!bulkContainer) return;
+            bulkContainer.innerHTML = '';
+
+            realTimeLocations.forEach(location => {
+                const checkbox = document.createElement('div');
+                checkbox.className = 'checkbox-item';
+                checkbox.innerHTML = `
+                    <input type="checkbox" id="bulk-${location.id}" value="${location.id}" class="location-checkbox" onchange="updateSelectedCount()">
+                    <label for="bulk-${location.id}" style="font-size: 12px;">${location.name} ${location.currentTheme ? ' (🎨 Themed)' : ''}</label>
+                `;
+                bulkContainer.appendChild(checkbox);
+            });
+        }
+
+        function updateLocationCount() {
+            const countEl = document.getElementById('locationCount');
+            if (countEl) countEl.textContent = `${realTimeLocations.length} locations`;
+        }
+
+        function toggleSelectAllLocations() {
+            const selectAll = document.getElementById('selectAllLocations');
+            const checkboxes = document.querySelectorAll('.location-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.location-checkbox:checked');
+            const countEl = document.getElementById('selectedCount');
+            if (countEl) countEl.textContent = `${checkboxes.length} selected`;
+        }
+
+        function clearBulkSelection() {
+            const checkboxes = document.querySelectorAll('.location-checkbox');
+            checkboxes.forEach(cb => cb.checked = false);
+            const selectAll = document.getElementById('selectAllLocations');
+            if (selectAll) selectAll.checked = false;
+            updateSelectedCount();
+        }
+
+        // ===========================
+        // Load & Populate Themes
+        // ===========================
+        async function loadThemes() {
+            try {
+                const response = await apiCall('/themes');
+                if (response.success) {
+                    themes = response.data;
+                    populateThemeDropdowns();
+                    console.log(`✅ Loaded ${themes.length} themes`);
+                }
+            } catch (error) {
+                console.error('Failed to load themes:', error);
+                showNotification('❌ Failed to load themes', 'error');
+            }
+        }
+
+        function populateThemeDropdowns() {
+            ['bulkThemeSelect', 'modalThemeSelect'].forEach(dropdownId => {
+                const select = document.getElementById(dropdownId);
+                if (!select) return;
+
+                const firstOption = select.options[0];
+                select.innerHTML = '';
+                if (firstOption) select.appendChild(firstOption);
+
+                themes.forEach(theme => {
+                    const option = document.createElement('option');
+                    option.value = theme._id;
+                    option.textContent = theme.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // ===========================
+        // Theme Modal Functions
+        // ===========================
+        function openThemeModal(locationId) {
+            currentModalLocationId = locationId;
+            const location = realTimeLocations.find(loc => loc.id === locationId);
+            const modal = document.getElementById('themeModal');
+            const locationInfo = document.getElementById('modalLocationInfo');
+            
+            if (location && locationInfo) {
+                locationInfo.innerHTML = `
+                    <strong>${location.name}</strong><br>
+                    <small>${location.address || 'No address'} • ${location.phone || 'No phone'}</small>
+                `;
+            }
+            
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeThemeModal() {
+            const modal = document.getElementById('themeModal');
+            if (modal) modal.style.display = 'none';
+            currentModalLocationId = null;
+        }
+
+        async function applyThemeFromModal() {
+            if (!currentModalLocationId) {
+                showNotification('No location selected', 'error');
+                return;
+            }
+            const themeId = document.getElementById('modalThemeSelect').value;
+            if (!themeId) {
+                showNotification('Please select a theme', 'error');
+                return;
+            }
+            await applyThemeToRealLocation(currentModalLocationId, themeId);
+            closeThemeModal();
+        }
+
+        // ===========================
+        // Apply / Remove Theme
+        // ===========================
+        async function applyThemeToRealLocation(locationId, themeId = null) {
+            try {
+                if (!themeId) {
+                    themeId = document.getElementById('bulkThemeSelect').value;
+                    if (!themeId) {
+                        showNotification('Please select a theme', 'error');
+                        return;
                     }
                 }
+                showNotification(`🎨 Applying theme...`, 'info');
+                const response = await apiCall('/themes/apply', {
+                    method: 'POST',
+                    body: JSON.stringify({ locationId, themeId })
+                });
+                if (response.success) {
+                    showNotification(`✅ Theme applied!`, 'success');
+                    await loadRealTimeLocations();
+                } else {
+                    showNotification(`❌ ${response.message}`, 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showNotification('❌ Error applying theme', 'error');
+            }
+        }
 
-                async function loadThemes(){
-                    const res = await apiCall('/themes');
-                    if(res.success){
-                        const select = document.getElementById('themeSelect');
-                        res.data.forEach(t=>{
-                            const opt = document.createElement('option');
-                            opt.value = t._id;
-                            opt.textContent = t.name;
-                            select.appendChild(opt);
-                        });
+        async function applyBulkThemeToRealLocations() {
+            try {
+                const themeId = document.getElementById('bulkThemeSelect').value;
+                const checkboxes = document.querySelectorAll('.location-checkbox:checked');
+                if (!themeId) {
+                    showNotification('Please select a theme', 'error');
+                    return;
+                }
+                if (checkboxes.length === 0) {
+                    showNotification('Select at least one location', 'error');
+                    return;
+                }
+
+                const locationIds = Array.from(checkboxes).map(cb => cb.value);
+                showNotification(`🎨 Applying to ${locationIds.length} locations...`, 'info');
+
+                for (let locId of locationIds) {
+                    await applyThemeToRealLocation(locId, themeId);
+                }
+
+                clearBulkSelection();
+            } catch (e) {
+                console.error(e);
+                showNotification('❌ Bulk apply error', 'error');
+            }
+        }
+
+        async function removeThemeFromRealLocation(locationId) {
+            try {
+                const confirmDelete = confirm('Are you sure you want to remove the theme?');
+                if (!confirmDelete) return;
+                showNotification(`🗑️ Removing theme...`, 'info');
+                const response = await apiCall('/themes/remove', {
+                    method: 'POST',
+                    body: JSON.stringify({ locationId })
+                });
+                if (response.success) {
+                    showNotification('✅ Theme removed', 'success');
+                    await loadRealTimeLocations();
+                } else {
+                    showNotification(`❌ ${response.message}`, 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showNotification('❌ Error removing theme', 'error');
+            }
+        }
+
+        async function removeThemeFromAllSelected() {
+            const checkboxes = document.querySelectorAll('.location-checkbox:checked');
+            if (checkboxes.length === 0) {
+                showNotification('Select at least one location', 'error');
+                return;
+            }
+
+            const confirmDelete = confirm(`Are you sure you want to remove the theme from ${checkboxes.length} locations?`);
+            if (!confirmDelete) return;
+
+            showNotification(`🗑️ Removing themes from ${checkboxes.length} locations...`, 'info');
+
+            for (let cb of checkboxes) {
+                await removeThemeFromRealLocation(cb.value);
+            }
+
+            clearBulkSelection();
+        }
+
+        // ===========================
+        // Permissions
+        // ===========================
+        function managePermissions(locationId) {
+            currentModalLocationId = locationId;
+            const loc = realTimeLocations.find(l => l.id === locationId);
+            if (!loc) return;
+
+            const themesCheckbox = document.getElementById('perm-themes');
+            const chatCheckbox = document.getElementById('perm-chat');
+
+            if (themesCheckbox) {
+                themesCheckbox.checked = loc.permissions?.themeBuilderAccess || false;
+                document.getElementById('perm-themes-status').textContent = themesCheckbox.checked ? 'Enabled' : 'Disabled';
+            }
+            if (chatCheckbox) {
+                chatCheckbox.checked = loc.permissions?.chatWidget?.isActive || false;
+                document.getElementById('perm-chat-status').textContent = chatCheckbox.checked ? 'Enabled' : 'Disabled';
+            }
+
+            const modal = document.getElementById('permissionsModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closePermissionsModal() {
+            const modal = document.getElementById('permissionsModal');
+            if (modal) modal.style.display = 'none';
+            currentModalLocationId = null;
+        }
+
+        async function savePermissions() {
+            if (!currentModalLocationId) {
+                showNotification('❌ No location selected', 'error');
+                return;
+            }
+
+            try {
+                const themesCheckbox = document.getElementById('perm-themes');
+                const chatCheckbox = document.getElementById('perm-chat');
+
+                showNotification('⚙️ Updating permissions...', 'info');
+
+                const response = await apiCall(`/access/status/${currentModalLocationId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        themeBuilderAccess: themesCheckbox?.checked || false,
+                        chatWidgetEnabled: chatCheckbox?.checked || false
+                    })
+                });
+
+                if (response.success) {
+                    showNotification('✅ Permissions updated', 'success');
+
+                    const locIndex = realTimeLocations.findIndex(l => l.id === currentModalLocationId);
+                    if (locIndex > -1) {
+                        realTimeLocations[locIndex].permissions = {
+                            themeBuilderAccess: response.data.themeBuilderAccess,
+                            chatWidget: { isActive: response.data.chatWidgetEnabled }
+                        };
                     }
+
+                    closePermissionsModal();
+                    displayRealTimeLocations();
+                } else {
+                    showNotification(`❌ ${response.message}`, 'error');
                 }
 
-                async function previewTheme(themeId){
-                    const iframe = document.getElementById('previewIframe');
-                    if(!themeId){ iframe.srcdoc=''; return; }
-                    const res = await apiCall('/themes/generate-css/'+themeId);
-                    iframe.srcdoc='<style>'+res.data.css+'</style><div>Preview content</div>';
+            } catch (e) {
+                console.error(e);
+                showNotification('❌ Error saving permissions', 'error');
+            }
+        }
+
+        // ===========================
+        // Stats
+        // ===========================
+        function updateGlobalStats() {
+            const totalEl = document.getElementById('totalLocations');
+            if (totalEl) totalEl.textContent = realTimeLocations.length;
+
+            const themedEl = document.getElementById('themedLocations');
+            if (themedEl) themedEl.textContent = realTimeLocations.filter(l => l.currentTheme).length;
+
+            const themeAccessEl = document.getElementById('themeAccess');
+            if (themeAccessEl) themeAccessEl.textContent = realTimeLocations.filter(l => l.permissions?.themeBuilderAccess).length;
+
+            const customCssEl = document.getElementById('customCssLocations');
+            if (customCssEl) customCssEl.textContent = realTimeLocations.filter(l => l.hasCustomCSS).length;
+        }
+
+        // ===========================
+        // Event Listeners
+        // ===========================
+        function initEventListeners() {
+            // Refresh button
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => {
+                    loadRealTimeLocations();
+                    loadThemes();
+                });
+            }
+
+            // Refresh locations button
+            const refreshLocationsBtn = document.getElementById('refreshLocationsBtn');
+            if (refreshLocationsBtn) {
+                refreshLocationsBtn.addEventListener('click', loadRealTimeLocations);
+            }
+
+            // Search functionality
+            setupSearch();
+
+            // Close modals when clicking outside
+            window.addEventListener('click', (event) => {
+                const themeModal = document.getElementById('themeModal');
+                const permissionsModal = document.getElementById('permissionsModal');
+                
+                if (themeModal && event.target === themeModal) {
+                    closeThemeModal();
                 }
+                if (permissionsModal && event.target === permissionsModal) {
+                    closePermissionsModal();
+                }
+            });
+        }
 
-                document.getElementById('themeSelect').addEventListener('change', e=>previewTheme(e.target.value));
-                document.getElementById('applyBtn').addEventListener('click', async ()=>{
-                    const themeId = document.getElementById('themeSelect').value;
-                    if(!themeId)return alert('Select theme');
-                    const res = await apiCall('/themes/apply',{method:'POST', body:JSON.stringify({locationId:LOCATION_ID, themeId})});
-                    alert(res.message);
-                });
-                document.getElementById('removeBtn').addEventListener('click', async ()=>{
-                    const res = await apiCall('/themes/remove',{method:'POST', body:JSON.stringify({locationId:LOCATION_ID})});
-                    alert(res.message);
-                });
-
-                checkAccess();
-            <\/script>
-        </body>
-        </html>
-    `);
-    doc.close();
-})();
+        // ===========================
+        // Initialize
+        // ===========================
+        document.addEventListener('DOMContentLoaded', async () => {
+            initEventListeners();
+            await loadThemes();
+            await loadRealTimeLocations();
+        });
+    </script>
+</body>
+</html>
