@@ -327,117 +327,125 @@ function loadThemes(){
 }
 
 // ====== Apply Theme ======
-async function applyTheme(themeId, saveToDB = true){
-    if(!currentLocation) return showNotification('No location selected','error');
-    
-    try{
-        showNotification('Applying theme...','info');
-        const theme = themes.find(t => t.id === themeId);
-        if(!theme) return showNotification('Theme not found','error');
-        
-        await loadThemeScript(theme.scriptUrl);
-        
-        if(saveToDB) {
-            try {
-                const safeLocationId = currentLocation?.locationId || currentLocation?.id || currentLocation?._id || 'default-location';
-                
-                const themeData = {
-                    name: theme.name,
-                    description: theme.description,
-                    locationId: safeLocationId,
-                    userId: '110',
-                    companyId: currentLocation.companyId || 'default-company',
-                    previewImage: theme.scriptUrl,
-                    addBarColor: theme.addBarColor,
-                    gradientColor: theme.gradientColor,
-                    hoverColor: theme.hoverColor,
-                    textColor: theme.textColor,
-                    backgroundColor: theme.backgroundColor,
-                    buttonBgColor: theme.buttonBgColor,
-                    buttonTextColor: theme.buttonTextColor,
-                    buttonHoverColor: theme.buttonHoverColor,
-                    fontFamily: theme.fontFamily,
-                    headingFontSize: theme.headingFontSize,
-                    bodyFontSize: theme.bodyFontSize,
-                    borderRadius: theme.borderRadius,
-                    transitionSpeed: theme.transitionSpeed,
-                    category: 'dashboard',
-                    isActive: true,
-                    isGlobal: false,
-                    version: 1
-                };
+// ====== Apply Theme ======
+async function applyTheme(themeId, saveToDB = true) {
+  if (!currentLocation) return showNotification('No location selected', 'error');
 
-                console.log('📤 Sending theme data:', themeData);
+  try {
+    showNotification('Applying theme...', 'info');
+    const theme = themes.find(t => t.id === themeId);
+    if (!theme) return showNotification('Theme not found', 'error');
 
-                const res = await apiCall('/themes/apply',{ 
-                    method:'POST', 
-                    body: themeData
-                });
-                
-                if(res.success){
-                    showNotification('Theme applied and saved!','success');
-                    currentTheme = theme;
-                    if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
-                    populateThemeOptions();
-                } else {
-                    showNotification(`Theme applied but failed to save: ${res.message || 'Unknown error'}`,'warning');
-                }
-            } catch(apiError) {
-                console.error('Failed to save theme to DB:', apiError);
-                showNotification('Theme applied but failed to save to database','warning');
-                currentTheme = theme;
-                if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
-                populateThemeOptions();
-            }
-        } else {
-            currentTheme = theme;
-            if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
-            populateThemeOptions();
-            showNotification('Theme applied!','success');
+    await loadThemeScript(theme.scriptUrl);
+
+    if (saveToDB) {
+      try {
+        // ✅ Always pick the correct locationId
+        const safeLocationId = currentLocation?.id || currentLocation?.locationId || currentLocation?._id;
+        if (!safeLocationId) {
+          console.error('❌ Missing locationId in currentLocation:', currentLocation);
+          return showNotification('Missing location ID – cannot save theme.', 'error');
         }
-        
-    } catch(e){ 
-        console.error(e); 
-        showNotification('Error applying theme','error'); 
+
+        const themeData = {
+          name: theme.name,
+          description: theme.description,
+          locationId: safeLocationId, // ✅ FIXED
+          userId: '110',
+          companyId: currentLocation.companyId || 'default-company',
+          previewImage: theme.scriptUrl,
+          addBarColor: theme.addBarColor,
+          gradientColor: theme.gradientColor,
+          hoverColor: theme.hoverColor,
+          textColor: theme.textColor,
+          backgroundColor: theme.backgroundColor,
+          buttonBgColor: theme.buttonBgColor,
+          buttonTextColor: theme.buttonTextColor,
+          buttonHoverColor: theme.buttonHoverColor,
+          fontFamily: theme.fontFamily,
+          headingFontSize: theme.headingFontSize,
+          bodyFontSize: theme.bodyFontSize,
+          borderRadius: theme.borderRadius,
+          transitionSpeed: theme.transitionSpeed,
+          category: 'dashboard',
+          isActive: true,
+          isGlobal: false,
+          version: 1
+        };
+
+        console.log('📤 Sending theme data:', themeData);
+
+        const res = await apiCall('/themes/apply', {
+          method: 'POST',
+          body: themeData
+        });
+
+        if (res.success) {
+          showNotification('Theme applied and saved!', 'success');
+          currentTheme = theme;
+          if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
+          populateThemeOptions();
+        } else {
+          showNotification(`Theme applied but failed to save: ${res.message || 'Unknown error'}`, 'warning');
+        }
+      } catch (apiError) {
+        console.error('Failed to save theme to DB:', apiError);
+        showNotification('Theme applied but failed to save to database', 'warning');
+      }
+    } else {
+      currentTheme = theme;
+      if (currentThemeNameEl) currentThemeNameEl.textContent = currentTheme.name;
+      populateThemeOptions();
+      showNotification('Theme applied!', 'success');
     }
+  } catch (e) {
+    console.error(e);
+    showNotification('Error applying theme', 'error');
+  }
 }
 
 // ====== Remove Theme ======
-async function removeTheme(){
-    if(!currentLocation) return showNotification('No location selected','error');
-    if(!currentTheme && !document.querySelector('script[data-theme-script]')) return showNotification('No theme to remove','error');
-    if(!confirm('Are you sure you want to remove the current theme?')) return;
-    
-    try{
-        showNotification('Removing theme...','info');
-        document.querySelectorAll('script[data-theme-script]').forEach(script => script.remove());
-        
-        const safeLocationId = currentLocation?.locationId || currentLocation?.id || currentLocation?._id || 'default-location';
-        
-        try {
-            const res = await apiCall('/themes/remove',{ 
-                method:'POST', 
-                body:{ locationId: safeLocationId } 
-            });
-            
-            if(res.success){
-                showNotification('Theme removed!','success');
-            } else {
-                showNotification(`Theme removed but failed to update DB: ${res.message || 'Unknown error'}`,'warning');
-            }
-        } catch(apiError) {
-            console.error('Failed to remove theme from DB:', apiError);
-            showNotification('Theme removed but failed to update database','warning');
-        }
-        
-        currentTheme = null;
-        if (currentThemeNameEl) currentThemeNameEl.textContent = 'No theme applied';
-        populateThemeOptions();
-        
-    } catch(e){ 
-        console.error(e); 
-        showNotification('Error removing theme','error'); 
+async function removeTheme() {
+  if (!currentLocation) return showNotification('No location selected', 'error');
+  if (!currentTheme && !document.querySelector('script[data-theme-script]'))
+    return showNotification('No theme to remove', 'error');
+
+  if (!confirm('Are you sure you want to remove the current theme?')) return;
+
+  try {
+    showNotification('Removing theme...', 'info');
+    document.querySelectorAll('script[data-theme-script]').forEach(script => script.remove());
+
+    // ✅ Always use correct locationId
+    const safeLocationId = currentLocation?.id || currentLocation?.locationId || currentLocation?._id;
+    if (!safeLocationId) {
+      console.error('❌ Missing locationId in currentLocation:', currentLocation);
+      return showNotification('Missing location ID – cannot remove theme.', 'error');
     }
+
+    try {
+      const res = await apiCall('/themes/remove', {
+        method: 'POST',
+        body: { locationId: safeLocationId } // ✅ FIXED
+      });
+
+      if (res.success) {
+        showNotification('Theme removed!', 'success');
+      } else {
+        showNotification(`Theme removed but failed to update DB: ${res.message || 'Unknown error'}`, 'warning');
+      }
+    } catch (apiError) {
+      console.error('Failed to remove theme from DB:', apiError);
+      showNotification('Theme removed but failed to update database', 'warning');
+    }
+
+    currentTheme = null;
+    if (currentThemeNameEl) currentThemeNameEl.textContent = 'No theme applied';
+    populateThemeOptions();
+  } catch (e) {
+    console.error(e);
+    showNotification('Error removing theme', 'error');
+  }
 }
 
 // ====== (rest of your color picker, drag, controls, etc. remain unchanged) ======
