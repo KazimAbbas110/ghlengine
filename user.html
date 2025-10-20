@@ -755,7 +755,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
       // 🔹 Step 3: Verify and refresh from DB (optional)
       try {
-        const res = await apiCall(`/themes/get?locationId=${locationId}`);
+        const res = await apiCall(`/themes/by-location/${locationId}`);
         if (res?.success && res?.data) {
           const theme = res.data;
           console.log('🎨 Restoring saved theme from DB:', theme.name);
