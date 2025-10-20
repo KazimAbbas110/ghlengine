@@ -13,7 +13,45 @@
 
 <!-- Floating Theme Widget -->
 <div class="theme-widget" id="themeWidget">
-  <!-- ... your existing HTML remains the same ... -->
+  <div class="theme-widget" id="themeWidget" style="position:fixed;bottom:30px;right:30px;width:300px;background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:99999;font-family:Arial, sans-serif;">
+  <div id="widgetHeader" style="display:flex;align-items:center;justify-content:space-between;padding:10px 15px;background:linear-gradient(135deg,#4361ee,#7209b7);color:#fff;border-radius:12px 12px 0 0;cursor:move;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div id="statusDot" class="status-dot" style="width:10px;height:10px;border-radius:50%;background:#00ff5e;"></div>
+      <span id="locationStatus">Loading...</span>
+    </div>
+    <div>
+      <button id="minimizeBtn" style="background:none;border:none;color:white;font-size:14px;cursor:pointer;"><i class="fas fa-minus"></i></button>
+      <button id="closeBtn" style="background:none;border:none;color:white;font-size:14px;margin-left:5px;cursor:pointer;"><i class="fas fa-times"></i></button>
+    </div>
+  </div>
+
+  <div style="padding:15px;">
+    <h3 id="locationName" style="margin:0;font-size:16px;color:#333;">Loading...</h3>
+    <p style="margin:5px 0 10px;font-size:13px;color:#666;">Theme: <span id="currentThemeName">None</span></p>
+
+    <div>
+      <h4 style="font-size:14px;margin-bottom:8px;">Available Themes</h4>
+      <div id="themeOptions" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+
+    <div style="margin-top:15px;">
+      <h4 style="font-size:14px;margin-bottom:8px;">Background Color</h4>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <input type="color" id="backgroundColorPicker" value="#ffffff" style="width:40px;height:40px;border:none;">
+        <div id="colorPreview" style="width:40px;height:40px;border-radius:8px;border:1px solid #ccc;background:#ffffff;"></div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button id="applyColorBtn" class="btn btn-primary" style="flex:1;padding:6px 0;border:none;background:#4361ee;color:#fff;border-radius:6px;cursor:pointer;">Apply</button>
+        <button id="resetColorBtn" class="btn btn-secondary" style="flex:1;padding:6px 0;border:none;background:#ccc;color:#333;border-radius:6px;cursor:pointer;">Reset</button>
+      </div>
+    </div>
+
+    <button id="removeThemeBtn" style="margin-top:15px;width:100%;padding:8px 0;background:#e63946;color:#fff;border:none;border-radius:8px;cursor:pointer;">
+      <i class="fas fa-trash"></i> Remove Theme
+    </button>
+  </div>
+</div>
+
 </div>
 
 <div id="notificationsContainer"></div>
