@@ -75,7 +75,15 @@ const THEME_URLS = {
   purple: 'https://ghlengine.vercel.app/ghlengine-p.js',
   yellow: 'https://ghlengine.vercel.app/ghlengine-y.js'
 };
-
+// ====== Initialize DOM References ======
+function initializeDomReferences() {
+  statusDotEl = getElementSafe('statusDot');
+  locationStatusEl = getElementSafe('locationStatus');
+  locationNameEl = getElementSafe('locationName');
+  currentThemeNameEl = getElementSafe('currentThemeName');
+  backgroundColorPickerEl = getElementSafe('backgroundColorPicker');
+  colorPreviewEl = getElementSafe('colorPreview');
+}
 // ====== DOM Element References ======
 let statusDotEl, locationStatusEl, locationNameEl, currentThemeNameEl, backgroundColorPickerEl, colorPreviewEl;
 
