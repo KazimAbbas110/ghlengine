@@ -60,7 +60,7 @@
 
 <div id="notificationsContainer"></div>
 </div>
-<script>
+<!-- <script>
 // ====== JS Variables ======
 let currentLocation = null;
 let themes = [];
@@ -653,6 +653,359 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     initBackgroundColorPicker();
     await loadUserLocation();
     loadThemes();
+});
+</script> -->
+<script>
+// ====== JS Variables ======
+let currentLocation = null;
+let themes = [];
+let isDragging = false;
+let dragOffset = {x:0,y:0};
+let currentPosition = {x:30,y:30};
+let currentBackgroundColor = '#ffffff';
+let currentTheme = null;
+
+// Your hosted theme URLs
+const THEME_URLS = {
+  purple: 'https://ghlengine.vercel.app/ghlengine-p.js',
+  yellow: 'https://ghlengine.vercel.app/ghlengine-y.js'
+};
+
+// ====== DOM Element References ======
+let statusDotEl, locationStatusEl, locationNameEl, currentThemeNameEl, backgroundColorPickerEl, colorPreviewEl;
+
+// ====== Generic API call ======
+async function apiCall(endpoint, options = {}) {
+    const API_BASE_URL = 'https://ghlengine-production.up.railway.app/api';
+    const url = `${API_BASE_URL}${endpoint}`;
+    const headers = { 
+        'Content-Type': 'application/json', 
+        'Authorization': 'Bearer 110', 
+        ...options.headers 
+    };
+    
+    const config = { 
+        method: options.method || 'GET', 
+        headers, 
+        ...(options.body && { body: JSON.stringify(options.body) }) 
+    };
+    
+    try {
+        const response = await fetch(url, config);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) { 
+        console.error('API Error:', error); 
+        throw error; 
+    }
+}
+
+// ====== Notifications ======
+function showNotification(msg, type='info', duration=4000){
+    const container = document.getElementById('notificationsContainer');
+    if (!container) return;
+    
+    const notif = document.createElement('div');
+    notif.className = `notification ${type}`;
+    notif.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-circle':'info-circle'}"></i><span>${msg}</span>`;
+    container.appendChild(notif);
+    setTimeout(()=>notif.classList.add('show'),50);
+    setTimeout(()=>{notif.classList.remove('show'); setTimeout(()=>notif.remove(),300);}, duration);
+}
+
+// ====== Safe DOM Element Access ======
+function getElementSafe(id) {
+    const element = document.getElementById(id);
+    if (!element) console.warn(`Element with ID '${id}' not found`);
+    return element;
+}
+
+// ====== Load User Location ======
+async function loadUserLocation(){
+    try{
+        showNotification('Loading location...', 'info');
+        const response = await apiCall('/locations/real-time');
+        if(response.success && response.data && response.data.length){
+            currentLocation = response.data[0];
+
+            // ✅ Add locationId fallback for compatibility
+            if (!currentLocation.locationId && (currentLocation.id || currentLocation._id)) {
+                currentLocation.locationId = currentLocation.id || currentLocation._id;
+            }
+
+            if (locationNameEl) locationNameEl.textContent = currentLocation.name;
+            if (locationStatusEl) locationStatusEl.textContent = 'Active';
+            if (statusDotEl) statusDotEl.className = 'status-dot';
+            
+            // ✅ Load saved theme from sub-account
+            if(currentLocation.currentTheme){
+                if (currentThemeNameEl) currentThemeNameEl.textContent = currentLocation.currentTheme.name;
+                currentTheme = currentLocation.currentTheme;
+                
+                // Apply the saved theme from previewImage field
+                if (currentLocation.currentTheme.previewImage) {
+                    await loadThemeScript(currentLocation.currentTheme.previewImage);
+                    showNotification('Theme loaded from database', 'success', 2000);
+                }
+            } else {
+                if (currentThemeNameEl) currentThemeNameEl.textContent = 'No theme applied';
+            }
+
+            if(currentLocation.backgroundColor){
+                currentBackgroundColor = currentLocation.backgroundColor;
+                if (backgroundColorPickerEl) backgroundColorPickerEl.value = currentBackgroundColor;
+                if (colorPreviewEl) colorPreviewEl.style.backgroundColor = currentBackgroundColor;
+                document.body.style.backgroundColor = currentBackgroundColor;
+            }
+        } else {
+            currentLocation = {
+                locationId: 'default-location',
+                name: 'Default Location',
+                active: true
+            };
+            if (locationNameEl) locationNameEl.textContent = currentLocation.name;
+        }
+        showNotification('Location loaded', 'success', 2000);
+    } catch(e){
+        console.error('Load location error:', e);
+        currentLocation = {
+            locationId: 'default-location',
+            name: 'Default Location',
+            active: true
+        };
+        if (locationNameEl) locationNameEl.textContent = currentLocation.name;
+        if (locationStatusEl) locationStatusEl.textContent = 'Ready';
+        if (statusDotEl) statusDotEl.className = 'status-dot';
+        showNotification('Using default location', 'info');
+    }
+}
+
+// ====== Load Themes ======
+function loadThemes(){
+    themes = [
+        {
+            id: 'purple',
+            name: 'Purple Theme',
+            description: 'Professional purple theme with modern gradient design',
+            color: 'linear-gradient(135deg, #7209b7 0%, #4361ee 100%)',
+            scriptUrl: THEME_URLS.purple,
+            addBarColor: '#7209b7',
+            gradientColor: '#7209b7',
+            hoverColor: '#5a08a5',
+            textColor: '#FFFFFF',
+            backgroundColor: '#FFFFFF',
+            buttonBgColor: '#7209b7',
+            buttonTextColor: '#FFFFFF',
+            buttonHoverColor: '#5a08a5',
+            fontFamily: 'Arial, sans-serif',
+            headingFontSize: '14px',
+            bodyFontSize: '12px',
+            borderRadius: '8px',
+            transitionSpeed: '0.3s'
+        },
+        {
+            id: 'yellow',
+            name: 'Yellow Theme',
+            description: 'Bright and energetic yellow theme',
+            color: 'linear-gradient(135deg, #ffd166 0%, #ff9e00 100%)',
+            scriptUrl: THEME_URLS.yellow,
+            addBarColor: '#ff9e00',
+            gradientColor: '#ff9e00',
+            hoverColor: '#e68a00',
+            textColor: '#000000',
+            backgroundColor: '#FFFFFF',
+            buttonBgColor: '#ff9e00',
+            buttonTextColor: '#000000',
+            buttonHoverColor: '#e68a00',
+            fontFamily: 'Arial, sans-serif',
+            headingFontSize: '14px',
+            bodyFontSize: '12px',
+            borderRadius: '8px',
+            transitionSpeed: '0.3s'
+        }
+    ];
+    
+    populateThemeOptions();
+}
+
+// ====== Populate Theme Options ======
+function populateThemeOptions(){
+    const container = getElementSafe('themeOptions');
+    if(!container) return;
+    
+    if(!themes.length){
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray)">No themes available</div>';
+        return;
+    }
+    
+    const currentId = currentTheme ? currentTheme.id : '';
+    container.innerHTML = themes.map(t=>`
+        <div class="theme-option ${t.id===currentId?'active':''}" data-theme-id="${t.id}">
+            <div class="theme-preview" style="background:${t.color}">
+                <i class="fas fa-paint-brush"></i>
+            </div>
+            <div class="theme-details">
+                <h4>${t.name}</h4>
+                <p>${t.description}</p>
+            </div>
+            <button class="btn btn-primary btn-sm apply-theme-btn" data-theme-id="${t.id}">
+                <i class="fas fa-check"></i> Apply
+            </button>
+        </div>
+    `).join('');
+
+    document.querySelectorAll('.apply-theme-btn').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+            e.stopPropagation();
+            applyTheme(btn.getAttribute('data-theme-id'), true);
+        });
+    });
+}
+
+// ====== Load Theme Script ======
+function loadThemeScript(url) {
+    return new Promise((resolve, reject) => {
+        // Remove any existing theme scripts
+        const existingScripts = document.querySelectorAll('script[data-theme-script]');
+        existingScripts.forEach(script => script.remove());
+        
+        // Create new script element
+        const script = document.createElement('script');
+        script.src = url;
+        script.setAttribute('data-theme-script', 'true');
+        script.onload = () => {
+            console.log('Theme script loaded successfully:', url);
+            resolve();
+        };
+        script.onerror = () => {
+            console.error('Failed to load theme script:', url);
+            reject(new Error(`Failed to load theme script: ${url}`));
+        };
+        document.head.appendChild(script);
+    });
+}
+
+// ====== Apply Theme (with save + persist) ======
+async function applyTheme(themeId, saveToDB = true) {
+  if (!currentLocation) return showNotification('No location selected', 'error');
+
+  const safeLocationId = currentLocation?.id || currentLocation?.locationId || currentLocation?._id;
+  if (!safeLocationId) {
+    console.error('❌ Missing locationId in currentLocation:', currentLocation);
+    return showNotification('Missing location ID – cannot save theme.', 'error');
+  }
+
+  try {
+    showNotification('Applying theme...', 'info');
+    const theme = themes.find(t => t.id === themeId);
+    if (!theme) return showNotification('Theme not found', 'error');
+
+    // ✅ Load and apply immediately
+    await loadThemeScript(theme.scriptUrl);
+
+    // ⚡ Save locally for instant reloads
+    localStorage.setItem(`themeScript-${safeLocationId}`, theme.scriptUrl);
+
+    if (saveToDB) {
+      const timestamp = Date.now();
+      const uniqueThemeName = `${theme.name} - ${safeLocationId.substring(0, 8)} - ${timestamp}`;
+
+      const themeData = {
+        name: uniqueThemeName,
+        description: theme.description,
+        locationId: safeLocationId,
+        userId: '110',
+        companyId: currentLocation.companyId || 'default-company',
+        previewImage: theme.scriptUrl,
+        addBarColor: theme.addBarColor,
+        gradientColor: theme.gradientColor,
+        hoverColor: theme.hoverColor,
+        textColor: theme.textColor,
+        backgroundColor: theme.backgroundColor,
+        buttonBgColor: theme.buttonBgColor,
+        buttonTextColor: theme.buttonTextColor,
+        buttonHoverColor: theme.buttonHoverColor,
+        fontFamily: theme.fontFamily,
+        headingFontSize: theme.headingFontSize,
+        bodyFontSize: theme.bodyFontSize,
+        borderRadius: theme.borderRadius,
+        transitionSpeed: theme.transitionSpeed,
+        category: 'dashboard',
+        isActive: true,
+        isGlobal: false,
+        version: 1
+      };
+
+      console.log('📤 Creating theme first...');
+      const createResponse = await apiCall('/themes', { method: 'POST', body: themeData });
+
+      if (createResponse.success) {
+        const createdThemeId = createResponse.data._id;
+        console.log('✅ Theme created with ID:', createdThemeId);
+        console.log('📤 Applying theme to location...');
+
+        const applyResponse = await apiCall('/themes/apply', {
+          method: 'POST',
+          body: { locationId: safeLocationId, themeId: createdThemeId }
+        });
+
+        if (applyResponse.success) {
+          showNotification('Theme applied and saved!', 'success');
+          currentTheme = theme;
+          if (currentThemeNameEl) currentThemeNameEl.textContent = theme.name;
+          populateThemeOptions();
+        }
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    showNotification('Error applying theme', 'error');
+  }
+}
+
+// ====== Initialize ======
+document.addEventListener('DOMContentLoaded', async ()=>{
+  initializeDomReferences();
+  initDrag();
+  initControls();
+  initBackgroundColorPicker();
+  await loadUserLocation();
+  loadThemes();
+
+  // =============================
+  // ⚡ Restore Theme on Refresh
+  // =============================
+  try {
+    const locationId = currentLocation?.id || currentLocation?.locationId || currentLocation?._id;
+    if (locationId) {
+      // 🔹 Step 1: Instant localStorage load
+      const cachedThemeUrl = localStorage.getItem(`themeScript-${locationId}`);
+      if (cachedThemeUrl) {
+        await loadThemeScript(cachedThemeUrl);
+        console.log('⚡ Loaded theme instantly from localStorage');
+      }
+
+      // 🔹 Step 2: Verify and refresh from DB
+      const res = await apiCall(`/themes/get?locationId=${locationId}`);
+      if (res?.success && res?.data) {
+        const theme = res.data;
+        console.log('🎨 Restoring saved theme from DB:', theme.name);
+        if (theme.previewImage) {
+          await loadThemeScript(theme.previewImage);
+          localStorage.setItem(`themeScript-${locationId}`, theme.previewImage);
+          showNotification(`Theme "${theme.name}" reapplied automatically`, 'success');
+          currentTheme = theme;
+          if (currentThemeNameEl) currentThemeNameEl.textContent = theme.name;
+          populateThemeOptions();
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Failed to restore theme:', e);
+  }
 });
 </script>
 
