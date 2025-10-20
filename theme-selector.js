@@ -981,7 +981,7 @@
 
 
 
-<script>
+
 (function(){
     // =========================
     // Configuration - Updated with caching
@@ -2186,4 +2186,4 @@
 
     console.log(`🎨 GHL Theme Builder v${CONFIG.VERSION} - Optimized with caching and API fixes`);
 })();
-</script>
+
