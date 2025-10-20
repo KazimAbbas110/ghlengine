@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -294,5 +294,916 @@ document.addEventListener('DOMContentLoaded',async()=>{
 });
 </script>
 
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Widget</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            transition: all 0.3s ease;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        /* Theme Widget Styles */
+        .theme-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 320px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            z-index: 99999;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .theme-widget.minimized {
+            transform: translateY(calc(100% - 50px));
+        }
+        
+        .theme-widget.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .widget-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #4361ee, #7209b7);
+            color: #fff;
+            border-radius: 12px 12px 0 0;
+            cursor: move;
+            user-select: none;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff5e;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        
+        .widget-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .widget-controls button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .widget-controls button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .widget-content {
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .location-info {
+            margin-bottom: 15px;
+        }
+        
+        .location-name {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .theme-status {
+            margin: 5px 0 10px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .theme-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .theme-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-option:hover {
+            border-color: #4361ee;
+            background: #f8f9ff;
+        }
+        
+        .theme-option.active {
+            border-color: #4361ee;
+            background: #f0f2ff;
+        }
+        
+        .theme-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .theme-details {
+            flex: 1;
+        }
+        
+        .theme-details h4 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .theme-details p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .apply-theme-btn {
+            padding: 6px 12px;
+            border: none;
+            background: #4361ee;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+        
+        .apply-theme-btn:hover {
+            background: #3a56d4;
+        }
+        
+        .color-section {
+            margin-bottom: 20px;
+        }
+        
+        .color-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        
+        .color-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 8px 0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #4361ee;
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            background: #3a56d4;
+        }
+        
+        .btn-secondary {
+            background: #e9ecef;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+        
+        .btn-danger {
+            background: #e63946;
+            color: #fff;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f3c;
+        }
+        
+        .remove-theme-btn {
+            width: 100%;
+            padding: 10px 0;
+            background: #e63946;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .remove-theme-btn:hover {
+            background: #d32f3c;
+        }
+        
+        /* Notifications */
+        .notifications-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100000;
+        }
+        
+        .notification {
+            background: white;
+            padding: 14px 18px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            max-width: 300px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .notification.success {
+            border-left: 4px solid #00c853;
+        }
+        
+        .notification.error {
+            border-left: 4px solid #f44336;
+        }
+        
+        .notification.info {
+            border-left: 4px solid #2196f3;
+        }
+        
+        .notification.warning {
+            border-left: 4px solid #ff9800;
+        }
+        
+        .notification i {
+            font-size: 18px;
+        }
+        
+        .notification.success i {
+            color: #00c853;
+        }
+        
+        .notification.error i {
+            color: #f44336;
+        }
+        
+        .notification.info i {
+            color: #2196f3;
+        }
+        
+        .notification.warning i {
+            color: #ff9800;
+        }
+        
+        .notification span {
+            flex: 1;
+            font-size: 14px;
+        }
+        
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Theme Widget -->
+    <div class="theme-widget" id="themeWidget">
+        <div class="widget-header" id="widgetHeader">
+            <div style="display:flex;align-items:center;">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="locationStatus">Loading...</span>
+            </div>
+            <div class="widget-controls">
+                <button id="minimizeBtn"><i class="fas fa-minus"></i></button>
+                <button id="closeBtn"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        <div class="widget-content" id="widgetContent">
+            <div class="location-info">
+                <h3 class="location-name" id="locationName">Loading...</h3>
+                <p class="theme-status">Theme: <span id="currentThemeName">None</span></p>
+            </div>
+
+            <div>
+                <h4 class="section-title">Available Themes</h4>
+                <div class="theme-options" id="themeOptions">
+                    <div style="text-align:center;padding:20px;color:#666">
+                        <i class="fas fa-spinner fa-spin"></i> Loading themes...
+                    </div>
+                </div>
+            </div>
+
+            <div class="color-section">
+                <h4 class="section-title">Background Color</h4>
+                <div class="color-controls">
+                    <input type="color" id="backgroundColorPicker" class="color-picker" value="#f5f7fa">
+                    <div id="colorPreview" class="color-preview"></div>
+                </div>
+                <div class="color-buttons">
+                    <button id="applyColorBtn" class="btn btn-primary">Apply</button>
+                    <button id="resetColorBtn" class="btn btn-secondary">Reset</button>
+                </div>
+            </div>
+
+            <button id="removeThemeBtn" class="remove-theme-btn">
+                <i class="fas fa-trash"></i> Remove Theme
+            </button>
+        </div>
+    </div>
+
+    <div id="notificationsContainer" class="notifications-container"></div>
+
+    <script>
+        // ==========================
+        // GHL Theme Widget JS
+        // ==========================
+        (() => {
+            const API_BASE = 'https://ghlengine-production.up.railway.app/api';
+            const AUTH_TOKEN = '110';
+
+            let currentLocation = null;
+            let themes = [];
+            let currentTheme = null;
+            let currentBackgroundColor = '#f5f7fa';
+            let isDragging = false;
+            let dragOffset = { x: 0, y: 0 };
+            let currentPosition = { x: 30, y: 30 };
+
+            // ====== DOM Elements ======
+            let statusDotEl, locationStatusEl, locationNameEl, currentThemeNameEl;
+            let backgroundColorPickerEl, colorPreviewEl, themeOptionsEl;
+
+            function initDomRefs() {
+                statusDotEl = document.getElementById('statusDot');
+                locationStatusEl = document.getElementById('locationStatus');
+                locationNameEl = document.getElementById('locationName');
+                currentThemeNameEl = document.getElementById('currentThemeName');
+                backgroundColorPickerEl = document.getElementById('backgroundColorPicker');
+                colorPreviewEl = document.getElementById('colorPreview');
+                themeOptionsEl = document.getElementById('themeOptions');
+            }
+
+            // ====== API Helper ======
+            async function apiCall(endpoint, options = {}) {
+                const url = `${API_BASE}${endpoint}`;
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${AUTH_TOKEN}`,
+                    ...options.headers
+                };
+
+                const config = {
+                    method: options.method || 'GET',
+                    headers,
+                    ...(options.body && { body: JSON.stringify(options.body) })
+                };
+
+                try {
+                    const response = await fetch(url, config);
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('API Error:', error);
+                    throw error;
+                }
+            }
+
+            // ====== Notifications ======
+            function showNotification(msg, type = 'info', duration = 4000) {
+                const container = document.getElementById('notificationsContainer');
+                if (!container) return;
+
+                const notif = document.createElement('div');
+                notif.className = `notification ${type}`;
+                notif.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i><span>${msg}</span>`;
+                container.appendChild(notif);
+                setTimeout(() => notif.classList.add('show'), 50);
+                setTimeout(() => {
+                    notif.classList.remove('show');
+                    setTimeout(() => notif.remove(), 300);
+                }, duration);
+            }
+
+            // ====== Load User Location ======
+            async function loadUserLocation() {
+                try {
+                    showNotification('Loading location...', 'info');
+                    
+                    // Get current location from API
+                    const data = await apiCall('/locations/real-time');
+                    
+                    if (data.success && data.data && data.data.length > 0) {
+                        currentLocation = data.data[0];
+                        
+                        // Ensure locationId exists
+                        if (!currentLocation.locationId) {
+                            currentLocation.locationId = currentLocation.id || currentLocation._id || 'unknown-location';
+                        }
+                    } else {
+                        // Fallback to demo location
+                        currentLocation = {
+                            locationId: 'demo-location',
+                            name: 'Demo Location',
+                            active: true,
+                            companyId: 'demo-company'
+                        };
+                        showNotification('Using demo location data', 'info');
+                    }
+
+                    locationNameEl.textContent = currentLocation.name;
+                    locationStatusEl.textContent = currentLocation.active ? 'Active' : 'Inactive';
+                    statusDotEl.className = 'status-dot';
+
+                    // Try to load current theme from backend
+                    try {
+                        const themeData = await apiCall(`/themes/get?locationId=${currentLocation.locationId}`);
+                        if (themeData.success && themeData.data) {
+                            currentTheme = themeData.data;
+                            currentThemeNameEl.textContent = currentTheme.name;
+                            applyThemeStyles(currentTheme);
+                            showNotification('Theme loaded from server', 'success');
+                        }
+                    } catch (e) {
+                        console.log('No theme found on server');
+                        // Load theme from localStorage as fallback
+                        const savedTheme = localStorage.getItem(`theme-${currentLocation.locationId}`);
+                        if (savedTheme) {
+                            currentTheme = JSON.parse(savedTheme);
+                            currentThemeNameEl.textContent = currentTheme.name;
+                            applyThemeStyles(currentTheme);
+                        }
+                    }
+
+                    // Load background color
+                    const savedBg = localStorage.getItem(`bg-${currentLocation.locationId}`);
+                    if (savedBg) {
+                        currentBackgroundColor = savedBg;
+                        document.body.style.backgroundColor = currentBackgroundColor;
+                        backgroundColorPickerEl.value = currentBackgroundColor;
+                        colorPreviewEl.style.backgroundColor = currentBackgroundColor;
+                    }
+
+                    showNotification('Location loaded successfully', 'success');
+
+                } catch (e) {
+                    console.error('Error loading location', e);
+                    showNotification('Failed to load location, using demo data', 'error');
+                    
+                    // Fallback to demo data
+                    currentLocation = {
+                        locationId: 'demo-location',
+                        name: 'Demo Location',
+                        active: true
+                    };
+                    locationNameEl.textContent = currentLocation.name;
+                    locationStatusEl.textContent = 'Ready';
+                }
+            }
+
+            // ====== Load Themes ======
+            async function loadThemes() {
+                try {
+                    // Get themes for current location
+                    const data = await apiCall(`/themes/get?locationId=${currentLocation.locationId}`);
+                    
+                    if (data.success && data.data) {
+                        // If we have themes from API, use them
+                        themes = Array.isArray(data.data) ? data.data : [data.data];
+                    } else {
+                        // Fallback to default themes
+                        themes = [
+                            {
+                                id: 'purple',
+                                name: 'Purple Theme',
+                                description: 'Professional purple theme with modern gradient design',
+                                primary: '#7209b7',
+                                secondary: '#4361ee',
+                                textColor: '#FFFFFF',
+                                backgroundColor: '#FFFFFF',
+                                buttonBgColor: '#7209b7',
+                                buttonTextColor: '#FFFFFF',
+                                buttonHoverColor: '#5a08a5',
+                                category: 'dashboard',
+                                isActive: true,
+                                isGlobal: false
+                            },
+                            {
+                                id: 'yellow',
+                                name: 'Yellow Theme',
+                                description: 'Bright and energetic yellow theme',
+                                primary: '#ff9e00',
+                                secondary: '#ffd166',
+                                textColor: '#000000',
+                                backgroundColor: '#FFFFFF',
+                                buttonBgColor: '#ff9e00',
+                                buttonTextColor: '#000000',
+                                buttonHoverColor: '#e68a00',
+                                category: 'dashboard',
+                                isActive: true,
+                                isGlobal: false
+                            }
+                        ];
+                    }
+
+                    populateThemeOptions();
+                    showNotification('Themes loaded successfully', 'success');
+
+                } catch (e) {
+                    console.error('Error loading themes', e);
+                    // Fallback to default themes
+                    themes = [
+                        {
+                            id: 'purple',
+                            name: 'Purple Theme',
+                            description: 'Professional purple theme with modern gradient design',
+                            primary: '#7209b7',
+                            secondary: '#4361ee',
+                            textColor: '#FFFFFF',
+                            backgroundColor: '#FFFFFF',
+                            buttonBgColor: '#7209b7',
+                            buttonTextColor: '#FFFFFF',
+                            buttonHoverColor: '#5a08a5'
+                        },
+                        {
+                            id: 'yellow',
+                            name: 'Yellow Theme',
+                            description: 'Bright and energetic yellow theme',
+                            primary: '#ff9e00',
+                            secondary: '#ffd166',
+                            textColor: '#000000',
+                            backgroundColor: '#FFFFFF',
+                            buttonBgColor: '#ff9e00',
+                            buttonTextColor: '#000000',
+                            buttonHoverColor: '#e68a00'
+                        }
+                    ];
+                    populateThemeOptions();
+                    showNotification('Using default themes', 'warning');
+                }
+            }
+
+            function populateThemeOptions() {
+                if (!themeOptionsEl) return;
+                
+                if (!themes.length) {
+                    themeOptionsEl.innerHTML = '<p style="text-align:center;color:#666">No themes available</p>';
+                    return;
+                }
+
+                themeOptionsEl.innerHTML = themes.map(t => `
+                    <div class="theme-option ${currentTheme && t.id === currentTheme.id ? 'active' : ''}" data-theme-id="${t.id}">
+                        <div class="theme-preview" style="background:${t.primary || '#000'}">
+                            <i class="fas fa-paint-brush"></i>
+                        </div>
+                        <div class="theme-details">
+                            <h4>${t.name}</h4>
+                            <p>${t.description || ''}</p>
+                        </div>
+                        <button class="apply-theme-btn" data-theme-id="${t.id}">
+                            <i class="fas fa-check"></i> Apply
+                        </button>
+                    </div>
+                `).join('');
+
+                document.querySelectorAll('.apply-theme-btn').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        e.stopPropagation();
+                        const id = btn.getAttribute('data-theme-id');
+                        applyTheme(id);
+                    });
+                });
+            }
+
+            function applyThemeStyles(theme) {
+                // Set CSS custom properties
+                document.documentElement.style.setProperty('--primary', theme.primary);
+                document.documentElement.style.setProperty('--secondary', theme.secondary);
+                document.documentElement.style.setProperty('--text', theme.textColor);
+                document.documentElement.style.setProperty('--background', theme.backgroundColor);
+                document.documentElement.style.setProperty('--button-bg', theme.buttonBgColor);
+                document.documentElement.style.setProperty('--button-text', theme.buttonTextColor);
+                document.documentElement.style.setProperty('--button-hover', theme.buttonHoverColor);
+            }
+
+            async function applyTheme(themeId) {
+                const theme = themes.find(t => t.id === themeId);
+                if (!theme) return showNotification('Theme not found', 'error');
+
+                try {
+                    showNotification('Applying theme...', 'info');
+                    
+                    // Apply theme styles immediately
+                    applyThemeStyles(theme);
+                    currentTheme = theme;
+                    currentThemeNameEl.textContent = theme.name;
+                    
+                    // Save to localStorage as backup
+                    localStorage.setItem(`theme-${currentLocation.locationId}`, JSON.stringify(theme));
+
+                    // Check if theme already exists in backend by trying to apply it
+                    try {
+                        // First try to apply the theme directly (assuming it exists)
+                        const applyResponse = await apiCall('/themes/apply', {
+                            method: 'POST',
+                            body: {
+                                locationId: currentLocation.locationId,
+                                themeId: theme.id
+                            }
+                        });
+
+                        if (applyResponse.success) {
+                            showNotification(`${theme.name} applied successfully!`, 'success');
+                        } else {
+                            // If applying fails, create the theme first
+                            throw new Error('Theme not found, creating new theme');
+                        }
+                    } catch (applyError) {
+                        console.log('Theme not found, creating new one:', applyError);
+                        
+                        // Create the theme in backend
+                        const createResponse = await apiCall('/themes', {
+                            method: 'POST',
+                            body: {
+                                name: theme.name,
+                                description: theme.description,
+                                locationId: currentLocation.locationId,
+                                userId: AUTH_TOKEN,
+                                companyId: currentLocation.companyId || 'default-company',
+                                primary: theme.primary,
+                                secondary: theme.secondary,
+                                textColor: theme.textColor,
+                                backgroundColor: theme.backgroundColor,
+                                buttonBgColor: theme.buttonBgColor,
+                                buttonTextColor: theme.buttonTextColor,
+                                buttonHoverColor: theme.buttonHoverColor,
+                                category: theme.category || 'dashboard',
+                                isActive: true,
+                                isGlobal: false
+                            }
+                        });
+
+                        if (createResponse.success) {
+                            const newThemeId = createResponse.data._id || createResponse.data.id;
+                            
+                            // Apply the newly created theme
+                            await apiCall('/themes/apply', {
+                                method: 'POST',
+                                body: {
+                                    locationId: currentLocation.locationId,
+                                    themeId: newThemeId
+                                }
+                            });
+                            
+                            showNotification(`${theme.name} created and applied successfully!`, 'success');
+                        } else {
+                            throw new Error('Failed to create theme');
+                        }
+                    }
+
+                    populateThemeOptions();
+                    
+                } catch (e) {
+                    console.error(e);
+                    showNotification('Error applying theme: ' + e.message, 'error');
+                }
+            }
+
+            async function removeTheme() {
+                if (!currentTheme) return showNotification('No theme applied', 'error');
+
+                if (!confirm('Are you sure you want to remove the current theme?')) return;
+
+                try {
+                    showNotification('Removing theme...', 'info');
+                    
+                    // Remove theme styles
+                    const root = document.documentElement;
+                    root.style.removeProperty('--primary');
+                    root.style.removeProperty('--secondary');
+                    root.style.removeProperty('--text');
+                    root.style.removeProperty('--background');
+                    root.style.removeProperty('--button-bg');
+                    root.style.removeProperty('--button-text');
+                    root.style.removeProperty('--button-hover');
+                    
+                    // Remove from localStorage
+                    localStorage.removeItem(`theme-${currentLocation.locationId}`);
+                    
+                    currentTheme = null;
+                    currentThemeNameEl.textContent = 'None';
+                    
+                    // Remove via backend
+                    try {
+                        await apiCall('/themes/remove', {
+                            method: 'POST',
+                            body: { locationId: currentLocation.locationId }
+                        });
+                        showNotification('Theme removed successfully!', 'success');
+                    } catch (apiError) {
+                        console.error('Error removing theme from backend', apiError);
+                        showNotification('Theme removed locally but failed to update server', 'warning');
+                    }
+
+                    populateThemeOptions();
+                    
+                } catch (e) {
+                    console.error(e);
+                    showNotification('Error removing theme', 'error');
+                }
+            }
+
+            async function applyBackgroundColor(color) {
+                document.body.style.backgroundColor = color;
+                currentBackgroundColor = color;
+                localStorage.setItem(`bg-${currentLocation.locationId}`, color);
+                showNotification('Background color applied!', 'success');
+            }
+
+            function initBackgroundPicker() {
+                backgroundColorPickerEl.value = currentBackgroundColor;
+                colorPreviewEl.style.backgroundColor = currentBackgroundColor;
+
+                backgroundColorPickerEl.addEventListener('input', e => {
+                    colorPreviewEl.style.backgroundColor = e.target.value;
+                });
+
+                document.getElementById('applyColorBtn').addEventListener('click', () => 
+                    applyBackgroundColor(backgroundColorPickerEl.value));
+                
+                document.getElementById('resetColorBtn').addEventListener('click', () => 
+                    applyBackgroundColor('#f5f7fa'));
+            }
+
+            // Drag widget
+            function initDrag() {
+                const widget = document.getElementById('themeWidget');
+                const header = document.getElementById('widgetHeader');
+                if (!widget || !header) return;
+
+                header.addEventListener('mousedown', startDrag);
+                header.addEventListener('touchstart', startDrag);
+
+                function startDrag(e) {
+                    e.preventDefault();
+                    isDragging = true;
+                    const clientX = e.clientX || e.touches[0].clientX;
+                    const clientY = e.clientY || e.touches[0].clientY;
+                    const rect = widget.getBoundingClientRect();
+                    dragOffset.x = clientX - rect.left;
+                    dragOffset.y = clientY - rect.top;
+                    document.addEventListener('mousemove', onDrag);
+                    document.addEventListener('touchmove', onDrag);
+                    document.addEventListener('mouseup', stopDrag);
+                    document.addEventListener('touchend', stopDrag);
+                }
+
+                function onDrag(e) {
+                    if (!isDragging) return;
+                    const clientX = e.clientX || e.touches[0].clientX;
+                    const clientY = e.clientY || e.touches[0].clientY;
+                    currentPosition.x = clientX - dragOffset.x;
+                    currentPosition.y = clientY - dragOffset.y;
+                    const maxX = window.innerWidth - widget.offsetWidth;
+                    const maxY = window.innerHeight - widget.offsetHeight;
+                    currentPosition.x = Math.max(0, Math.min(currentPosition.x, maxX));
+                    currentPosition.y = Math.max(0, Math.min(currentPosition.y, maxY));
+                    widget.style.left = currentPosition.x + 'px';
+                    widget.style.top = currentPosition.y + 'px';
+                    widget.style.right = 'auto';
+                    widget.style.bottom = 'auto';
+                }
+
+                function stopDrag() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', onDrag);
+                    document.removeEventListener('touchmove', onDrag);
+                    document.removeEventListener('mouseup', stopDrag);
+                    document.removeEventListener('touchend', stopDrag);
+                }
+            }
+
+            function initControls() {
+                document.getElementById('minimizeBtn').addEventListener('click', e => {
+                    e.stopPropagation();
+                    const widget = document.getElementById('themeWidget');
+                    widget.classList.toggle('minimized');
+                });
+
+                document.getElementById('closeBtn').addEventListener('click', e => {
+                    e.stopPropagation();
+                    const widget = document.getElementById('themeWidget');
+                    widget.classList.add('hidden');
+                    setTimeout(() => widget.classList.remove('hidden'), 5000);
+                    showNotification('Widget hidden. Will reappear in 5 seconds', 'info');
+                });
+
+                document.getElementById('removeThemeBtn').addEventListener('click', removeTheme);
+            }
+
+            // ====== Initialize ======
+            document.addEventListener('DOMContentLoaded', async () => {
+                initDomRefs();
+                initDrag();
+                initControls();
+                initBackgroundPicker();
+                await loadUserLocation();
+                await loadThemes();
+            });
+        })();
+    </script>
 </body>
 </html>
