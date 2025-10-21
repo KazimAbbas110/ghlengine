@@ -1209,17 +1209,269 @@
             }
         }
 
-        // ===========================
-        // Permissions - FIXED
-        // ===========================
-        function managePermissions(locationId) {
-            currentModalLocationId = locationId;
-            const loc = realTimeLocations.find(l => l.id === locationId);
-            if (!loc) return;
+        // // ===========================
+        // // Permissions - FIXED
+        // // ===========================
+        // function managePermissions(locationId) {
+        //     currentModalLocationId = locationId;
+        //     const loc = realTimeLocations.find(l => l.id === locationId);
+        //     if (!loc) return;
 
+        //     const themesCheckbox = document.getElementById('perm-themes');
+        //     const chatCheckbox = document.getElementById('perm-chat');
+
+        //     if (themesCheckbox) {
+        //         themesCheckbox.checked = loc.permissions?.themeBuilderAccess || false;
+        //         document.getElementById('perm-themes-status').textContent = themesCheckbox.checked ? 'Enabled' : 'Disabled';
+        //     }
+        //     if (chatCheckbox) {
+        //         chatCheckbox.checked = loc.permissions?.chatWidget?.isActive || false;
+        //         document.getElementById('perm-chat-status').textContent = chatCheckbox.checked ? 'Enabled' : 'Disabled';
+        //     }
+
+        //     const modal = document.getElementById('permissionsModal');
+        //     if (modal) modal.style.display = 'flex';
+        // }
+
+        // function closePermissionsModal() {
+        //     const modal = document.getElementById('permissionsModal');
+        //     if (modal) modal.style.display = 'none';
+        //     currentModalLocationId = null;
+        // }
+
+        // async function savePermissions() {
+        //     if (!currentModalLocationId) {
+        //         showNotification('❌ No location selected', 'error');
+        //         return;
+        //     }
+
+        //     try {
+        //         const themesCheckbox = document.getElementById('perm-themes');
+        //         const chatCheckbox = document.getElementById('perm-chat');
+
+        //         showNotification('⚙️ Updating permissions...', 'info');
+
+        //         const response = await apiCall(`/access/status/${currentModalLocationId}`, {
+        //             method: 'PUT',
+        //             body: JSON.stringify({
+        //                 themeBuilderAccess: themesCheckbox?.checked || false,
+        //                 chatWidgetEnabled: chatCheckbox?.checked || false
+        //             })
+        //         });
+
+        //         if (response.success) {
+        //             showNotification('✅ Permissions updated successfully', 'success');
+
+        //             // Update local data
+        //             const locIndex = realTimeLocations.findIndex(l => l.id === currentModalLocationId);
+        //             if (locIndex > -1) {
+        //                 realTimeLocations[locIndex].permissions = {
+        //                     themeBuilderAccess: response.data.themeBuilderAccess,
+        //                     chatWidget: { isActive: response.data.chatWidgetEnabled }
+        //                 };
+        //             }
+
+        //             closePermissionsModal();
+        //             displayRealTimeLocations();
+        //             updateGlobalStats();
+        //         } else {
+        //             throw new Error(response.message || 'Failed to update permissions');
+        //         }
+
+        //     } catch (error) {
+        //         console.error('Save permissions error:', error);
+        //         showNotification(`❌ Error: ${error.message}`, 'error');
+        //     }
+        // }
+
+        // // ===========================
+        // // Stats - FIXED
+        // // ===========================
+        // function updateGlobalStats() {
+        //     const totalLocations = realTimeLocations.length;
+        //     const themedLocations = realTimeLocations.filter(l => l.currentTheme && l.currentTheme._id).length;
+        //     const themeAccessEnabled = realTimeLocations.filter(l => l.permissions?.themeBuilderAccess).length;
+        //     const customCssActive = realTimeLocations.filter(l => l.hasCustomCSS).length;
+
+        //     console.log('Stats calculated:', { totalLocations, themedLocations, themeAccessEnabled, customCssActive });
+
+        //     const totalEl = document.getElementById('totalLocations');
+        //     if (totalEl) totalEl.textContent = totalLocations;
+
+        //     const themedEl = document.getElementById('themedLocations');
+        //     if (themedEl) themedEl.textContent = themedLocations;
+
+        //     const themeAccessEl = document.getElementById('themeAccess');
+        //     if (themeAccessEl) themeAccessEl.textContent = themeAccessEnabled;
+
+        //     const customCssEl = document.getElementById('customCssLocations');
+        //     if (customCssEl) customCssEl.textContent = customCssActive;
+        // }
+
+        // // ===========================
+        // // Event Listeners
+        // // ===========================
+        // function initEventListeners() {
+        //     // Refresh button
+        //     const refreshBtn = document.getElementById('refreshBtn');
+        //     if (refreshBtn) {
+        //         refreshBtn.addEventListener('click', () => {
+        //             loadRealTimeLocations();
+        //             loadThemes();
+        //         });
+        //     }
+
+        //     // Search functionality
+        //     setupSearch();
+
+        //     // Close modals when clicking outside
+        //     window.addEventListener('click', (event) => {
+        //         const themeModal = document.getElementById('themeModal');
+        //         const permissionsModal = document.getElementById('permissionsModal');
+                
+        //         if (themeModal && event.target === themeModal) {
+        //             closeThemeModal();
+        //         }
+        //         if (permissionsModal && event.target === permissionsModal) {
+        //             closePermissionsModal();
+        //         }
+        //     });
+        // }
+
+        // // ===========================
+        // // Initialize
+        // // ===========================
+        // document.addEventListener('DOMContentLoaded', async () => {
+        //     console.log('🚀 Initializing GHL Theme Builder...');
+        //     initEventListeners();
+        //     await loadThemes();
+        //     await loadRealTimeLocations();
+        // });
+
+
+
+
+
+        // ===========================
+// Permissions - COMPLETELY FIXED
+// ===========================
+function managePermissions(locationId) {
+    currentModalLocationId = locationId;
+    const loc = realTimeLocations.find(l => l.id === locationId);
+    if (!loc) {
+        showNotification('❌ Location not found', 'error');
+        return;
+    }
+
+    console.log('🔧 Loading permissions for location:', locationId, loc);
+
+    const themesCheckbox = document.getElementById('perm-themes');
+    const chatCheckbox = document.getElementById('perm-chat');
+
+    if (themesCheckbox) {
+        // Check if permissions exist and themeBuilderAccess is defined
+        const hasThemeAccess = loc.permissions?.themeBuilderAccess === true;
+        themesCheckbox.checked = hasThemeAccess;
+        document.getElementById('perm-themes-status').textContent = hasThemeAccess ? 'Enabled' : 'Disabled';
+        console.log('🎨 Theme Builder Access:', hasThemeAccess);
+    }
+
+    if (chatCheckbox) {
+        // Check if permissions exist and chatWidget isActive is defined
+        const hasChatAccess = loc.permissions?.chatWidget?.isActive === true;
+        chatCheckbox.checked = hasChatAccess;
+        document.getElementById('perm-chat-status').textContent = hasChatAccess ? 'Enabled' : 'Disabled';
+        console.log('💬 Chat Widget Access:', hasChatAccess);
+    }
+
+    const modal = document.getElementById('permissionsModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        console.log('✅ Permissions modal opened');
+    }
+}
+
+function closePermissionsModal() {
+    const modal = document.getElementById('permissionsModal');
+    if (modal) modal.style.display = 'none';
+    currentModalLocationId = null;
+    console.log('🔒 Permissions modal closed');
+}
+
+async function savePermissions() {
+    if (!currentModalLocationId) {
+        showNotification('❌ No location selected', 'error');
+        return;
+    }
+
+    try {
+        const themesCheckbox = document.getElementById('perm-themes');
+        const chatCheckbox = document.getElementById('perm-chat');
+
+        const themeBuilderAccess = themesCheckbox?.checked || false;
+        const chatWidgetEnabled = chatCheckbox?.checked || false;
+
+        console.log('💾 Saving permissions:', {
+            locationId: currentModalLocationId,
+            themeBuilderAccess,
+            chatWidgetEnabled
+        });
+
+        showNotification('⚙️ Updating permissions...', 'info');
+
+        // Make API call to update permissions
+        const response = await apiCall(`/access/status/${currentModalLocationId}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                themeBuilderAccess: themeBuilderAccess,
+                chatWidgetEnabled: chatWidgetEnabled
+            })
+        });
+
+        console.log('📡 API Response:', response);
+
+        if (response.success) {
+            showNotification('✅ Permissions updated successfully!', 'success');
+
+            // Update local data immediately
+            const locIndex = realTimeLocations.findIndex(l => l.id === currentModalLocationId);
+            if (locIndex > -1) {
+                // Ensure permissions object exists
+                if (!realTimeLocations[locIndex].permissions) {
+                    realTimeLocations[locIndex].permissions = {};
+                }
+                if (!realTimeLocations[locIndex].permissions.chatWidget) {
+                    realTimeLocations[locIndex].permissions.chatWidget = {};
+                }
+
+                // Update the local state
+                realTimeLocations[locIndex].permissions.themeBuilderAccess = themeBuilderAccess;
+                realTimeLocations[locIndex].permissions.chatWidget.isActive = chatWidgetEnabled;
+
+                console.log('🔄 Updated local state:', realTimeLocations[locIndex]);
+            }
+
+            // Close modal and refresh display
+            closePermissionsModal();
+            displayRealTimeLocations(); // Refresh the grid to show updated permissions
+            updateGlobalStats(); // Update stats counter
+
+            console.log('✅ Permissions saved and UI updated');
+
+        } else {
+            throw new Error(response.message || response.error || 'Failed to update permissions');
+        }
+
+    } catch (error) {
+        console.error('❌ Save permissions error:', error);
+        showNotification(`❌ Error: ${error.message}`, 'error');
+        
+        // Revert checkboxes to previous state
+        const loc = realTimeLocations.find(l => l.id === currentModalLocationId);
+        if (loc) {
             const themesCheckbox = document.getElementById('perm-themes');
             const chatCheckbox = document.getElementById('perm-chat');
-
+            
             if (themesCheckbox) {
                 themesCheckbox.checked = loc.permissions?.themeBuilderAccess || false;
                 document.getElementById('perm-themes-status').textContent = themesCheckbox.checked ? 'Enabled' : 'Disabled';
@@ -1228,125 +1480,139 @@
                 chatCheckbox.checked = loc.permissions?.chatWidget?.isActive || false;
                 document.getElementById('perm-chat-status').textContent = chatCheckbox.checked ? 'Enabled' : 'Disabled';
             }
-
-            const modal = document.getElementById('permissionsModal');
-            if (modal) modal.style.display = 'flex';
         }
+    }
+}
 
-        function closePermissionsModal() {
-            const modal = document.getElementById('permissionsModal');
-            if (modal) modal.style.display = 'none';
-            currentModalLocationId = null;
-        }
+// ===========================
+// Improved Display Function to Show Real-time Permission Changes
+// ===========================
+function displayRealTimeLocations() {
+    const container = document.getElementById('realTimeLocationsContainer');
+    if (!container) return;
 
-        async function savePermissions() {
-            if (!currentModalLocationId) {
-                showNotification('❌ No location selected', 'error');
-                return;
-            }
+    if (realTimeLocations.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>📍 No Locations Found</h3>
+                <p>No locations were found in your account.</p>
+                <button class="btn btn-primary" onclick="loadRealTimeLocations()">Try Again</button>
+            </div>
+        `;
+        return;
+    }
 
-            try {
-                const themesCheckbox = document.getElementById('perm-themes');
-                const chatCheckbox = document.getElementById('perm-chat');
-
-                showNotification('⚙️ Updating permissions...', 'info');
-
-                const response = await apiCall(`/access/status/${currentModalLocationId}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({
-                        themeBuilderAccess: themesCheckbox?.checked || false,
-                        chatWidgetEnabled: chatCheckbox?.checked || false
-                    })
-                });
-
-                if (response.success) {
-                    showNotification('✅ Permissions updated successfully', 'success');
-
-                    // Update local data
-                    const locIndex = realTimeLocations.findIndex(l => l.id === currentModalLocationId);
-                    if (locIndex > -1) {
-                        realTimeLocations[locIndex].permissions = {
-                            themeBuilderAccess: response.data.themeBuilderAccess,
-                            chatWidget: { isActive: response.data.chatWidgetEnabled }
-                        };
-                    }
-
-                    closePermissionsModal();
-                    displayRealTimeLocations();
-                    updateGlobalStats();
-                } else {
-                    throw new Error(response.message || 'Failed to update permissions');
-                }
-
-            } catch (error) {
-                console.error('Save permissions error:', error);
-                showNotification(`❌ Error: ${error.message}`, 'error');
-            }
-        }
-
-        // ===========================
-        // Stats - FIXED
-        // ===========================
-        function updateGlobalStats() {
-            const totalLocations = realTimeLocations.length;
-            const themedLocations = realTimeLocations.filter(l => l.currentTheme && l.currentTheme._id).length;
-            const themeAccessEnabled = realTimeLocations.filter(l => l.permissions?.themeBuilderAccess).length;
-            const customCssActive = realTimeLocations.filter(l => l.hasCustomCSS).length;
-
-            console.log('Stats calculated:', { totalLocations, themedLocations, themeAccessEnabled, customCssActive });
-
-            const totalEl = document.getElementById('totalLocations');
-            if (totalEl) totalEl.textContent = totalLocations;
-
-            const themedEl = document.getElementById('themedLocations');
-            if (themedEl) themedEl.textContent = themedLocations;
-
-            const themeAccessEl = document.getElementById('themeAccess');
-            if (themeAccessEl) themeAccessEl.textContent = themeAccessEnabled;
-
-            const customCssEl = document.getElementById('customCssLocations');
-            if (customCssEl) customCssEl.textContent = customCssActive;
-        }
-
-        // ===========================
-        // Event Listeners
-        // ===========================
-        function initEventListeners() {
-            // Refresh button
-            const refreshBtn = document.getElementById('refreshBtn');
-            if (refreshBtn) {
-                refreshBtn.addEventListener('click', () => {
-                    loadRealTimeLocations();
-                    loadThemes();
-                });
-            }
-
-            // Search functionality
-            setupSearch();
-
-            // Close modals when clicking outside
-            window.addEventListener('click', (event) => {
-                const themeModal = document.getElementById('themeModal');
-                const permissionsModal = document.getElementById('permissionsModal');
+    container.innerHTML = `
+        <div class="locations-grid">
+            ${realTimeLocations.map(location => {
+                const hasTheme = location.currentTheme && location.currentTheme._id;
+                const themeName = hasTheme ? (location.currentTheme.name || 'Unknown Theme') : 'No Theme';
+                const themeAccess = location.permissions?.themeBuilderAccess ? '✅ Enabled' : '❌ Disabled';
+                const chatAccess = location.permissions?.chatWidget?.isActive ? '✅ Enabled' : '❌ Disabled';
                 
-                if (themeModal && event.target === themeModal) {
-                    closeThemeModal();
-                }
-                if (permissionsModal && event.target === permissionsModal) {
-                    closePermissionsModal();
-                }
-            });
-        }
+                console.log(`📍 ${location.name} - Theme Access: ${location.permissions?.themeBuilderAccess}, Chat Access: ${location.permissions?.chatWidget?.isActive}`);
+                
+                return `
+                <div class="location-card ${hasTheme ? 'has-theme' : ''}">
+                    <div class="location-header">
+                        <h3>${location.name || 'Unnamed Location'}</h3>
+                        <span class="location-id">${location.id ? location.id.substring(0, 8) : 'N/A'}...</span>
+                    </div>
+                    <div class="location-details">
+                        <div class="detail"><strong>📍 Address:</strong> ${location.address || 'N/A'}</div>
+                        <div class="detail"><strong>📞 Phone:</strong> ${location.phone || 'N/A'}</div>
+                        <div class="detail"><strong>📧 Email:</strong> ${location.email || 'N/A'}</div>
+                        <div class="detail"><strong>🎨 Theme:</strong> ${hasTheme ? '✅ ' + themeName : '❌ None'}</div>
+                        <div class="detail"><strong>🔄 Custom CSS:</strong> ${location.hasCustomCSS ? '✅ Yes' : '❌ No'}</div>
+                        <div class="detail"><strong>⚙️ Theme Access:</strong> ${themeAccess}</div>
+                        <div class="detail"><strong>💬 Chat Widget:</strong> ${chatAccess}</div>
+                    </div>
+                    <div class="location-actions">
+                        <button class="btn btn-primary btn-sm" onclick="openThemeModal('${location.id}')">
+                            <i class="fas fa-palette"></i> Apply Theme
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="managePermissions('${location.id}')">
+                            <i class="fas fa-cog"></i> Permissions
+                        </button>
+                        ${hasTheme ? `
+                            <button class="btn btn-danger btn-sm" onclick="removeThemeFromRealLocation('${location.id}')">
+                                <i class="fas fa-trash"></i> Remove Theme
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `}).join('')}
+        </div>
+    `;
+}
 
-        // ===========================
-        // Initialize
-        // ===========================
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 Initializing GHL Theme Builder...');
-            initEventListeners();
-            await loadThemes();
-            await loadRealTimeLocations();
-        });
+// ===========================
+// Enhanced Stats Function
+// ===========================
+function updateGlobalStats() {
+    const totalLocations = realTimeLocations.length;
+    const themedLocations = realTimeLocations.filter(l => l.currentTheme && l.currentTheme._id).length;
+    const themeAccessEnabled = realTimeLocations.filter(l => l.permissions?.themeBuilderAccess === true).length;
+    const customCssActive = realTimeLocations.filter(l => l.hasCustomCSS === true).length;
+
+    console.log('📊 Stats Update:', {
+        totalLocations,
+        themedLocations,
+        themeAccessEnabled,
+        customCssActive,
+        locations: realTimeLocations.map(l => ({
+            name: l.name,
+            themeAccess: l.permissions?.themeBuilderAccess,
+            hasTheme: !!l.currentTheme
+        }))
+    });
+
+    const totalEl = document.getElementById('totalLocations');
+    if (totalEl) totalEl.textContent = totalLocations;
+
+    const themedEl = document.getElementById('themedLocations');
+    if (themedEl) themedEl.textContent = themedLocations;
+
+    const themeAccessEl = document.getElementById('themeAccess');
+    if (themeAccessEl) themeAccessEl.textContent = themeAccessEnabled;
+
+    const customCssEl = document.getElementById('customCssLocations');
+    if (customCssEl) customCssEl.textContent = customCssActive;
+}
+
+// ===========================
+// Add Debug Function to Check Current State
+// ===========================
+function debugPermissions() {
+    console.log('🔍 DEBUG - Current Locations and Permissions:');
+    realTimeLocations.forEach((location, index) => {
+        console.log(`${index + 1}. ${location.name} (${location.id})`);
+        console.log('   Theme Builder Access:', location.permissions?.themeBuilderAccess);
+        console.log('   Chat Widget Active:', location.permissions?.chatWidget?.isActive);
+        console.log('   Current Theme:', location.currentTheme ? location.currentTheme.name : 'None');
+    });
+}
+
+// Add debug button to panel actions (optional)
+function addDebugButton() {
+    const panelActions = document.querySelector('.panel-actions');
+    if (panelActions) {
+        const debugBtn = document.createElement('button');
+        debugBtn.className = 'btn btn-outline';
+        debugBtn.innerHTML = '<i class="fas fa-bug"></i> Debug';
+        debugBtn.onclick = debugPermissions;
+        panelActions.appendChild(debugBtn);
+    }
+}
+
+// Call this in your init function
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Initializing GHL Theme Builder...');
+    initEventListeners();
+    addDebugButton(); // Add debug button
+    await loadThemes();
+    await loadRealTimeLocations();
+});
     </script>
 </body>
 </html>
