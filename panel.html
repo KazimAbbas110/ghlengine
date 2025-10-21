@@ -1307,7 +1307,49 @@
         //     const customCssEl = document.getElementById('customCssLocations');
         //     if (customCssEl) customCssEl.textContent = customCssActive;
         // }
-// ===========================
+
+        // // ===========================
+        // // Event Listeners
+        // // ===========================
+        // function initEventListeners() {
+        //     // Refresh button
+        //     const refreshBtn = document.getElementById('refreshBtn');
+        //     if (refreshBtn) {
+        //         refreshBtn.addEventListener('click', () => {
+        //             loadRealTimeLocations();
+        //             loadThemes();
+        //         });
+        //     }
+
+        //     // Search functionality
+        //     setupSearch();
+
+        //     // Close modals when clicking outside
+        //     window.addEventListener('click', (event) => {
+        //         const themeModal = document.getElementById('themeModal');
+        //         const permissionsModal = document.getElementById('permissionsModal');
+                
+        //         if (themeModal && event.target === themeModal) {
+        //             closeThemeModal();
+        //         }
+        //         if (permissionsModal && event.target === permissionsModal) {
+        //             closePermissionsModal();
+        //         }
+        //     });
+        // }
+
+        // // ===========================
+        // // Initialize
+        // // ===========================
+        // document.addEventListener('DOMContentLoaded', async () => {
+        //     console.log('🚀 Initializing GHL Theme Builder...');
+        //     initEventListeners();
+        //     await loadThemes();
+        //     await loadRealTimeLocations();
+        // });
+
+
+        // ===========================
 // Permissions - COMPLETELY FIXED
 // ===========================
 function managePermissions(locationId) {
@@ -1559,54 +1601,15 @@ function addDebugButton() {
         panelActions.appendChild(debugBtn);
     }
 }
-        // ===========================
-        // Event Listeners
-        // ===========================
-        function initEventListeners() {
-            // Refresh button
-            const refreshBtn = document.getElementById('refreshBtn');
-            if (refreshBtn) {
-                refreshBtn.addEventListener('click', () => {
-                    loadRealTimeLocations();
-                    loadThemes();
-                });
-            }
 
-            // Search functionality
-            setupSearch();
-
-            // Close modals when clicking outside
-            window.addEventListener('click', (event) => {
-                const themeModal = document.getElementById('themeModal');
-                const permissionsModal = document.getElementById('permissionsModal');
-                
-                if (themeModal && event.target === themeModal) {
-                    closeThemeModal();
-                }
-                if (permissionsModal && event.target === permissionsModal) {
-                    closePermissionsModal();
-                }
-            });
-        }
-// // Call this in your init function
-// document.addEventListener('DOMContentLoaded', async () => {
-//     console.log('🚀 Initializing GHL Theme Builder...');
-//     initEventListeners();
-//     addDebugButton(); // Add debug button
-//     await loadThemes();
-//     await loadRealTimeLocations();
-// });
-
-
-        // ===========================
-        // Initialize
-        // ===========================
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 Initializing GHL Theme Builder...');
-            initEventListeners();
-            await loadThemes();
-            await loadRealTimeLocations();
-        });
+// Call this in your init function
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Initializing GHL Theme Builder...');
+    initEventListeners();
+    addDebugButton(); // Add debug button
+    await loadThemes();
+    await loadRealTimeLocations();
+});
     </script>
 </body>
 </html>
