@@ -3740,299 +3740,265 @@
 
 
 
-
-
 (function(){
-    console.log('🚀 GHL Theme Builder - Persistent Version Loaded');
+    console.log('🚀 GHL Full Theme Builder v2 (With Editor)');
 
-    // =========================
-    // Configuration
-    // =========================
     const CONFIG = {
-        BTN_ID: "ghl-theme-builder-btn-2025",
-        POPUP_ID: "ghl-theme-builder-popup-2025", 
-        STYLE_ID: "ghl-theme-style-2025",
+        BTN_ID: "ghl-theme-builder-btn-full",
+        POPUP_ID: "ghl-theme-builder-popup-full",
+        STYLE_ID: "ghl-theme-style-full",
         BACKEND_API: "https://ghlengine-production.up.railway.app/api",
         AUTH_TOKEN: "110",
-        VERSION: "6.1.0"
+        VERSION: "2.0.0"
     };
 
-    // =========================
-    // State
-    // =========================
     const state = {
-        currentLocation: null,
+        btnRef: null,
+        popupRef: null,
         currentTheme: null,
+        currentLocation: null,
         themes: [],
-        popupRef: null
+        accessInfo: null
     };
 
-    // =========================
-    // API Service
-    // =========================
+    // --- Location Detection ---
+    const locationService = {
+        detect() {
+            const url = window.location.href;
+            const match = url.match(/\/location\/([^\/]+)\//);
+            const locationId = match ? match[1] : null;
+            return locationId ? { locationId, name: this.getName(), url } : null;
+        },
+        getName() {
+            const el = document.querySelector('.hl_switcher-loc-name') || document.querySelector('[data-location-name]');
+            return el?.textContent?.trim() || 'GHL Location';
+        }
+    };
+
+    // --- Permission Check ---
+    const permissionService = {
+        async check(locationId){
+            try {
+                const res = await fetch(`${CONFIG.BACKEND_API}/access/status/${locationId}`, {
+                    headers: { 'Authorization': `Bearer ${CONFIG.AUTH_TOKEN}` }
+                });
+                const data = await res.json();
+                return data.success && data.data.themeBuilderAccess;
+            } catch(e){ return false; }
+        }
+    };
+
+    // --- API Service ---
     const apiService = {
         async call(endpoint, options = {}) {
             const url = `${CONFIG.BACKEND_API}${endpoint}`;
             const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${CONFIG.AUTH_TOKEN}`, ...options.headers };
             const config = { method: options.method || 'GET', headers, ...(options.body && { body: JSON.stringify(options.body) }) };
-            try {
-                const response = await fetch(url, config);
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || data.error || `HTTP ${response.status}`);
-                return data;
-            } catch(e){ throw e; }
+            const res = await fetch(url, config);
+            const data = await res.json();
+            if(!res.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
+            return data;
         },
-
-        async getThemeByLocation(locationId){
-            if(!locationId) throw new Error('No location ID');
-            try {
-                const res = await this.call(`/themes/by-location/${locationId}`);
-                return res.success ? res.data : null;
-            } catch(e){
-                if(e.message.includes('404')) return null;
-                throw e;
-            }
+        async getThemes(locationId){ return this.call(`/themes/by-location/${locationId}`); },
+        async createTheme(themeData){ 
+            const timestamp = new Date().getTime();
+            const validated = { ...themeData, name: `${themeData.name} ${timestamp}`, locationId: themeData.locationId, userId: CONFIG.AUTH_TOKEN, isActive:true };
+            return this.call('/themes', { method: 'POST', body: validated });
         },
-
-        async getAllThemes(){
-            return this.call('/themes');
-        },
-
-        async createTheme(themeData){
-            const timestamp = Date.now();
-            const uniqueName = `${themeData.name} ${timestamp}`;
-            const body = {
-                ...themeData,
-                name: uniqueName,
-                description: "Theme created via GHL Theme Builder",
-                locationId: themeData.locationId,
-                userId: CONFIG.AUTH_TOKEN,
-                companyId: "default-company",
-                category: "dashboard",
-                isActive: true,
-                isGlobal: false
-            };
-            return this.call('/themes', { method: 'POST', body });
-        },
-
-        async applyThemeToLocation(themeId, locationId){
-            return this.call('/themes/apply', { method: 'POST', body: { themeId, locationId } });
-        },
-
-        async removeThemeFromLocation(locationId){
-            return this.call('/themes/remove', { method: 'POST', body: { locationId } });
-        }
+        async updateTheme(themeId, data){ return this.call(`/themes/${themeId}`, { method: 'PUT', body: data }); },
+        async deleteTheme(themeId){ return this.call(`/themes/${themeId}`, { method: 'DELETE' }); },
+        async applyTheme(themeId, locationId){ return this.call('/themes/apply', { method: 'POST', body:{ themeId, locationId } }); }
     };
 
-    // =========================
-    // Theme CSS Service
-    // =========================
+    // --- Theme CSS Service ---
     const themeCSSService = {
         generateCSS(theme){
             if(!theme) return '';
             return `
-/* Theme Builder v${CONFIG.VERSION} - ${theme.name} */
-
-/* Sidebar */
-[class*="sidebar"], .sidebar-container, .transition-slowest .flex-col > .overflow-hidden {
+.sidebar-container, .transition-slowest .flex-col > .overflow-hidden {
     background: linear-gradient(135deg, ${theme.sidebarGradientStart} 0%, ${theme.sidebarGradientEnd} 100%) !important;
 }
-
-/* Header */
-.hl_header .container-fluid, [class*="header"] .container-fluid {
+.hl_header .container-fluid {
     background: linear-gradient(135deg, ${theme.headerGradientStart} 0%, ${theme.headerGradientEnd} 100%) !important;
 }
-
-/* Text Colors */
-.nav-title, .menu-title, .hl-switcher-loc-name, .hl-switcher-loc-city, .search-placeholder, .hl-text {
+.hl-text, .nav-title, .menu-title, .hl_switcher-loc-name {
     color: ${theme.textColor} !important;
     font-family: ${theme.fontFamily} !important;
 }
-
-/* Card & Container Background */
-.hl-card, [class*="card"], [class*="container"]:not(.hl_header .container-fluid) {
+.hl-card, #location-switcher-sidbar-v2 {
     background-color: ${theme.backgroundColor} !important;
-}
-
-/* Active States */
-.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a.active,
-[class*="active"], [class*="selected"] {
-    background-color: rgba(255,255,255,0.2) !important;
-}
-
-/* Icons */
-svg path, [class*="icon"] { fill: ${theme.textColor} !important; color: ${theme.textColor} !important; stroke: ${theme.textColor} !important; }
-            `;
+}`;
         },
-
-        applyThemeCSS(theme){
-            this.removeThemeCSS();
-            if(theme){
-                const style = document.createElement('style');
-                style.id = CONFIG.STYLE_ID;
-                style.textContent = this.generateCSS(theme);
-                document.head.appendChild(style);
-            }
-        },
-
-        removeThemeCSS(){
-            const existing = document.getElementById(CONFIG.STYLE_ID);
-            if(existing) existing.remove();
-        }
-    };
-
-    // =========================
-    // Theme Manager
-    // =========================
-    const themeManager = {
-        async loadCurrentTheme(){
-            if(!state.currentLocation) return;
-            const theme = await apiService.getThemeByLocation(state.currentLocation.locationId);
-            if(theme){
-                state.currentTheme = theme;
-                themeCSSService.applyThemeCSS(theme);
-            } else {
-                state.currentTheme = null;
-                themeCSSService.removeThemeCSS();
-            }
-        },
-
-        async loadAllThemes(){
-            const res = await apiService.getAllThemes();
-            state.themes = res.success ? (Array.isArray(res.data) ? res.data : [res.data]) : [];
-        },
-
-        async applyTheme(themeId){
-            if(!state.currentLocation) return;
-            const theme = state.themes.find(t => t._id === themeId);
+        apply(theme){
+            this.remove();
             if(!theme) return;
-            await apiService.applyThemeToLocation(themeId, state.currentLocation.locationId);
-            state.currentTheme = theme;
-            themeCSSService.applyThemeCSS(theme);
+            const style = document.createElement('style');
+            style.id = CONFIG.STYLE_ID;
+            style.textContent = this.generateCSS(theme);
+            document.head.appendChild(style);
         },
+        remove(){ const s = document.getElementById(CONFIG.STYLE_ID); if(s) s.remove(); }
+    };
 
-        async removeTheme(){
+    // --- Theme Manager ---
+    const themeManager = {
+        presets:[
+            { name:'Blue', sidebarStart:'#1e3a8a', sidebarEnd:'#3b82f6', headerStart:'#1e40af', headerEnd:'#60a5fa', textColor:'#fff', background:'#1e40af' },
+            { name:'Green', sidebarStart:'#065f46', sidebarEnd:'#10b981', headerStart:'#047857', headerEnd:'#34d399', textColor:'#fff', background:'#047857' },
+            { name:'Purple', sidebarStart:'#5b21b6', sidebarEnd:'#a855f7', headerStart:'#6b21a8', headerEnd:'#c084fc', textColor:'#fff', background:'#6b21a8' },
+            { name:'Red', sidebarStart:'#b91c1c', sidebarEnd:'#f87171', headerStart:'#991b1b', headerEnd:'#fca5a5', textColor:'#fff', background:'#991b1b' }
+        ],
+        async load(){
             if(!state.currentLocation) return;
-            await apiService.removeThemeFromLocation(state.currentLocation.locationId);
-            state.currentTheme = null;
-            themeCSSService.removeThemeCSS();
+            try{
+                const res = await apiService.getThemes(state.currentLocation.locationId);
+                state.themes = res.data || [];
+                state.currentTheme = state.themes.find(t=>t.isActive) || null;
+                themeCSSService.apply(state.currentTheme);
+            }catch(e){ console.error(e); state.themes=[]; themeCSSService.remove(); }
         },
-
-        async createTheme(themeData){
+        async applyPreset(preset){
             if(!state.currentLocation) return;
-            const fullData = {...themeData, locationId: state.currentLocation.locationId};
-            const res = await apiService.createTheme(fullData);
-            if(res.success && res.data){
-                state.themes.push(res.data);
-                await this.applyTheme(res.data._id);
-            }
+            const themeData = { 
+                name:`Preset ${preset.name}`, 
+                sidebarGradientStart:preset.sidebarStart, sidebarGradientEnd:preset.sidebarEnd,
+                headerGradientStart:preset.headerStart, headerGradientEnd:preset.headerEnd,
+                textColor:preset.textColor, backgroundColor:preset.background,
+                fontFamily:'Roboto, sans-serif', locationId:state.currentLocation.locationId
+            };
+            try{
+                const res = await apiService.createTheme(themeData);
+                state.currentTheme = res.data;
+                themeCSSService.apply(state.currentTheme);
+                await apiService.applyTheme(res.data._id, state.currentLocation.locationId);
+                await this.load();
+                ui.renderPopup();
+            }catch(e){ console.error(e); }
+        },
+        async deleteTheme(themeId){
+            try{
+                await apiService.deleteTheme(themeId);
+                if(state.currentTheme && state.currentTheme._id===themeId) state.currentTheme=null;
+                await this.load();
+                ui.renderPopup();
+            }catch(e){ console.error(e); }
+        },
+        async saveEditedTheme(themeId, editedTheme){
+            try{
+                await apiService.updateTheme(themeId, editedTheme);
+                state.currentTheme = {...state.currentTheme, ...editedTheme};
+                themeCSSService.apply(state.currentTheme);
+                await apiService.applyTheme(themeId, state.currentLocation.locationId);
+                await this.load();
+                ui.renderPopup();
+            }catch(e){ console.error(e); }
         }
     };
 
-    // =========================
-    // UI Service
-    // =========================
-    const uiService = {
+    // --- UI ---
+    const ui = {
         createButton(){
-            if(document.getElementById(CONFIG.BTN_ID)) return;
             const btn = document.createElement('button');
             btn.id = CONFIG.BTN_ID;
-            btn.innerText = '🎨 THEMES';
-            btn.style = `
-                position: fixed; top: 20px; right: 20px; z-index:2147483647;
-                padding:12px 16px; background:#2563EB; color:white; border:none; border-radius:8px;
-                cursor:pointer; font-weight:bold; font-family:system-ui,sans-serif;
-            `;
-            btn.addEventListener('click', uiService.openPopup);
+            btn.innerText='🎨 THEMES';
+            btn.style.cssText='position:fixed;top:20px;right:20px;padding:12px 16px;background:#2563EB;color:white;border:none;border-radius:8px;z-index:2147483647;cursor:pointer;';
+            btn.addEventListener('click', ()=>this.openPopup());
             document.body.appendChild(btn);
+            state.btnRef=btn;
         },
-
         async openPopup(){
-            if(!state.popupRef){
-                const popup = document.createElement('div');
-                popup.id = CONFIG.POPUP_ID;
-                popup.style = `
-                    position: fixed; top:50%; left:50%; transform: translate(-50%,-50%);
-                    background:white; padding:24px; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,0.3);
-                    z-index:2147483646; width:90vw; max-width:500px; max-height:80vh; overflow-y:auto;
-                    display:block; border:2px solid #e5e7eb; font-family:system-ui,sans-serif;
-                `;
-                document.body.appendChild(popup);
-                state.popupRef = popup;
-            }
-
-            await this.updatePopup();
+            if(!state.popupRef) await this.createPopup();
+            state.popupRef.style.display='block';
         },
+        async createPopup(){
+            const popup=document.createElement('div');
+            popup.id=CONFIG.POPUP_ID;
+            popup.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:24px;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.3);z-index:2147483646;width:90vw;max-width:600px;max-height:80vh;overflow-y:auto;display:none;';
+            document.body.appendChild(popup);
+            state.popupRef=popup;
+            this.renderPopup();
+        },
+        renderPopup(){
+            const popup=state.popupRef;
+            if(!popup) return;
 
-        async updatePopup(){
-            if(!state.popupRef) return;
-            const themeList = state.themes.map(t=>{
-                const active = state.currentTheme?._id===t._id;
-                return `<div style="margin:6px 0;padding:8px;border:${active?'2px solid #10B981':'1px solid #e5e7eb'};border-radius:6px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-                    <span>${t.name}</span>
-                    ${active?'✅ Active':'<button style="background:#2563EB;color:white;padding:4px 8px;border:none;border-radius:4px;">Apply</button>'}
-                </div>`;
-            }).join('');
-            state.popupRef.innerHTML = `
-                <h2>🎨 GHL Theme Builder</h2>
-                <div><strong>Location:</strong> ${state.currentLocation?.name||'Detecting...'}</div>
-                <div><strong>Current Theme:</strong> ${state.currentTheme?.name||'None'}</div>
-                <h3>Available Themes</h3>
-                <div>${themeList || 'No themes found.'}</div>
-                <button id="close-popup-btn" style="margin-top:10px;padding:8px 12px;background:#6b7280;color:white;border:none;border-radius:6px;">Close</button>
+            const current = state.currentTheme || {sidebarGradientStart:'#1e3a8a', sidebarGradientEnd:'#3b82f6', headerGradientStart:'#1e40af', headerGradientEnd:'#60a5fa', textColor:'#fff', backgroundColor:'#1e40af', fontFamily:'Roboto, sans-serif'};
+
+            popup.innerHTML=`
+                <h2>🎨 Full Theme Builder</h2>
+                <div>Location: ${state.currentLocation?.name}</div>
+                <div>Current Theme: ${state.currentTheme?.name || 'None'}</div>
+
+                <h3>Presets:</h3>
+                <div style="margin:12px 0;">
+                    ${themeManager.presets.map(p=>`<button data-preset="${p.name}" style="margin:4px;padding:8px 12px;border:none;border-radius:6px;background:${p.sidebarStart};color:white;cursor:pointer;">${p.name}</button>`).join('')}
+                </div>
+
+                <h3>Edit Theme:</h3>
+                <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+                    <label>Sidebar Gradient Start: <input type="color" id="edit-sidebar-start" value="${current.sidebarGradientStart}"></label>
+                    <label>Sidebar Gradient End: <input type="color" id="edit-sidebar-end" value="${current.sidebarGradientEnd}"></label>
+                    <label>Header Gradient Start: <input type="color" id="edit-header-start" value="${current.headerGradientStart}"></label>
+                    <label>Header Gradient End: <input type="color" id="edit-header-end" value="${current.headerGradientEnd}"></label>
+                    <label>Text Color: <input type="color" id="edit-text-color" value="${current.textColor}"></label>
+                    <label>Background Color: <input type="color" id="edit-bg-color" value="${current.backgroundColor}"></label>
+                    <label>Font Family: <input type="text" id="edit-font-family" value="${current.fontFamily}"></label>
+                    <button id="save-edited-theme" style="margin-top:4px;padding:6px 10px;background:#10b981;color:white;border:none;border-radius:6px;cursor:pointer;">Save Changes</button>
+                </div>
+
+                <h3>Existing Themes:</h3>
+                <ul style="padding-left:20px;">
+                    ${state.themes.map(t=>`<li>${t.name} <button data-delete="${t._id}" style="margin-left:8px;color:red;">Delete</button></li>`).join('')}
+                </ul>
+
+                <button id="close-popup" style="margin-top:12px;">Close</button>
             `;
-            document.getElementById('close-popup-btn')?.addEventListener('click', uiService.closePopup);
 
-            // Attach apply theme buttons
-            state.popupRef.querySelectorAll('div > button').forEach((btn,i)=>{
-                btn.addEventListener('click',()=>themeManager.applyTheme(state.themes[i]._id).then(()=>uiService.updatePopup()));
+            // Presets
+            popup.querySelectorAll('button[data-preset]').forEach(btn=>{
+                const presetName=btn.dataset.preset;
+                const presetObj=themeManager.presets.find(p=>p.name===presetName);
+                btn.addEventListener('click', ()=>themeManager.applyPreset(presetObj));
             });
-        },
 
-        closePopup(){ if(state.popupRef) state.popupRef.style.display='none'; }
-    };
+            // Delete
+            popup.querySelectorAll('button[data-delete]').forEach(btn=>{
+                const themeId=btn.dataset.delete;
+                btn.addEventListener('click', ()=>themeManager.deleteTheme(themeId));
+            });
 
-    // =========================
-    // URL Location Service
-    // =========================
-    const urlLocationService = {
-        extractLocationIdFromURL(){
-            const patterns = [/\/location\/([^\/]+)\//];
-            for(let p of patterns){
-                const m = window.location.href.match(p);
-                if(m && m[1]) return m[1];
-            }
-            return null;
-        },
-        getCurrentLocation(){
-            const id = this.extractLocationIdFromURL();
-            return id ? { locationId:id, name:'GHL Location', url:window.location.href } : null;
+            // Save Edited Theme
+            popup.querySelector('#save-edited-theme')?.addEventListener('click', ()=>{
+                if(!state.currentTheme) return alert('No theme selected');
+                const edited = {
+                    sidebarGradientStart: popup.querySelector('#edit-sidebar-start').value,
+                    sidebarGradientEnd: popup.querySelector('#edit-sidebar-end').value,
+                    headerGradientStart: popup.querySelector('#edit-header-start').value,
+                    headerGradientEnd: popup.querySelector('#edit-header-end').value,
+                    textColor: popup.querySelector('#edit-text-color').value,
+                    backgroundColor: popup.querySelector('#edit-bg-color').value,
+                    fontFamily: popup.querySelector('#edit-font-family').value
+                };
+                themeCSSService.apply(edited); // live preview
+                themeManager.saveEditedTheme(state.currentTheme._id, edited);
+            });
+
+            popup.querySelector('#close-popup')?.addEventListener('click', ()=>popup.style.display='none');
         }
     };
 
-    // =========================
-    // Initialize
-    // =========================
+    // --- Init ---
     async function init(){
-        state.currentLocation = urlLocationService.getCurrentLocation();
+        state.currentLocation = locationService.detect();
         if(!state.currentLocation) return;
-
-        // Load theme from DB first for persistence
-        await themeManager.loadCurrentTheme();
-
-        // Load all themes for popup
-        await themeManager.loadAllThemes();
-
-        // Create floating button
-        uiService.createButton();
-
-        console.log('✅ GHL Theme Builder initialized with persistent theme');
+        const hasAccess = await permissionService.check(state.currentLocation.locationId);
+        if(!hasAccess) return console.log('❌ No access to Theme Builder');
+        await themeManager.load();
+        ui.createButton();
+        console.log('✅ Full Theme Builder initialized with Editor');
     }
 
-    if(document.readyState==='loading'){
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
 
 })();
