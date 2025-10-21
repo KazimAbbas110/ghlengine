@@ -2194,11 +2194,9 @@
 
 
 
-
-
 /* =========================
    Professional GHL Theme Builder
-   Fixed Duplicate & Loading Issues
+   Complete Multi-Page Support
 ========================= */
 
 (function(){
@@ -2212,7 +2210,7 @@
         PREVIEW_STYLE_ID: "ghl-theme-preview",
         BACKEND_API: "https://ghlengine-production.up.railway.app/api",
         AUTH_TOKEN: "110",
-        VERSION: "3.5.0"
+        VERSION: "4.0.0"
     };
 
     // =========================
@@ -2228,13 +2226,28 @@
         isLoading: false,
         customTheme: {
             name: "",
-            sidebarGradientStart: "#2563EB",
-            sidebarGradientEnd: "#1D4ED8",
-            headerGradientStart: "#2563EB",
-            headerGradientEnd: "#1D4ED8",
-            backgroundColor: "#FFFFFF",
-            textColor: "#FFFFFF",
-            fontFamily: "Inter, sans-serif"
+            // Background Colors
+            sidebarContainerBackground: "#ffffff",
+            sidebarHeaderBackground: "#ffffff",
+            locationSwitcherBackground: "#ffffff",
+            searchBarBackground: "#ffffff", 
+            quickActionsBackground: "#ffffff",
+            backButtonBackground: "#ffffff",
+            cardHeaderBackground: "#000000",
+            wrapperContainerBackground: "#ffffff",
+            
+            // Text Colors
+            menuTextColor: "#000000",
+            locationSwitcherTextColor: "#000000",
+            searchBarPlaceholderColor: "#000000",
+            backButtonTextColor: "#000000",
+            dividerColor: "#000000",
+            cursorTextColor: "#000000",
+            cardHeaderTextColor: "#ffffff",
+            textMediumColor: "#ffffff",
+            
+            // Active States
+            activeMenuItemBackground: "rgb(253,250,250)"
         }
     };
 
@@ -2245,9 +2258,25 @@
         extractLocationIdFromURL() {
             try {
                 const currentURL = window.location.href;
-                const urlPattern = /\/location\/([^\/]+)\/launchpad/;
-                const match = currentURL.match(urlPattern);
-                return match && match[1] ? match[1] : null;
+                // Match various GHL URL patterns
+                const patterns = [
+                    /\/location\/([^\/]+)\/launchpad/,
+                    /\/location\/([^\/]+)\/dashboard/,
+                    /\/location\/([^\/]+)\/workflows/,
+                    /\/location\/([^\/]+)\/contacts/,
+                    /\/location\/([^\/]+)\/calendar/,
+                    /\/location\/([^\/]+)\/reputation/,
+                    /\/location\/([^\/]+)\/marketing/,
+                    /\/location\/([^\/]+)\/funnels/
+                ];
+                
+                for (let pattern of patterns) {
+                    const match = currentURL.match(pattern);
+                    if (match && match[1]) {
+                        return match[1];
+                    }
+                }
+                return null;
             } catch (error) {
                 console.error('❌ Error extracting location from URL:', error);
                 return null;
@@ -2267,7 +2296,14 @@
 
         getCurrentLocationName() {
             try {
-                const selectors = ['.hl_switcher-loc-name', '[data-location-name]'];
+                const selectors = [
+                    '.hl_switcher-loc-name',
+                    '[data-location-name]',
+                    '.location-name',
+                    '.current-location',
+                    '.hl-text-lg'
+                ];
+
                 for (let selector of selectors) {
                     const element = document.querySelector(selector);
                     if (element && element.textContent) {
@@ -2295,7 +2331,6 @@
                     throw new Error('Could not detect current GHL location from URL');
                 }
 
-                // For now, we'll assume access is granted if we have a location
                 return {
                     permitted: true,
                     location: currentLocation,
@@ -2319,7 +2354,7 @@
     };
 
     // =========================
-    // API Service - FIXED DUPLICATE ISSUES
+    // API Service - Enhanced for Complete Theme Data
     // =========================
     const apiService = {
         async call(endpoint, options = {}) {
@@ -2354,34 +2389,47 @@
             }
         },
 
-        // FIXED: Generate unique theme names to avoid duplicates
+        // FIXED: Complete theme creation with all properties
         async createTheme(themeData) {
-            // Ensure unique name by checking existing themes first
-            const existingThemes = await this.getAllThemes();
-            let uniqueName = themeData.name;
-            let counter = 1;
-            
-            // Check if name already exists and make it unique
-            if (existingThemes.success && existingThemes.data) {
-                const existingNames = existingThemes.data.map(theme => theme.name);
-                while (existingNames.includes(uniqueName)) {
-                    uniqueName = `${themeData.name} (${counter})`;
-                    counter++;
-                }
-            }
+            const timestamp = new Date().getTime();
+            const uniqueName = `${themeData.name} ${timestamp}`;
 
             const validatedData = {
-                ...themeData,
-                name: uniqueName, // Use unique name
-                backgroundColor: this.validateHexColor(themeData.backgroundColor),
-                textColor: this.validateHexColor(themeData.textColor),
-                sidebarGradientStart: this.validateHexColor(themeData.sidebarGradientStart),
-                sidebarGradientEnd: this.validateHexColor(themeData.sidebarGradientEnd),
-                headerGradientStart: this.validateHexColor(themeData.headerGradientStart),
-                headerGradientEnd: this.validateHexColor(themeData.headerGradientEnd)
+                name: uniqueName,
+                description: "Complete GHL theme for all sub-account pages",
+                locationId: themeData.locationId,
+                userId: CONFIG.AUTH_TOKEN,
+                companyId: "default-company",
+                
+                // Background Colors
+                sidebarContainerBackground: this.validateHexColor(themeData.sidebarContainerBackground),
+                sidebarHeaderBackground: this.validateHexColor(themeData.sidebarHeaderBackground),
+                locationSwitcherBackground: this.validateHexColor(themeData.locationSwitcherBackground),
+                searchBarBackground: this.validateHexColor(themeData.searchBarBackground),
+                quickActionsBackground: this.validateHexColor(themeData.quickActionsBackground),
+                backButtonBackground: this.validateHexColor(themeData.backButtonBackground),
+                cardHeaderBackground: this.validateHexColor(themeData.cardHeaderBackground),
+                wrapperContainerBackground: this.validateHexColor(themeData.wrapperContainerBackground),
+                
+                // Text Colors
+                menuTextColor: this.validateHexColor(themeData.menuTextColor),
+                locationSwitcherTextColor: this.validateHexColor(themeData.locationSwitcherTextColor),
+                searchBarPlaceholderColor: this.validateHexColor(themeData.searchBarPlaceholderColor),
+                backButtonTextColor: this.validateHexColor(themeData.backButtonTextColor),
+                dividerColor: this.validateHexColor(themeData.dividerColor),
+                cursorTextColor: this.validateHexColor(themeData.cursorTextColor),
+                cardHeaderTextColor: this.validateHexColor(themeData.cardHeaderTextColor),
+                textMediumColor: this.validateHexColor(themeData.textMediumColor),
+                
+                // Active States
+                activeMenuItemBackground: themeData.activeMenuItemBackground,
+                
+                category: "dashboard",
+                isActive: true,
+                isGlobal: false
             };
 
-            console.log('🎨 Creating theme with unique name:', validatedData.name);
+            console.log('🎨 Creating complete theme:', validatedData.name);
             return this.call('/themes', {
                 method: 'POST',
                 body: validatedData
@@ -2397,9 +2445,20 @@
                 return color.length === 7 ? color : '#FFFFFF';
             }
             
-            // If it's rgba, convert to hex (simple conversion without alpha)
+            // If it's rgba, convert to hex
             if (color.startsWith('rgba')) {
                 const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (match) {
+                    const r = parseInt(match[1]).toString(16).padStart(2, '0');
+                    const g = parseInt(match[2]).toString(16).padStart(2, '0');
+                    const b = parseInt(match[3]).toString(16).padStart(2, '0');
+                    return `#${r}${g}${b}`.toUpperCase();
+                }
+            }
+            
+            // If it's rgb, convert to hex
+            if (color.startsWith('rgb')) {
+                const match = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
                 if (match) {
                     const r = parseInt(match[1]).toString(16).padStart(2, '0');
                     const g = parseInt(match[2]).toString(16).padStart(2, '0');
@@ -2420,14 +2479,12 @@
             return this.call(`/themes/${themeId}`);
         },
 
-        // FIXED: Enhanced theme loading for location
         async getThemeByLocation(locationId) {
             if (!locationId) throw new Error('No location ID provided');
             try {
                 const response = await this.call(`/themes/by-location/${locationId}`);
                 return response;
             } catch (error) {
-                // If no theme found for location, return empty
                 if (error.message.includes('404') || error.message.includes('not found')) {
                     return { success: true, data: null };
                 }
@@ -2456,7 +2513,7 @@
     };
 
     // =========================
-    // Theme CSS Service
+    // Theme CSS Service - COMPLETE GHL CLASSES
     // =========================
     const themeCSSService = {
         generateCSS(theme, isPreview = false) {
@@ -2466,45 +2523,117 @@
             
             return `
 /* GHL Theme Builder v${CONFIG.VERSION} - ${comment} */
+/* Applied to Location: ${state.currentLocation?.locationId} */
+
+/* =========================
+   Sidebar Container
+========================= */
 .transition-slowest .flex-col > .overflow-hidden {
-    background: linear-gradient(135deg, ${theme.sidebarGradientStart} 0%, ${theme.sidebarGradientEnd} 100%) !important;
+    background-color: ${theme.sidebarContainerBackground} !important;
 }
 
+/* =========================
+   Sidebar Header
+========================= */
 .sidebar-v2-location .hl_header .container-fluid {
-    background: linear-gradient(135deg, ${theme.headerGradientStart} 0%, ${theme.headerGradientEnd} 100%) !important;
+    background-color: ${theme.sidebarHeaderBackground} !important;
 }
 
-.notification-banner-top-bar {
-    background: linear-gradient(135deg, ${theme.headerGradientStart} 0%, ${theme.headerGradientEnd} 100%) !important;
+/* =========================
+   Menu Text
+========================= */
+.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title {
+    color: ${theme.menuTextColor} !important;
 }
 
-.crm-opportunities-status .hl-text,
-.notification-title-message,
-.sidebar-v2-location .hl_force-block,
-.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-placeholder,
-.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-icon,
-.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-shortcut,
-.hl_switcher-loc-name,
-.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city,
-.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
-.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title,
 .sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title {
-    color: ${theme.textColor} !important;
+    color: ${theme.menuTextColor} !important;
 }
 
-.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2,
-.sidebar-v2-location #sidebar-v2 #globalSearchOpener,
-.sidebar-v2-location #sidebar-v2 #quickActions,
+.sidebar-v2-location #sidebar-v2 .menu-title {
+    color: ${theme.menuTextColor} !important;
+}
+
 .sidebar-v2-location #sidebar-v2 #backButtonv2 {
-    background-color: ${theme.backgroundColor} !important;
+    color: ${theme.backButtonTextColor} !important;
 }
 
-.hl_switcher-loc-name,
-.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city,
-.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
-.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title,
-.sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title {
-    font-family: ${theme.fontFamily} !important;
+.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title {
+    color: ${theme.menuTextColor} !important;
+}
+
+.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a.active {
+    background-color: ${theme.activeMenuItemBackground} !important;
+}
+
+/* =========================
+   Location Switcher
+========================= */
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-name {
+    color: ${theme.locationSwitcherTextColor} !important;
+}
+
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city {
+    color: ${theme.locationSwitcherTextColor} !important;
+}
+
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 {
+    background-color: ${theme.locationSwitcherBackground} !important;
+}
+
+/* =========================
+   Search Bar
+========================= */
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-placeholder {
+    color: ${theme.searchBarPlaceholderColor} !important;
+}
+
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener {
+    background-color: ${theme.searchBarBackground} !important;
+}
+
+/* =========================
+   Quick Actions & Buttons
+========================= */
+.sidebar-v2-location #sidebar-v2 #quickActions {
+    background-color: ${theme.quickActionsBackground} !important;
+}
+
+.sidebar-v2-location #sidebar-v2 #backButtonv2 {
+    background-color: ${theme.backButtonBackground} !important;
+}
+
+/* =========================
+   Divider & Cursor
+========================= */
+.divider {
+    color: ${theme.dividerColor} !important;
+}
+
+.cursor-text {
+    color: ${theme.cursorTextColor} !important;
+}
+
+/* =========================
+   Card Component
+========================= */
+.hl-card .hl-card-header {
+    background-color: ${theme.cardHeaderBackground} !important;
+    color: ${theme.cardHeaderTextColor} !important;
+}
+
+/* =========================
+   Text Styles
+========================= */
+.hl-text-md-medium {
+    color: ${theme.textMediumColor} !important;
+}
+
+/* =========================
+   Wrapper / Container
+========================= */
+.hl-wrapper-container {
+    background-color: ${theme.wrapperContainerBackground} !important;
 }
             `;
         },
@@ -2517,7 +2646,7 @@
                 style.id = CONFIG.STYLE_ID;
                 style.textContent = css;
                 document.head.appendChild(style);
-                console.log('✅ Theme CSS applied:', theme.name);
+                console.log('✅ Complete theme CSS applied to all pages');
             }
         },
 
@@ -2544,7 +2673,7 @@
     };
 
     // =========================
-    // Theme Manager - COMPLETELY FIXED
+    // Theme Manager - Complete Implementation
     // =========================
     const themeManager = {
         async loadThemes() {
@@ -2584,7 +2713,7 @@
                 
                 console.log(`🔄 Applying theme ${themeId} to location ${state.currentLocation.locationId}`);
                 
-                // First get theme details
+                // Get theme details
                 const themeResponse = await apiService.getThemeById(themeId);
                 let theme = null;
                 
@@ -2599,7 +2728,7 @@
                 if (applyResponse && applyResponse.success) {
                     state.currentTheme = theme;
                     themeCSSService.applyThemeCSS(theme);
-                    console.log(`✅ Theme "${theme.name}" applied successfully`);
+                    console.log(`✅ Complete theme "${theme.name}" applied to all pages`);
                     return true;
                 } else {
                     throw new Error(applyResponse?.message || 'Failed to apply theme');
@@ -2620,7 +2749,7 @@
                 if (removeResponse && removeResponse.success) {
                     state.currentTheme = null;
                     themeCSSService.removeThemeCSS();
-                    console.log('✅ Theme removed successfully');
+                    console.log('✅ Theme removed from all pages');
                     return true;
                 } else {
                     throw new Error(removeResponse?.message || 'Failed to remove theme');
@@ -2649,7 +2778,7 @@
                 if (theme && theme._id) {
                     state.currentTheme = theme;
                     themeCSSService.applyThemeCSS(theme);
-                    console.log(`✅ Current theme loaded: ${theme.name}`);
+                    console.log(`✅ Current theme loaded for all pages: ${theme.name}`);
                 } else {
                     state.currentTheme = null;
                     themeCSSService.removeThemeCSS();
@@ -2666,28 +2795,11 @@
             try {
                 if (!state.currentLocation) throw new Error('No current location detected');
 
-                console.log('🔄 Creating custom theme:', themeData.name);
-
-                // FIXED: Generate timestamp for unique names
-                const timestamp = new Date().getTime();
-                const uniqueName = themeData.name.includes('(') ? themeData.name : `${themeData.name} ${timestamp}`;
+                console.log('🔄 Creating complete custom theme:', themeData.name);
 
                 const completeThemeData = {
-                    name: uniqueName,
-                    description: "Custom theme created through theme builder",
-                    locationId: state.currentLocation.locationId,
-                    userId: CONFIG.AUTH_TOKEN,
-                    companyId: "default-company",
-                    textColor: themeData.textColor,
-                    backgroundColor: themeData.backgroundColor,
-                    fontFamily: themeData.fontFamily.split(',')[0].trim(),
-                    sidebarGradientStart: themeData.sidebarGradientStart,
-                    sidebarGradientEnd: themeData.sidebarGradientEnd,
-                    headerGradientStart: themeData.headerGradientStart,
-                    headerGradientEnd: themeData.headerGradientEnd,
-                    category: "dashboard",
-                    isActive: true,
-                    isGlobal: false
+                    ...themeData,
+                    locationId: state.currentLocation.locationId
                 };
 
                 const createResponse = await apiService.createTheme(completeThemeData);
@@ -2698,7 +2810,7 @@
                 }
 
                 if (createdTheme && createdTheme._id) {
-                    console.log(`✅ Custom theme created: ${uniqueName}`);
+                    console.log(`✅ Complete custom theme created: ${createdTheme.name}`);
                     
                     // Reload themes and apply the new one
                     await this.loadThemes();
@@ -2716,7 +2828,7 @@
     };
 
     // =========================
-    // Professional UI Service
+    // Professional UI Service - Complete Theme Builder
     // =========================
     const uiService = {
         createFloatingButton() {
@@ -2795,7 +2907,7 @@
                 borderRadius: '8px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
                 zIndex: 100000,
-                width: '420px',
+                width: '450px',
                 maxHeight: '85vh',
                 overflowY: 'auto',
                 border: '1px solid #e5e7eb',
@@ -2821,19 +2933,20 @@
 
             const currentLocationName = state.currentLocation?.name || 'Detecting...';
             const currentLocationId = state.currentLocation?.locationId || 'Not detected';
-            const accessStatus = state.accessInfo?.themeBuilderAccess ? '✅ Enabled' : '❌ Disabled';
             const currentThemeName = state.currentTheme?.name || 'None';
 
             state.popupRef.innerHTML = `
                 <div style="margin-bottom: 16px;">
                     <h3 style="margin: 0 0 6px 0; color: #1f2937; font-size: 16px; font-weight: 600;">
-                        🎨 Professional Theme Builder
+                        🎨 Complete Theme Builder
                     </h3>
                     <div style="color: #6b7280; font-size: 11px; line-height: 1.4; background: #f8fafc; padding: 8px; border-radius: 4px;">
                         <div><strong>Location:</strong> ${currentLocationName}</div>
                         <div><strong>Location ID:</strong> ${currentLocationId}</div>
-                        <div><strong>Access:</strong> ${accessStatus}</div>
                         <div><strong>Current Theme:</strong> <span style="color: ${state.currentTheme ? '#10B981' : '#DC2626'}">${currentThemeName}</span></div>
+                        <div style="margin-top: 4px; font-size: 10px; color: #059669;">
+                            ✅ Themes apply to ALL sub-account pages
+                        </div>
                     </div>
                 </div>
 
@@ -2849,52 +2962,73 @@
                 </div>
 
                 <div style="border-top: 1px solid #e5e7eb; padding-top: 16px;">
-                    <h4 style="margin: 0 0 8px 0; color: #374151; font-size: 14px; font-weight: 600;">
-                        Create Custom Theme
+                    <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 14px; font-weight: 600;">
+                        Create Complete Theme
                     </h4>
                     
-                    <div style="margin-bottom: 10px;">
+                    <div style="margin-bottom: 12px;">
                         <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Theme Name *</label>
                         <input type="text" id="custom-theme-name" 
                                placeholder="Enter unique theme name" 
                                style="width: 100%; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;"
-                               value="My Custom Theme">
+                               value="My Complete Theme">
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                        <div>
-                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Sidebar Start</label>
-                            <input type="color" id="sidebar-start" value="#2563EB" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px; padding: 12px; background: #fafafa; margin-bottom: 12px;">
+                        <h5 style="margin: 0 0 8px 0; color: #374151; font-size: 12px; font-weight: 600;">Background Colors</h5>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                            <div>
+                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Sidebar Container</label>
+                                <input type="color" id="sidebar-container-bg" value="${state.customTheme.sidebarContainerBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Sidebar Header</label>
+                                <input type="color" id="sidebar-header-bg" value="${state.customTheme.sidebarHeaderBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Location Switcher</label>
+                                <input type="color" id="location-switcher-bg" value="${state.customTheme.locationSwitcherBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Search Bar</label>
+                                <input type="color" id="search-bar-bg" value="${state.customTheme.searchBarBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
+                            </div>
                         </div>
-                        <div>
-                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Sidebar End</label>
-                            <input type="color" id="sidebar-end" value="#1D4ED8" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+
+                        <h5 style="margin: 10px 0 8px 0; color: #374151; font-size: 12px; font-weight: 600;">Text Colors</h5>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                            <div>
+                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Menu Text</label>
+                                <input type="color" id="menu-text-color" value="${state.customTheme.menuTextColor}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Location Text</label>
+                                <input type="color" id="location-text-color" value="${state.customTheme.locationSwitcherTextColor}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Search Placeholder</label>
+                                <input type="color" id="search-placeholder-color" value="${state.customTheme.searchBarPlaceholderColor}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Card Header Text</label>
+                                <input type="color" id="card-header-text-color" value="${state.customTheme.cardHeaderTextColor}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
+                            </div>
+                        </div>
+
+                        <h5 style="margin: 10px 0 8px 0; color: #374151; font-size: 12px; font-weight: 600;">Additional Colors</h5>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div>
+                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Card Header BG</label>
+                                <input type="color" id="card-header-bg" value="${state.customTheme.cardHeaderBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Wrapper Container</label>
+                                <input type="color" id="wrapper-container-bg" value="${state.customTheme.wrapperContainerBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
+                            </div>
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                        <div>
-                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Header Start</label>
-                            <input type="color" id="header-start" value="#2563EB" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Header End</label>
-                            <input type="color" id="header-end" value="#1D4ED8" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                        <div>
-                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Background Color</label>
-                            <input type="color" id="background-color" value="#FFFFFF" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Text Color</label>
-                            <input type="color" id="text-color" value="#FFFFFF" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px;">
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                         <button id="preview-theme" 
                                 style="flex: 1; padding: 8px 12px; background: #F59E0B; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
                             👀 Preview
@@ -2939,7 +3073,11 @@
             if (refreshBtn) refreshBtn.addEventListener('click', () => this.refreshData());
 
             // Real-time preview on color changes
-            const colorInputs = ['sidebar-start', 'sidebar-end', 'header-start', 'header-end', 'background-color', 'text-color'];
+            const colorInputs = [
+                'sidebar-container-bg', 'sidebar-header-bg', 'location-switcher-bg', 'search-bar-bg',
+                'menu-text-color', 'location-text-color', 'search-placeholder-color', 'card-header-text-color',
+                'card-header-bg', 'wrapper-container-bg'
+            ];
             colorInputs.forEach(id => {
                 const input = document.getElementById(id);
                 if (input) {
@@ -2950,26 +3088,42 @@
 
         updateCustomThemeFromInputs() {
             const nameInput = document.getElementById('custom-theme-name');
-            const sidebarStart = document.getElementById('sidebar-start');
-            const sidebarEnd = document.getElementById('sidebar-end');
-            const headerStart = document.getElementById('header-start');
-            const headerEnd = document.getElementById('header-end');
-            const backgroundColor = document.getElementById('background-color');
-            const textColor = document.getElementById('text-color');
+            
+            // Background Colors
+            const sidebarContainerBg = document.getElementById('sidebar-container-bg');
+            const sidebarHeaderBg = document.getElementById('sidebar-header-bg');
+            const locationSwitcherBg = document.getElementById('location-switcher-bg');
+            const searchBarBg = document.getElementById('search-bar-bg');
+            const cardHeaderBg = document.getElementById('card-header-bg');
+            const wrapperContainerBg = document.getElementById('wrapper-container-bg');
+            
+            // Text Colors
+            const menuTextColor = document.getElementById('menu-text-color');
+            const locationTextColor = document.getElementById('location-text-color');
+            const searchPlaceholderColor = document.getElementById('search-placeholder-color');
+            const cardHeaderTextColor = document.getElementById('card-header-text-color');
 
             if (nameInput) state.customTheme.name = nameInput.value;
-            if (sidebarStart) state.customTheme.sidebarGradientStart = sidebarStart.value;
-            if (sidebarEnd) state.customTheme.sidebarGradientEnd = sidebarEnd.value;
-            if (headerStart) state.customTheme.headerGradientStart = headerStart.value;
-            if (headerEnd) state.customTheme.headerGradientEnd = headerEnd.value;
-            if (backgroundColor) state.customTheme.backgroundColor = backgroundColor.value;
-            if (textColor) state.customTheme.textColor = textColor.value;
+            
+            // Backgrounds
+            if (sidebarContainerBg) state.customTheme.sidebarContainerBackground = sidebarContainerBg.value;
+            if (sidebarHeaderBg) state.customTheme.sidebarHeaderBackground = sidebarHeaderBg.value;
+            if (locationSwitcherBg) state.customTheme.locationSwitcherBackground = locationSwitcherBg.value;
+            if (searchBarBg) state.customTheme.searchBarBackground = searchBarBg.value;
+            if (cardHeaderBg) state.customTheme.cardHeaderBackground = cardHeaderBg.value;
+            if (wrapperContainerBg) state.customTheme.wrapperContainerBackground = wrapperContainerBg.value;
+            
+            // Text Colors
+            if (menuTextColor) state.customTheme.menuTextColor = menuTextColor.value;
+            if (locationTextColor) state.customTheme.locationSwitcherTextColor = locationTextColor.value;
+            if (searchPlaceholderColor) state.customTheme.searchBarPlaceholderColor = searchPlaceholderColor.value;
+            if (cardHeaderTextColor) state.customTheme.cardHeaderTextColor = cardHeaderTextColor.value;
         },
 
         previewCustomTheme() {
             this.updateCustomThemeFromInputs();
             themeCSSService.previewThemeCSS(state.customTheme);
-            this.showNotification('Theme preview active - close popup to cancel', 'info');
+            this.showNotification('Complete theme preview active - applies to ALL pages', 'info');
         },
 
         async createCustomTheme() {
@@ -2982,7 +3136,7 @@
 
             try {
                 await themeManager.createCustomTheme(state.customTheme);
-                this.showNotification('Custom theme created and applied successfully!', 'success');
+                this.showNotification('Complete theme created and applied to ALL pages!', 'success');
                 this.closePopup();
             } catch (error) {
                 this.showNotification(`Failed to create theme: ${error.message}`, 'error');
@@ -2999,7 +3153,7 @@
                 if (state.themes.length === 0) {
                     container.innerHTML = `
                         <div style="text-align: center; color: #6b7280; padding: 20px; font-size: 11px;">
-                            No themes found in database. Create your first theme!
+                            No themes found in database. Create your first complete theme!
                         </div>
                     `;
                     return;
@@ -3007,7 +3161,7 @@
 
                 container.innerHTML = state.themes.map(theme => {
                     const isActive = state.currentTheme && state.currentTheme._id === theme._id;
-                    const color = theme.sidebarGradientStart || '#2563EB';
+                    const color = theme.sidebarContainerBackground || '#2563EB';
                     
                     return `
                         <div class="theme-item" data-theme-id="${theme._id}"
@@ -3030,7 +3184,7 @@
                     item.addEventListener('click', () => {
                         themeManager.applyTheme(themeId)
                             .then(() => {
-                                this.showNotification(`"${theme.name}" applied to ${state.currentLocation.name}!`, 'success');
+                                this.showNotification(`"${theme.name}" applied to ALL pages in ${state.currentLocation.name}!`, 'success');
                                 this.updatePopupContent();
                             })
                             .catch(error => {
@@ -3063,10 +3217,10 @@
         confirmRemoveTheme() {
             if (!state.currentTheme) return;
             
-            if (confirm(`Remove "${state.currentTheme.name}" from ${state.currentLocation.name}?`)) {
+            if (confirm(`Remove "${state.currentTheme.name}" from ALL pages in ${state.currentLocation.name}?`)) {
                 themeManager.removeTheme()
                     .then(() => {
-                        this.showNotification('Theme removed successfully!', 'success');
+                        this.showNotification('Theme removed from ALL pages!', 'success');
                         this.updatePopupContent();
                     })
                     .catch(error => {
@@ -3127,10 +3281,10 @@
             return;
         }
 
-        console.log(`🚀 Initializing Professional GHL Theme Builder v${CONFIG.VERSION}...`);
+        console.log(`🚀 Initializing Complete GHL Theme Builder v${CONFIG.VERSION}...`);
 
         try {
-            // Get current location
+            // Get current location from any GHL page
             const currentLocation = urlLocationService.getCurrentLocation();
             if (!currentLocation || !currentLocation.locationId) {
                 console.log('❌ No GHL location detected in URL');
@@ -3157,7 +3311,7 @@
             // Create UI
             uiService.createFloatingButton();
             
-            console.log('✅ Professional Theme Builder initialized successfully');
+            console.log('✅ Complete Theme Builder initialized for ALL pages');
 
         } catch (error) {
             console.error('❌ Failed to initialize Theme Builder:', error);
@@ -3175,15 +3329,15 @@
         getCurrentTheme: () => state.currentTheme,
         getCurrentLocation: () => state.currentLocation,
         getThemes: () => state.themes,
-        debug: () => console.log('Theme Builder State:', state)
+        debug: () => console.log('Complete Theme Builder State:', state)
     };
 
-    // Auto-initialize
+    // Auto-initialize on ALL GHL pages
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeThemeBuilder);
     } else {
         initializeThemeBuilder();
     }
 
-    console.log(`🎨 Professional GHL Theme Builder v${CONFIG.VERSION} - Fixed Duplicate & Loading Issues`);
+    console.log(`🎨 Complete GHL Theme Builder v${CONFIG.VERSION} - Works on ALL Sub-Account Pages`);
 })();
