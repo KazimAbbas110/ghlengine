@@ -2188,13 +2188,9 @@
 // })();
 
 
-
-
-
-
 /* =========================
    Professional GHL Theme Builder
-   Working Version with Debug Features
+   With Create Theme Form
 ========================= */
 
 (function(){
@@ -2208,7 +2204,7 @@
         PREVIEW_STYLE_ID: "ghl-theme-preview",
         BACKEND_API: "https://ghlengine-production.up.railway.app/api",
         AUTH_TOKEN: "110",
-        VERSION: "4.2.0"
+        VERSION: "4.3.0"
     };
 
     // =========================
@@ -2314,7 +2310,7 @@
     };
 
     // =========================
-    // API Service - Working Version
+    // API Service
     // =========================
     const apiService = {
         async call(endpoint, options = {}) {
@@ -2438,7 +2434,7 @@
     };
 
     // =========================
-    // Theme CSS Service - Enhanced Selectors
+    // Theme CSS Service
     // =========================
     const themeCSSService = {
         generateCSS(theme, isPreview = false) {
@@ -2678,7 +2674,7 @@
     };
 
     // =========================
-    // UI Service - Simple and Reliable
+    // UI Service - WITH CREATE THEME FORM
     // =========================
     const uiService = {
         createFloatingButton() {
@@ -2763,7 +2759,7 @@
             popup.style.borderRadius = '8px';
             popup.style.boxShadow = '0 10px 25px rgba(0,0,0,0.2)';
             popup.style.zIndex = '100000';
-            popup.style.width = '400px';
+            popup.style.width = '420px';
             popup.style.maxHeight = '80vh';
             popup.style.overflowY = 'auto';
             popup.style.border = '1px solid #e5e7eb';
@@ -2814,13 +2810,57 @@
 
                 <div style="border-top: 1px solid #e5e7eb; padding-top: 16px;">
                     <h4 style="margin: 0 0 8px 0; color: #374151; font-size: 14px; font-weight: 600;">
-                        Quick Actions
+                        Create Custom Theme
                     </h4>
                     
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Theme Name</label>
+                        <input type="text" id="custom-theme-name" 
+                               placeholder="Enter theme name" 
+                               style="width: 100%; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;"
+                               value="My Custom Theme">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Sidebar Start</label>
+                            <input type="color" id="sidebar-start" value="#2563EB" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Sidebar End</label>
+                            <input type="color" id="sidebar-end" value="#1D4ED8" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Header Start</label>
+                            <input type="color" id="header-start" value="#2563EB" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Header End</label>
+                            <input type="color" id="header-end" value="#1D4ED8" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Background Color</label>
+                        <input type="color" id="background-color" value="#FFFFFF" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Text Color</label>
+                        <input type="color" id="text-color" value="#FFFFFF" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                    </div>
+
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button id="preview-theme" 
+                                style="flex: 1; padding: 8px 12px; background: #F59E0B; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
+                            👀 Preview
+                        </button>
                         <button id="create-theme" 
                                 style="flex: 1; padding: 8px 12px; background: #8B5CF6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
-                            🎨 Create Theme
+                            🎨 Create & Apply
                         </button>
                         ${state.currentTheme ? `
                         <button id="remove-theme" 
@@ -2845,34 +2885,63 @@
         },
 
         attachPopupEventListeners() {
+            const previewBtn = document.getElementById('preview-theme');
             const createBtn = document.getElementById('create-theme');
             const closeBtn = document.getElementById('close-popup');
             const removeBtn = document.getElementById('remove-theme');
             const refreshBtn = document.getElementById('refresh-data');
 
-            if (createBtn) createBtn.addEventListener('click', () => this.createSimpleTheme());
+            if (previewBtn) previewBtn.addEventListener('click', () => this.previewCustomTheme());
+            if (createBtn) createBtn.addEventListener('click', () => this.createCustomTheme());
             if (closeBtn) closeBtn.addEventListener('click', () => this.closePopup());
             if (removeBtn) removeBtn.addEventListener('click', () => this.confirmRemoveTheme());
             if (refreshBtn) refreshBtn.addEventListener('click', () => this.refreshData());
+
+            // Real-time preview on color changes
+            const colorInputs = ['sidebar-start', 'sidebar-end', 'header-start', 'header-end', 'background-color', 'text-color'];
+            colorInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', () => this.updateCustomThemeFromInputs());
+                }
+            });
         },
 
-        async createSimpleTheme() {
-            const themeName = `My Theme ${new Date().toLocaleDateString()}`;
-            
-            const themeData = {
-                name: themeName,
-                textColor: '#ffffff',
-                backgroundColor: '#FFFFFF',
-                fontFamily: 'Inter, sans-serif',
-                sidebarGradientStart: '#2563EB',
-                sidebarGradientEnd: '#1D4ED8',
-                headerGradientStart: '#2563EB',
-                headerGradientEnd: '#1D4ED8'
-            };
+        updateCustomThemeFromInputs() {
+            const nameInput = document.getElementById('custom-theme-name');
+            const sidebarStart = document.getElementById('sidebar-start');
+            const sidebarEnd = document.getElementById('sidebar-end');
+            const headerStart = document.getElementById('header-start');
+            const headerEnd = document.getElementById('header-end');
+            const backgroundColor = document.getElementById('background-color');
+            const textColor = document.getElementById('text-color');
+
+            if (nameInput) state.customTheme.name = nameInput.value;
+            if (sidebarStart) state.customTheme.sidebarGradientStart = sidebarStart.value;
+            if (sidebarEnd) state.customTheme.sidebarGradientEnd = sidebarEnd.value;
+            if (headerStart) state.customTheme.headerGradientStart = headerStart.value;
+            if (headerEnd) state.customTheme.headerGradientEnd = headerEnd.value;
+            if (backgroundColor) state.customTheme.backgroundColor = backgroundColor.value;
+            if (textColor) state.customTheme.textColor = textColor.value;
+        },
+
+        previewCustomTheme() {
+            this.updateCustomThemeFromInputs();
+            themeCSSService.previewThemeCSS(state.customTheme);
+            this.showNotification('Theme preview active - close popup to cancel', 'info');
+        },
+
+        async createCustomTheme() {
+            this.updateCustomThemeFromInputs();
+
+            if (!state.customTheme.name.trim()) {
+                this.showNotification('Please enter a theme name', 'error');
+                return;
+            }
 
             try {
-                await themeManager.createCustomTheme(themeData);
-                this.showNotification('Theme created and applied!', 'success');
+                await themeManager.createCustomTheme(state.customTheme);
+                this.showNotification('Custom theme created and applied successfully!', 'success');
                 this.closePopup();
             } catch (error) {
                 this.showNotification(`Failed to create theme: ${error.message}`, 'error');
@@ -2931,7 +3000,7 @@
             } catch (error) {
                 container.innerHTML = `
                     <div style="text-align: center; color: #DC2626; padding: 10px; font-size: 11px;">
-                        Failed to load themes
+                        Failed to load themes: ${error.message}
                     </div>
                 `;
             }
@@ -3057,5 +3126,5 @@
         initializeThemeBuilder();
     }
 
-    console.log(`🎨 GHL Theme Builder v${CONFIG.VERSION} - Loaded`);
+    console.log(`🎨 GHL Theme Builder v${CONFIG.VERSION} - Loaded with Create Theme Form`);
 })();
