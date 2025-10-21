@@ -2192,11 +2192,9 @@
 
 
 
-
-
 /* =========================
    Professional GHL Theme Builder
-   Debug Version - Find Correct Selectors
+   Working Version with Debug Features
 ========================= */
 
 (function(){
@@ -2205,12 +2203,12 @@
     // =========================
     const CONFIG = {
         BTN_ID: "ghl-theme-builder-btn",
-        POPUP_ID: "ghl-theme-builder-popup", 
+        POPUP_ID: "ghl-theme-builder-popup",
         STYLE_ID: "ghl-theme-style",
         PREVIEW_STYLE_ID: "ghl-theme-preview",
         BACKEND_API: "https://ghlengine-production.up.railway.app/api",
         AUTH_TOKEN: "110",
-        VERSION: "4.1.0"
+        VERSION: "4.2.0"
     };
 
     // =========================
@@ -2226,28 +2224,13 @@
         isLoading: false,
         customTheme: {
             name: "",
-            // Background Colors
-            sidebarContainerBackground: "#1e40af",
-            sidebarHeaderBackground: "#1e3a8a", 
-            locationSwitcherBackground: "#ffffff",
-            searchBarBackground: "#ffffff",
-            quickActionsBackground: "#ffffff",
-            backButtonBackground: "#ffffff",
-            cardHeaderBackground: "#000000",
-            wrapperContainerBackground: "#ffffff",
-            
-            // Text Colors
-            menuTextColor: "#ffffff",
-            locationSwitcherTextColor: "#000000",
-            searchBarPlaceholderColor: "#000000", 
-            backButtonTextColor: "#000000",
-            dividerColor: "#000000",
-            cursorTextColor: "#000000",
-            cardHeaderTextColor: "#ffffff",
-            textMediumColor: "#ffffff",
-            
-            // Active States
-            activeMenuItemBackground: "rgb(59, 130, 246)"
+            sidebarGradientStart: "#2563EB",
+            sidebarGradientEnd: "#1D4ED8",
+            headerGradientStart: "#2563EB", 
+            headerGradientEnd: "#1D4ED8",
+            backgroundColor: "#FFFFFF",
+            textColor: "#FFFFFF",
+            fontFamily: "Inter, sans-serif"
         }
     };
 
@@ -2258,24 +2241,9 @@
         extractLocationIdFromURL() {
             try {
                 const currentURL = window.location.href;
-                const patterns = [
-                    /\/location\/([^\/]+)\/launchpad/,
-                    /\/location\/([^\/]+)\/dashboard/,
-                    /\/location\/([^\/]+)\/workflows/,
-                    /\/location\/([^\/]+)\/contacts/,
-                    /\/location\/([^\/]+)\/calendar/,
-                    /\/location\/([^\/]+)\/reputation/,
-                    /\/location\/([^\/]+)\/marketing/,
-                    /\/location\/([^\/]+)\/funnels/
-                ];
-                
-                for (let pattern of patterns) {
-                    const match = currentURL.match(pattern);
-                    if (match && match[1]) {
-                        return match[1];
-                    }
-                }
-                return null;
+                const urlPattern = /\/location\/([^\/]+)\/launchpad/;
+                const match = currentURL.match(urlPattern);
+                return match && match[1] ? match[1] : null;
             } catch (error) {
                 console.error('❌ Error extracting location from URL:', error);
                 return null;
@@ -2313,142 +2281,40 @@
     };
 
     // =========================
-    // CSS Debug Service - FIND CORRECT SELECTORS
+    // Access Control Service
     // =========================
-    const cssDebugService = {
-        // Test different selector patterns
-        testSelectors() {
-            console.log('🔍 Testing CSS Selectors...');
-            
-            const testSelectors = [
-                // Sidebar container
-                '.transition-slowest .flex-col > .overflow-hidden',
-                '.flex-col > .overflow-hidden',
-                '.overflow-hidden',
-                '[class*="overflow-hidden"]',
-                '.sidebar-container',
-                '[data-testid*="sidebar"]',
-                '.bg-sidebar',
-                
-                // Sidebar header  
-                '.sidebar-v2-location .hl_header .container-fluid',
-                '.hl_header .container-fluid',
-                '.hl_header',
-                '.sidebar-header',
-                '[class*="header"] .container-fluid',
-                
-                // Menu items
-                '.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title',
-                '.nav-title',
-                '[class*="nav-title"]',
-                '.hl_nav-header .nav-title',
-                
-                // Location switcher
-                '.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2',
-                '#location-switcher-sidbar-v2',
-                '[id*="location-switcher"]',
-                '.hl_switcher-loc-name',
-                
-                // Search bar
-                '.sidebar-v2-location #sidebar-v2 #globalSearchOpener',
-                '#globalSearchOpener',
-                '[id*="search"]',
-                '.search-placeholder'
-            ];
-
-            testSelectors.forEach(selector => {
-                const elements = document.querySelectorAll(selector);
-                if (elements.length > 0) {
-                    console.log(`✅ Found ${elements.length} element(s) for: ${selector}`);
-                    elements.forEach((el, index) => {
-                        console.log(`   Element ${index + 1}:`, el);
-                        console.log(`   Computed background:`, window.getComputedStyle(el).backgroundColor);
-                        console.log(`   Computed color:`, window.getComputedStyle(el).color);
-                    });
-                } else {
-                    console.log(`❌ No elements found for: ${selector}`);
+    const accessService = {
+        async checkThemeBuilderAccess() {
+            try {
+                const currentLocation = urlLocationService.getCurrentLocation();
+                if (!currentLocation || !currentLocation.locationId) {
+                    throw new Error('Could not detect current GHL location from URL');
                 }
-            });
 
-            // Also log the entire body to find unique classes/IDs
-            console.log('📋 All unique classes in body:');
-            const allElements = document.body.getElementsByTagName('*');
-            const classes = new Set();
-            for (let element of allElements) {
-                if (element.className) {
-                    const classList = element.className.split(' ');
-                    classList.forEach(className => classes.add(className));
-                }
+                return {
+                    permitted: true,
+                    location: currentLocation,
+                    accessInfo: {
+                        themeBuilderAccess: true,
+                        userId: CONFIG.AUTH_TOKEN,
+                        companyId: "default-company"
+                    }
+                };
+
+            } catch (error) {
+                console.error('❌ Access check failed:', error);
+                return {
+                    permitted: false,
+                    location: null,
+                    accessInfo: null,
+                    error: error.message
+                };
             }
-            console.log(Array.from(classes).filter(cls => 
-                cls.includes('sidebar') || 
-                cls.includes('nav') || 
-                cls.includes('header') || 
-                cls.includes('menu') ||
-                cls.includes('location') ||
-                cls.includes('search') ||
-                cls.includes('background') ||
-                cls.includes('bg-')
-            ));
-        },
-
-        // Apply test styles to find working selectors
-        applyTestStyles() {
-            const testCSS = `
-                /* Test styles to identify working selectors */
-                .transition-slowest .flex-col > .overflow-hidden {
-                    background-color: #ff0000 !important;
-                    border: 2px solid yellow !important;
-                }
-                
-                .hl_header .container-fluid {
-                    background-color: #00ff00 !important;
-                    border: 2px solid blue !important;
-                }
-                
-                .nav-title {
-                    color: #ff00ff !important;
-                    font-weight: bold !important;
-                }
-                
-                #location-switcher-sidbar-v2 {
-                    background-color: #ffff00 !important;
-                    border: 2px solid red !important;
-                }
-                
-                #globalSearchOpener {
-                    background-color: #00ffff !important;
-                    border: 2px solid green !important;
-                }
-                
-                .hl_switcher-loc-name {
-                    color: #ff0000 !important;
-                    font-weight: bold !important;
-                }
-            `;
-            
-            const style = document.createElement('style');
-            style.id = 'ghl-test-styles';
-            style.textContent = testCSS;
-            document.head.appendChild(style);
-            
-            console.log('🎨 Applied test styles with bright colors. Check which elements change!');
-            console.log('🔴 Red = Sidebar container');
-            console.log('🟢 Green = Header');
-            console.log('🟣 Purple = Menu text');
-            console.log('🟡 Yellow = Location switcher');
-            console.log('🔵 Cyan = Search bar');
-            console.log('🔴 Red text = Location name');
-        },
-
-        removeTestStyles() {
-            const testStyle = document.getElementById('ghl-test-styles');
-            if (testStyle) testStyle.remove();
         }
     };
 
     // =========================
-    // API Service
+    // API Service - Working Version
     // =========================
     const apiService = {
         async call(endpoint, options = {}) {
@@ -2489,34 +2355,17 @@
 
             const validatedData = {
                 name: uniqueName,
-                description: "Complete GHL theme for all sub-account pages",
+                description: "Custom theme created through theme builder",
                 locationId: themeData.locationId,
                 userId: CONFIG.AUTH_TOKEN,
                 companyId: "default-company",
-                
-                // Background Colors
-                sidebarContainerBackground: this.validateHexColor(themeData.sidebarContainerBackground),
-                sidebarHeaderBackground: this.validateHexColor(themeData.sidebarHeaderBackground),
-                locationSwitcherBackground: this.validateHexColor(themeData.locationSwitcherBackground),
-                searchBarBackground: this.validateHexColor(themeData.searchBarBackground),
-                quickActionsBackground: this.validateHexColor(themeData.quickActionsBackground),
-                backButtonBackground: this.validateHexColor(themeData.backButtonBackground),
-                cardHeaderBackground: this.validateHexColor(themeData.cardHeaderBackground),
-                wrapperContainerBackground: this.validateHexColor(themeData.wrapperContainerBackground),
-                
-                // Text Colors
-                menuTextColor: this.validateHexColor(themeData.menuTextColor),
-                locationSwitcherTextColor: this.validateHexColor(themeData.locationSwitcherTextColor),
-                searchBarPlaceholderColor: this.validateHexColor(themeData.searchBarPlaceholderColor),
-                backButtonTextColor: this.validateHexColor(themeData.backButtonTextColor),
-                dividerColor: this.validateHexColor(themeData.dividerColor),
-                cursorTextColor: this.validateHexColor(themeData.cursorTextColor),
-                cardHeaderTextColor: this.validateHexColor(themeData.cardHeaderTextColor),
-                textMediumColor: this.validateHexColor(themeData.textMediumColor),
-                
-                // Active States
-                activeMenuItemBackground: themeData.activeMenuItemBackground,
-                
+                textColor: this.validateHexColor(themeData.textColor),
+                backgroundColor: this.validateHexColor(themeData.backgroundColor),
+                fontFamily: themeData.fontFamily.split(',')[0].trim(),
+                sidebarGradientStart: this.validateHexColor(themeData.sidebarGradientStart),
+                sidebarGradientEnd: this.validateHexColor(themeData.sidebarGradientEnd),
+                headerGradientStart: this.validateHexColor(themeData.headerGradientStart),
+                headerGradientEnd: this.validateHexColor(themeData.headerGradientEnd),
                 category: "dashboard",
                 isActive: true,
                 isGlobal: false
@@ -2589,7 +2438,7 @@
     };
 
     // =========================
-    // Theme CSS Service - DYNAMIC SELECTOR FINDING
+    // Theme CSS Service - Enhanced Selectors
     // =========================
     const themeCSSService = {
         generateCSS(theme, isPreview = false) {
@@ -2597,109 +2446,47 @@
             
             const comment = isPreview ? 'PREVIEW' : 'ACTIVE';
             
-            // Use more aggressive selectors that should work
             return `
-/* GHL Theme Builder v${CONFIG.VERSION} - ${comment} - Dynamic Selectors */
-
-/* Sidebar Background - Multiple selector attempts */
-[class*="sidebar"], 
-[class*="Sidebar"],
-[data-testid*="sidebar"],
-.bg-sidebar,
+/* GHL Theme Builder v${CONFIG.VERSION} - ${comment} */
 .transition-slowest .flex-col > .overflow-hidden {
-    background-color: ${theme.sidebarContainerBackground} !important;
+    background: linear-gradient(135deg, ${theme.sidebarGradientStart} 0%, ${theme.sidebarGradientEnd} 100%) !important;
 }
 
-/* Header Background */
-[class*="header"] .container-fluid,
-.hl_header .container-fluid,
 .sidebar-v2-location .hl_header .container-fluid {
-    background-color: ${theme.sidebarHeaderBackground} !important;
+    background: linear-gradient(135deg, ${theme.headerGradientStart} 0%, ${theme.headerGradientEnd} 100%) !important;
 }
 
-/* Menu Text Colors */
-[class*="nav-title"],
-.nav-title,
-.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
-.sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title,
-.sidebar-v2-location #sidebar-v2 .menu-title,
-.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title {
-    color: ${theme.menuTextColor} !important;
+.notification-banner-top-bar {
+    background: linear-gradient(135deg, ${theme.headerGradientStart} 0%, ${theme.headerGradientEnd} 100%) !important;
 }
 
-/* Location Switcher */
-#location-switcher-sidbar-v2,
-[id*="location-switcher"],
-.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 {
-    background-color: ${theme.locationSwitcherBackground} !important;
-}
-
-/* Location Text */
+.crm-opportunities-status .hl-text,
+.notification-title-message,
+.sidebar-v2-location .hl_force-block,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-placeholder,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-icon,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-shortcut,
 .hl_switcher-loc-name,
-.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-name,
-.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city {
-    color: ${theme.locationSwitcherTextColor} !important;
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city,
+.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
+.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title,
+.sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title {
+    color: ${theme.textColor} !important;
 }
 
-/* Search Bar */
-#globalSearchOpener,
-[class*="search"],
-.sidebar-v2-location #sidebar-v2 #globalSearchOpener {
-    background-color: ${theme.searchBarBackground} !important;
-}
-
-/* Search Placeholder */
-.search-placeholder,
-.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-placeholder {
-    color: ${theme.searchBarPlaceholderColor} !important;
-}
-
-/* Active Menu Item */
-[class*="active"],
-.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a.active {
-    background-color: ${theme.activeMenuItemBackground} !important;
-}
-
-/* Quick Actions */
-#quickActions,
-.sidebar-v2-location #sidebar-v2 #quickActions {
-    background-color: ${theme.quickActionsBackground} !important;
-}
-
-/* Back Button */
-#backButtonv2,
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener,
+.sidebar-v2-location #sidebar-v2 #quickActions,
 .sidebar-v2-location #sidebar-v2 #backButtonv2 {
-    background-color: ${theme.backButtonBackground} !important;
-    color: ${theme.backButtonTextColor} !important;
+    background-color: ${theme.backgroundColor} !important;
 }
 
-/* Card Header */
-.hl-card .hl-card-header,
-[class*="card-header"] {
-    background-color: ${theme.cardHeaderBackground} !important;
-    color: ${theme.cardHeaderTextColor} !important;
-}
-
-/* Medium Text */
-.hl-text-md-medium,
-[class*="text-md"] {
-    color: ${theme.textMediumColor} !important;
-}
-
-/* Wrapper Container */
-.hl-wrapper-container,
-[class*="wrapper"] {
-    background-color: ${theme.wrapperContainerBackground} !important;
-}
-
-/* Divider */
-.divider {
-    color: ${theme.dividerColor} !important;
-}
-
-/* Cursor Text */
-.cursor-text {
-    color: ${theme.cursorTextColor} !important;
+.hl_switcher-loc-name,
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city,
+.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
+.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title,
+.sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title {
+    font-family: ${theme.fontFamily} !important;
 }
             `;
         },
@@ -2712,13 +2499,7 @@
                 style.id = CONFIG.STYLE_ID;
                 style.textContent = css;
                 document.head.appendChild(style);
-                console.log('✅ Theme CSS applied with dynamic selectors');
-                
-                // Log which elements were affected
-                setTimeout(() => {
-                    console.log('🔍 Checking applied styles...');
-                    this.logAppliedStyles();
-                }, 1000);
+                console.log('✅ Theme CSS applied');
             }
         },
 
@@ -2741,27 +2522,6 @@
         removePreviewCSS() {
             const previewStyle = document.getElementById(CONFIG.PREVIEW_STYLE_ID);
             if (previewStyle) previewStyle.remove();
-        },
-
-        logAppliedStyles() {
-            const keyElements = [
-                { selector: '[class*="sidebar"]', name: 'Sidebar' },
-                { selector: '[class*="header"] .container-fluid', name: 'Header' },
-                { selector: '.nav-title', name: 'Menu Text' },
-                { selector: '#location-switcher-sidbar-v2', name: 'Location Switcher' },
-                { selector: '#globalSearchOpener', name: 'Search Bar' }
-            ];
-
-            keyElements.forEach(item => {
-                const element = document.querySelector(item.selector);
-                if (element) {
-                    const bgColor = window.getComputedStyle(element).backgroundColor;
-                    const textColor = window.getComputedStyle(element).color;
-                    console.log(`🎯 ${item.name}: BG=${bgColor}, Text=${textColor}`);
-                } else {
-                    console.log(`❌ ${item.name}: Element not found with selector: ${item.selector}`);
-                }
-            });
         }
     };
 
@@ -2819,7 +2579,7 @@
                 if (applyResponse && applyResponse.success) {
                     state.currentTheme = theme;
                     themeCSSService.applyThemeCSS(theme);
-                    console.log(`✅ Theme "${theme.name}" applied`);
+                    console.log(`✅ Theme "${theme.name}" applied successfully`);
                     return true;
                 } else {
                     throw new Error(applyResponse?.message || 'Failed to apply theme');
@@ -2840,7 +2600,7 @@
                 if (removeResponse && removeResponse.success) {
                     state.currentTheme = null;
                     themeCSSService.removeThemeCSS();
-                    console.log('✅ Theme removed');
+                    console.log('✅ Theme removed successfully');
                     return true;
                 } else {
                     throw new Error(removeResponse?.message || 'Failed to remove theme');
@@ -2918,33 +2678,39 @@
     };
 
     // =========================
-    // UI Service with Debug Tools
+    // UI Service - Simple and Reliable
     // =========================
     const uiService = {
         createFloatingButton() {
-            if (state.btnRef) return state.btnRef;
+            // Check if button already exists
+            if (document.getElementById(CONFIG.BTN_ID)) {
+                console.log('✅ Button already exists');
+                return document.getElementById(CONFIG.BTN_ID);
+            }
             
             const button = document.createElement('div');
             button.id = CONFIG.BTN_ID;
             button.innerHTML = '🎨 Themes';
+            button.title = 'GHL Theme Builder';
             
-            Object.assign(button.style, {
-                position: 'fixed',
-                top: '20px',
-                right: '20px',
-                padding: '10px 14px',
-                background: '#2563EB',
-                color: '#ffffff',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                zIndex: 99999,
-                fontSize: '12px',
-                fontWeight: '600',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                transition: 'all 0.2s ease',
-                userSelect: 'none'
-            });
+            // Simple, reliable styles
+            button.style.position = 'fixed';
+            button.style.top = '20px';
+            button.style.right = '20px';
+            button.style.padding = '10px 14px';
+            button.style.background = '#2563EB';
+            button.style.color = '#ffffff';
+            button.style.borderRadius = '6px';
+            button.style.cursor = 'pointer';
+            button.style.zIndex = '99999';
+            button.style.fontSize = '12px';
+            button.style.fontWeight = '600';
+            button.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+            button.style.transition = 'all 0.2s ease';
+            button.style.userSelect = 'none';
+            button.style.fontFamily = 'system-ui, -apple-system, sans-serif';
 
+            // Hover effects
             button.addEventListener('mouseenter', () => {
                 button.style.background = '#1d4ed8';
                 button.style.transform = 'translateY(-1px)';
@@ -2961,7 +2727,7 @@
             });
             
             document.body.appendChild(button);
-            state.btnRef = button;
+            console.log('✅ Floating button created successfully');
             return button;
         },
 
@@ -2977,7 +2743,6 @@
             if (state.popupRef) {
                 state.popupRef.style.display = 'none';
                 themeCSSService.removePreviewCSS();
-                cssDebugService.removeTestStyles();
             }
         },
 
@@ -2987,27 +2752,27 @@
             const popup = document.createElement('div');
             popup.id = CONFIG.POPUP_ID;
             
-            Object.assign(popup.style, {
-                display: 'none',
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                background: '#ffffff',
-                padding: '20px',
-                borderRadius: '8px',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-                zIndex: 100000,
-                width: '450px',
-                maxHeight: '85vh',
-                overflowY: 'auto',
-                border: '1px solid #e5e7eb',
-                fontFamily: 'system-ui, -apple-system, sans-serif'
-            });
+            // Simple, reliable popup styles
+            popup.style.display = 'none';
+            popup.style.position = 'fixed';
+            popup.style.top = '50%';
+            popup.style.left = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            popup.style.background = '#ffffff';
+            popup.style.padding = '20px';
+            popup.style.borderRadius = '8px';
+            popup.style.boxShadow = '0 10px 25px rgba(0,0,0,0.2)';
+            popup.style.zIndex = '100000';
+            popup.style.width = '400px';
+            popup.style.maxHeight = '80vh';
+            popup.style.overflowY = 'auto';
+            popup.style.border = '1px solid #e5e7eb';
+            popup.style.fontFamily = 'system-ui, -apple-system, sans-serif';
 
             document.body.appendChild(popup);
             state.popupRef = popup;
             
+            // Close popup when clicking outside
             document.addEventListener('click', (event) => {
                 if (popup.style.display === 'block' && 
                     !popup.contains(event.target) && 
@@ -3028,22 +2793,19 @@
             state.popupRef.innerHTML = `
                 <div style="margin-bottom: 16px;">
                     <h3 style="margin: 0 0 6px 0; color: #1f2937; font-size: 16px; font-weight: 600;">
-                        🎨 Theme Builder - DEBUG MODE
+                        🎨 GHL Theme Builder
                     </h3>
-                    <div style="color: #6b7280; font-size: 11px; line-height: 1.4; background: #f8fafc; padding: 8px; border-radius: 4px;">
+                    <div style="color: #6b7280; font-size: 12px; line-height: 1.4;">
                         <div><strong>Location:</strong> ${currentLocationName}</div>
-                        <div><strong>Current Theme:</strong> <span style="color: ${state.currentTheme ? '#10B981' : '#DC2626'}">${currentThemeName}</span></div>
-                        <div style="margin-top: 4px; font-size: 10px; color: #DC2626;">
-                            🔧 Debug Mode Active - Check Console for CSS Issues
-                        </div>
+                        <div><strong>Current Theme:</strong> ${currentThemeName}</div>
                     </div>
                 </div>
 
                 <div style="margin-bottom: 16px;">
                     <h4 style="margin: 0 0 8px 0; color: #374151; font-size: 14px; font-weight: 600;">
-                        Available Themes (${state.themes.length})
+                        Available Themes
                     </h4>
-                    <div id="theme-buttons-container" style="min-height: 80px; max-height: 150px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px; padding: 8px; background: #fafafa;">
+                    <div id="theme-buttons-container" style="min-height: 60px; max-height: 120px; overflow-y: auto; margin-bottom: 12px;">
                         <div style="text-align: center; color: #6b7280; padding: 10px; font-size: 12px;">
                             Loading themes...
                         </div>
@@ -3051,26 +2813,15 @@
                 </div>
 
                 <div style="border-top: 1px solid #e5e7eb; padding-top: 16px;">
-                    <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 14px; font-weight: 600;">
-                        Debug Tools
+                    <h4 style="margin: 0 0 8px 0; color: #374151; font-size: 14px; font-weight: 600;">
+                        Quick Actions
                     </h4>
                     
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
-                        <button id="test-selectors" 
-                                style="flex: 1; padding: 8px 12px; background: #F59E0B; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
-                            🔍 Test Selectors
-                        </button>
-                        <button id="test-styles" 
-                                style="flex: 1; padding: 8px 12px; background: #8B5CF6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
-                            🎨 Test Styles
-                        </button>
-                        <button id="create-theme" 
-                                style="flex: 1; padding: 8px 12px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
-                            ✅ Create Theme
-                        </button>
-                    </div>
-
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button id="create-theme" 
+                                style="flex: 1; padding: 8px 12px; background: #8B5CF6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
+                            🎨 Create Theme
+                        </button>
                         ${state.currentTheme ? `
                         <button id="remove-theme" 
                                 style="flex: 1; padding: 8px 12px; background: #DC2626; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
@@ -3078,7 +2829,7 @@
                         </button>
                         ` : ''}
                         <button id="refresh-data" 
-                                style="flex: 1; padding: 8px 12px; background: #2563EB; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
+                                style="flex: 1; padding: 8px 12px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
                             🔄 Refresh
                         </button>
                         <button id="close-popup" 
@@ -3094,49 +2845,34 @@
         },
 
         attachPopupEventListeners() {
-            const testSelectorsBtn = document.getElementById('test-selectors');
-            const testStylesBtn = document.getElementById('test-styles');
             const createBtn = document.getElementById('create-theme');
             const closeBtn = document.getElementById('close-popup');
             const removeBtn = document.getElementById('remove-theme');
             const refreshBtn = document.getElementById('refresh-data');
 
-            if (testSelectorsBtn) testSelectorsBtn.addEventListener('click', () => cssDebugService.testSelectors());
-            if (testStylesBtn) testStylesBtn.addEventListener('click', () => cssDebugService.applyTestStyles());
-            if (createBtn) createBtn.addEventListener('click', () => this.createDebugTheme());
+            if (createBtn) createBtn.addEventListener('click', () => this.createSimpleTheme());
             if (closeBtn) closeBtn.addEventListener('click', () => this.closePopup());
             if (removeBtn) removeBtn.addEventListener('click', () => this.confirmRemoveTheme());
             if (refreshBtn) refreshBtn.addEventListener('click', () => this.refreshData());
         },
 
-        async createDebugTheme() {
-            // Create a theme with obvious colors for testing
-            const debugTheme = {
-                name: "Debug Theme",
-                sidebarContainerBackground: "#1e40af", // Bright blue
-                sidebarHeaderBackground: "#1e3a8a", // Dark blue
-                locationSwitcherBackground: "#fbbf24", // Bright yellow
-                searchBarBackground: "#10b981", // Bright green
-                quickActionsBackground: "#8b5cf6", // Purple
-                backButtonBackground: "#ef4444", // Red
-                cardHeaderBackground: "#000000", // Black
-                wrapperContainerBackground: "#ffffff", // White
-                
-                menuTextColor: "#ffffff", // White
-                locationSwitcherTextColor: "#000000", // Black  
-                searchBarPlaceholderColor: "#000000", // Black
-                backButtonTextColor: "#ffffff", // White
-                dividerColor: "#000000", // Black
-                cursorTextColor: "#000000", // Black
-                cardHeaderTextColor: "#ffffff", // White
-                textMediumColor: "#ffffff", // White
-                
-                activeMenuItemBackground: "rgb(59, 130, 246)" // Blue
+        async createSimpleTheme() {
+            const themeName = `My Theme ${new Date().toLocaleDateString()}`;
+            
+            const themeData = {
+                name: themeName,
+                textColor: '#ffffff',
+                backgroundColor: '#FFFFFF',
+                fontFamily: 'Inter, sans-serif',
+                sidebarGradientStart: '#2563EB',
+                sidebarGradientEnd: '#1D4ED8',
+                headerGradientStart: '#2563EB',
+                headerGradientEnd: '#1D4ED8'
             };
 
             try {
-                await themeManager.createCustomTheme(debugTheme);
-                this.showNotification('Debug theme created! Check for bright colors on the page.', 'success');
+                await themeManager.createCustomTheme(themeData);
+                this.showNotification('Theme created and applied!', 'success');
                 this.closePopup();
             } catch (error) {
                 this.showNotification(`Failed to create theme: ${error.message}`, 'error');
@@ -3152,8 +2888,8 @@
                 
                 if (state.themes.length === 0) {
                     container.innerHTML = `
-                        <div style="text-align: center; color: #6b7280; padding: 20px; font-size: 11px;">
-                            No themes found. Create a debug theme first!
+                        <div style="text-align: center; color: #6b7280; padding: 10px; font-size: 12px;">
+                            No themes found. Create one!
                         </div>
                     `;
                     return;
@@ -3161,21 +2897,21 @@
 
                 container.innerHTML = state.themes.map(theme => {
                     const isActive = state.currentTheme && state.currentTheme._id === theme._id;
-                    const color = theme.sidebarContainerBackground || '#2563EB';
+                    const color = theme.sidebarGradientStart || '#2563EB';
                     
                     return `
                         <div class="theme-item" data-theme-id="${theme._id}"
                              style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 4px 0; padding: 6px 8px; border-radius: 4px; border: ${isActive ? '1px solid #10B981' : '1px solid #e5e7eb'}; background: ${isActive ? '#f0fdf4' : '#f9fafb'}; cursor: pointer; transition: all 0.2s ease; font-size: 11px;">
                             <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
                                 <div style="width: 12px; height: 12px; border-radius: 50%; background: ${color};"></div>
-                                <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${theme.name}">${theme.name}</div>
+                                <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${theme.name}</div>
                             </div>
-                            ${isActive ? '<span style="color: #10B981; font-weight: 600; font-size: 10px;">Active</span>' : 
-                              '<button style="background: #2563EB; color: white; border: none; border-radius: 3px; padding: 2px 6px; font-size: 9px; cursor: pointer;">Apply</button>'}
+                            ${isActive ? '<span style="color: #10B981; font-weight: 600; font-size: 10px;">Active</span>' : ''}
                         </div>
                     `;
                 }).join('');
 
+                // Add event listeners
                 container.querySelectorAll('.theme-item').forEach(item => {
                     const themeId = item.getAttribute('data-theme-id');
                     const theme = state.themes.find(t => t._id === themeId);
@@ -3194,8 +2930,8 @@
 
             } catch (error) {
                 container.innerHTML = `
-                    <div style="text-align: center; color: #DC2626; padding: 20px; font-size: 11px;">
-                        Failed to load themes: ${error.message}
+                    <div style="text-align: center; color: #DC2626; padding: 10px; font-size: 11px;">
+                        Failed to load themes
                     </div>
                 `;
             }
@@ -3223,41 +2959,29 @@
                         this.updatePopupContent();
                     })
                     .catch(error => {
-                        this.showNotification(`Failed to remove theme: ${error.message}`, 'error');
+                        this.showNotification(`Failed to remove: ${error.message}`, 'error');
                     });
             }
         },
 
         showNotification(message, type = 'info') {
             const notification = document.createElement('div');
-            notification.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-                    <span>${this.getNotificationIcon(type)}</span>
-                    <span>${message}</span>
-                </div>
-            `;
+            notification.innerHTML = message;
             
-            Object.assign(notification.style, {
-                position: 'fixed',
-                top: '60px',
-                right: '20px',
-                background: this.getNotificationColor(type),
-                color: '#ffffff',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                zIndex: 100003,
-                fontSize: '11px',
-                fontWeight: '500',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-            });
+            notification.style.position = 'fixed';
+            notification.style.top = '60px';
+            notification.style.right = '20px';
+            notification.style.background = this.getNotificationColor(type);
+            notification.style.color = '#ffffff';
+            notification.style.padding = '8px 12px';
+            notification.style.borderRadius = '4px';
+            notification.style.zIndex = '100003';
+            notification.style.fontSize = '11px';
+            notification.style.fontWeight = '500';
+            notification.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
             
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 3000);
-        },
-
-        getNotificationIcon(type) {
-            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-            return icons[type] || icons.info;
         },
 
         getNotificationColor(type) {
@@ -3272,42 +2996,43 @@
     };
 
     // =========================
-    // Initialization
+    // Simple Initialization
     // =========================
     async function initializeThemeBuilder() {
+        // Wait for body to be ready
         if (!document.body) {
             setTimeout(initializeThemeBuilder, 100);
             return;
         }
 
-        console.log(`🚀 Initializing GHL Theme Builder v${CONFIG.VERSION} - DEBUG MODE`);
-        console.log('🔧 Use the "Test Selectors" and "Test Styles" buttons to debug CSS issues');
+        console.log(`🚀 Initializing GHL Theme Builder v${CONFIG.VERSION}...`);
 
         try {
+            // Get current location
             const currentLocation = urlLocationService.getCurrentLocation();
             if (!currentLocation || !currentLocation.locationId) {
-                console.log('❌ No GHL location detected in URL');
+                console.log('❌ No GHL location detected');
                 return;
             }
 
             state.currentLocation = currentLocation;
 
+            // Check access
             const accessCheck = await accessService.checkThemeBuilderAccess();
             if (!accessCheck.permitted) {
-                console.log('❌ Theme Builder access not permitted for this location');
+                console.log('❌ Access not permitted');
                 return;
             }
 
             state.accessInfo = accessCheck.accessInfo;
 
-            await Promise.all([
-                themeManager.loadCurrentTheme(),
-                themeManager.loadThemes()
-            ]);
+            // Load current theme
+            await themeManager.loadCurrentTheme();
 
+            // Create UI button
             uiService.createFloatingButton();
             
-            console.log('✅ Theme Builder initialized in DEBUG mode');
+            console.log('✅ Theme Builder initialized successfully');
 
         } catch (error) {
             console.error('❌ Failed to initialize Theme Builder:', error);
@@ -3315,37 +3040,22 @@
     }
 
     // =========================
-    // Public API with Debug Tools
+    // Public API
     // =========================
     window.GHLThemeBuilder = {
         init: initializeThemeBuilder,
         open: () => uiService.openPopup(),
         close: () => uiService.closePopup(),
-        refresh: () => uiService.refreshData(),
         getCurrentTheme: () => state.currentTheme,
-        getCurrentLocation: () => state.currentLocation,
-        getThemes: () => state.themes,
-        
-        // Debug tools
-        testSelectors: () => cssDebugService.testSelectors(),
-        testStyles: () => cssDebugService.applyTestStyles(),
-        removeTestStyles: () => cssDebugService.removeTestStyles(),
-        
-        debug: () => {
-            console.log('🔧 Theme Builder Debug Info:', {
-                state: state,
-                config: CONFIG,
-                currentURL: window.location.href
-            });
-        }
+        getCurrentLocation: () => state.currentLocation
     };
 
-    // Auto-initialize
+    // Auto-initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeThemeBuilder);
     } else {
         initializeThemeBuilder();
     }
 
-    console.log(`🎨 GHL Theme Builder v${CONFIG.VERSION} - Debug Mode Active`);
+    console.log(`🎨 GHL Theme Builder v${CONFIG.VERSION} - Loaded`);
 })();
