@@ -1,4 +1,4 @@
-<script>
+
 (function(){
     // =========================
     // Configuration
@@ -116,4 +116,4 @@
     init();
 
 })();
-</script>
+
