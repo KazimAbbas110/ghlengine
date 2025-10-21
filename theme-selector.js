@@ -3742,9 +3742,8 @@
 
 
 
-
 (function(){
-    console.log('🚀 GHL Theme Builder - Full Coverage Loaded');
+    console.log('🚀 GHL Theme Builder - Persistent Version Loaded');
 
     // =========================
     // Configuration
@@ -3755,19 +3754,17 @@
         STYLE_ID: "ghl-theme-style-2025",
         BACKEND_API: "https://ghlengine-production.up.railway.app/api",
         AUTH_TOKEN: "110",
-        VERSION: "6.2.0"
+        VERSION: "6.1.0"
     };
 
     // =========================
     // State
     // =========================
     const state = {
-        btnRef: null,
-        popupRef: null,
-        currentTheme: null,
         currentLocation: null,
+        currentTheme: null,
         themes: [],
-        isLoading: false
+        popupRef: null
     };
 
     // =========================
@@ -3781,45 +3778,50 @@
             try {
                 const response = await fetch(url, config);
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message || `HTTP ${response.status}`);
+                if (!response.ok) throw new Error(data.message || data.error || `HTTP ${response.status}`);
                 return data;
-            } catch (error) { throw error; }
+            } catch(e){ throw e; }
         },
+
+        async getThemeByLocation(locationId){
+            if(!locationId) throw new Error('No location ID');
+            try {
+                const res = await this.call(`/themes/by-location/${locationId}`);
+                return res.success ? res.data : null;
+            } catch(e){
+                if(e.message.includes('404')) return null;
+                throw e;
+            }
+        },
+
+        async getAllThemes(){
+            return this.call('/themes');
+        },
+
         async createTheme(themeData){
-            const timestamp = new Date().getTime();
+            const timestamp = Date.now();
             const uniqueName = `${themeData.name} ${timestamp}`;
-            const validatedData = {
+            const body = {
+                ...themeData,
                 name: uniqueName,
+                description: "Theme created via GHL Theme Builder",
                 locationId: themeData.locationId,
                 userId: CONFIG.AUTH_TOKEN,
-                description: "Theme created via Builder",
-                textColor: this.validateColor(themeData.textColor),
-                backgroundColor: this.validateColor(themeData.backgroundColor),
-                fontFamily: themeData.fontFamily,
-                sidebarGradientStart: this.validateColor(themeData.sidebarGradientStart),
-                sidebarGradientEnd: this.validateColor(themeData.sidebarGradientEnd),
-                headerGradientStart: this.validateColor(themeData.headerGradientStart),
-                headerGradientEnd: this.validateColor(themeData.headerGradientEnd),
+                companyId: "default-company",
                 category: "dashboard",
                 isActive: true,
                 isGlobal: false
             };
-            return this.call('/themes',{method:'POST',body:validatedData});
+            return this.call('/themes', { method: 'POST', body });
         },
-        validateColor(color){
-            if(!color) return '#FFFFFF';
-            if(color.startsWith('#') && color.length===7) return color;
-            if(color.startsWith('rgba')) {
-                const match=color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-                if(match){ return `#${parseInt(match[1]).toString(16).padStart(2,'0')}${parseInt(match[2]).toString(16).padStart(2,'0')}${parseInt(match[3]).toString(16).padStart(2,'0')}`.toUpperCase(); }
-            }
-            return '#FFFFFF';
+
+        async applyThemeToLocation(themeId, locationId){
+            return this.call('/themes/apply', { method: 'POST', body: { themeId, locationId } });
         },
-        async getAllThemes(){ return this.call('/themes'); },
-        async getThemeById(id){ return this.call(`/themes/${id}`); },
-        async getThemeByLocation(locationId){ return this.call(`/themes/by-location/${locationId}`); },
-        async applyThemeToLocation(themeId, locationId){ return this.call('/themes/apply',{method:'POST',body:{themeId,locationId}}); },
-        async removeThemeFromLocation(locationId){ return this.call('/themes/remove',{method:'POST',body:{locationId}}); }
+
+        async removeThemeFromLocation(locationId){
+            return this.call('/themes/remove', { method: 'POST', body: { locationId } });
+        }
     };
 
     // =========================
@@ -3829,66 +3831,52 @@
         generateCSS(theme){
             if(!theme) return '';
             return `
+/* Theme Builder v${CONFIG.VERSION} - ${theme.name} */
+
 /* Sidebar */
-[class*="sidebar"],.sidebar-container,#sidebar-v2,.hl_sidebar,.hl_sidebar_v2,div[data-testid*="sidebar"],div[class*="bg-sidebar"] {
-    background: linear-gradient(135deg, ${theme.sidebarGradientStart}, ${theme.sidebarGradientEnd}) !important;
+[class*="sidebar"], .sidebar-container, .transition-slowest .flex-col > .overflow-hidden {
+    background: linear-gradient(135deg, ${theme.sidebarGradientStart} 0%, ${theme.sidebarGradientEnd} 100%) !important;
 }
 
 /* Header */
-[class*="header"] .container-fluid,.hl_header .container-fluid,.header-container,div[class*="header"] {
-    background: linear-gradient(135deg, ${theme.headerGradientStart}, ${theme.headerGradientEnd}) !important;
+.hl_header .container-fluid, [class*="header"] .container-fluid {
+    background: linear-gradient(135deg, ${theme.headerGradientStart} 0%, ${theme.headerGradientEnd} 100%) !important;
 }
 
-/* Cards, Containers, Modals */
-.hl-card,.card-container,[class*="Card"],.hl-wrapper-container,.container-fluid,div[class*="container"]:not(.hl_header .container-fluid),[role="dialog"],.modal-container,.hl_modal {
-    background-color: ${theme.backgroundColor} !important;
-}
-
-/* Text */
-.nav-title,.menu-title,.hl_nav-header nav a,.hl_nav-settings nav a,.hl_nav-header-without-footer nav a,.hl_switcher-loc-name,.hl_switcher-loc-city,.search-placeholder,.cursor-text,.notification-title-message {
+/* Text Colors */
+.nav-title, .menu-title, .hl-switcher-loc-name, .hl-switcher-loc-city, .search-placeholder, .hl-text {
     color: ${theme.textColor} !important;
     font-family: ${theme.fontFamily} !important;
-    font-weight: 500 !important;
 }
 
-/* Buttons, Icons, Active States */
-button,.btn,.hl-btn,.hl_button,.icon,.Icon,svg path {
-    color: ${theme.textColor} !important;
-    fill: ${theme.textColor} !important;
-    stroke: ${theme.textColor} !important;
-}
-.active,.selected,[aria-selected="true"] { background-color: rgba(255,255,255,0.2) !important; }
-
-/* Dynamic Elements */
-[class*="tooltip"],.dropdown-menu,.hl_dropdown,.hl_sidebar_hidden,.quick-actions,.notification-banner-top-bar,.calendar-event,.hl-workflow-card {
+/* Card & Container Background */
+.hl-card, [class*="card"], [class*="container"]:not(.hl_header .container-fluid) {
     background-color: ${theme.backgroundColor} !important;
-    color: ${theme.textColor} !important;
 }
 
-/* Hover */
-button:hover,.hl-btn:hover,.nav-title:hover,.menu-title:hover { opacity: 0.85 !important; }
-
-/* Debug */
-body::after {
-    content: "🎨 THEME ACTIVE: ${theme.name}" !important;
-    position: fixed !important; top: 10px !important; left: 10px !important;
-    background: #10B981 !important; color: white !important; padding: 8px 12px !important;
-    border-radius: 4px !important; font-size: 12px !important; font-weight: bold !important; z-index: 2147483647 !important;
-    pointer-events: none !important;
+/* Active States */
+.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a.active,
+[class*="active"], [class*="selected"] {
+    background-color: rgba(255,255,255,0.2) !important;
 }
+
+/* Icons */
+svg path, [class*="icon"] { fill: ${theme.textColor} !important; color: ${theme.textColor} !important; stroke: ${theme.textColor} !important; }
             `;
         },
+
         applyThemeCSS(theme){
             this.removeThemeCSS();
             if(theme){
-                const style=document.createElement('style');
-                style.id=CONFIG.STYLE_ID;
-                style.textContent=this.generateCSS(theme);
+                const style = document.createElement('style');
+                style.id = CONFIG.STYLE_ID;
+                style.textContent = this.generateCSS(theme);
                 document.head.appendChild(style);
             }
         },
+
         removeThemeCSS(){
-            const existing=document.getElementById(CONFIG.STYLE_ID);
+            const existing = document.getElementById(CONFIG.STYLE_ID);
             if(existing) existing.remove();
         }
     };
@@ -3897,40 +3885,47 @@ body::after {
     // Theme Manager
     // =========================
     const themeManager = {
-        async loadThemes(){
-            try{
-                state.isLoading=true;
-                const res=await apiService.getAllThemes();
-                state.themes=res?.data||[];
-                return state.themes;
-            }catch(e){state.themes=[]; return [];}
-            finally{state.isLoading=false;}
+        async loadCurrentTheme(){
+            if(!state.currentLocation) return;
+            const theme = await apiService.getThemeByLocation(state.currentLocation.locationId);
+            if(theme){
+                state.currentTheme = theme;
+                themeCSSService.applyThemeCSS(theme);
+            } else {
+                state.currentTheme = null;
+                themeCSSService.removeThemeCSS();
+            }
         },
+
+        async loadAllThemes(){
+            const res = await apiService.getAllThemes();
+            state.themes = res.success ? (Array.isArray(res.data) ? res.data : [res.data]) : [];
+        },
+
         async applyTheme(themeId){
-            if(!state.currentLocation) throw new Error('No location');
-            const themeRes=await apiService.getThemeById(themeId);
-            const theme=themeRes?.data;
-            if(!theme) throw new Error('Theme not found');
-            await apiService.applyThemeToLocation(themeId,state.currentLocation.locationId);
-            state.currentTheme=theme;
+            if(!state.currentLocation) return;
+            const theme = state.themes.find(t => t._id === themeId);
+            if(!theme) return;
+            await apiService.applyThemeToLocation(themeId, state.currentLocation.locationId);
+            state.currentTheme = theme;
             themeCSSService.applyThemeCSS(theme);
         },
+
         async removeTheme(){
-            if(!state.currentLocation) throw new Error('No location');
+            if(!state.currentLocation) return;
             await apiService.removeThemeFromLocation(state.currentLocation.locationId);
-            state.currentTheme=null;
+            state.currentTheme = null;
             themeCSSService.removeThemeCSS();
         },
-        async createCustomTheme(themeData){
-            if(!state.currentLocation) throw new Error('No location');
-            themeData.locationId=state.currentLocation.locationId;
-            const res=await apiService.createTheme(themeData);
-            const created=res?.data;
-            if(created){
-                await this.loadThemes();
-                await this.applyTheme(created._id);
+
+        async createTheme(themeData){
+            if(!state.currentLocation) return;
+            const fullData = {...themeData, locationId: state.currentLocation.locationId};
+            const res = await apiService.createTheme(fullData);
+            if(res.success && res.data){
+                state.themes.push(res.data);
+                await this.applyTheme(res.data._id);
             }
-            return created;
         }
     };
 
@@ -3938,85 +3933,106 @@ body::after {
     // UI Service
     // =========================
     const uiService = {
-        createFloatingButton(){
+        createButton(){
             if(document.getElementById(CONFIG.BTN_ID)) return;
-            const btn=document.createElement('button');
-            btn.id=CONFIG.BTN_ID; btn.innerHTML='🎨 THEMES';
-            btn.style.cssText='position:fixed;top:20px;right:20px;padding:12px 16px;background:#2563EB;color:white;border:none;border-radius:8px;cursor:pointer;z-index:2147483647;font-size:14px;font-weight:bold;';
-            btn.addEventListener('click',()=>this.openPopup());
-            document.body.appendChild(btn);
-            state.btnRef=btn;
-        },
-        async openPopup(){
-            await this.createPopup();
-            if(state.popupRef) state.popupRef.style.display='block';
-            await this.updatePopupContent();
-        },
-        closePopup(){ if(state.popupRef) state.popupRef.style.display='none'; },
-        async createPopup(){
-            if(state.popupRef) return;
-            const popup=document.createElement('div'); popup.id=CONFIG.POPUP_ID;
-            popup.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:24px;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.3);z-index:2147483646;width:90vw;max-width:500px;max-height:80vh;overflow-y:auto;border:2px solid #e5e7eb;font-family:system-ui;display:none;';
-            document.body.appendChild(popup); state.popupRef=popup;
-            document.addEventListener('click',e=>{if(popup.style.display==='block'&&!popup.contains(e.target)&&e.target.id!==CONFIG.BTN_ID)this.closePopup();});
-        },
-        async updatePopupContent(){
-            if(!state.popupRef) return;
-            const currentThemeName=state.currentTheme?.name||'None';
-            state.popupRef.innerHTML=`
-                <h2>🎨 GHL THEME BUILDER</h2>
-                <div>Current Theme: ${currentThemeName}</div>
-                <div id="theme-buttons-container" style="margin-top:15px;"></div>
-                <button id="close-popup">❌ Close</button>
+            const btn = document.createElement('button');
+            btn.id = CONFIG.BTN_ID;
+            btn.innerText = '🎨 THEMES';
+            btn.style = `
+                position: fixed; top: 20px; right: 20px; z-index:2147483647;
+                padding:12px 16px; background:#2563EB; color:white; border:none; border-radius:8px;
+                cursor:pointer; font-weight:bold; font-family:system-ui,sans-serif;
             `;
-            document.getElementById('close-popup')?.addEventListener('click',()=>this.closePopup());
-            await this.loadThemesIntoPopup();
+            btn.addEventListener('click', uiService.openPopup);
+            document.body.appendChild(btn);
         },
-        async loadThemesIntoPopup(){
-            const container=document.getElementById('theme-buttons-container'); if(!container) return;
-            await themeManager.loadThemes();
-            if(state.themes.length===0){container.innerHTML='No themes. Create one!'; return;}
-            container.innerHTML=state.themes.map(t=>{
-                const isActive=state.currentTheme?._id===t._id;
-                return `<div class="theme-item" data-theme-id="${t._id}" style="padding:8px;margin:4px;border:${isActive?'2px solid #10B981':'1px solid #e5e7eb'};cursor:pointer;">
-                    ${t.name} ${isActive?'✅ Active':''}
+
+        async openPopup(){
+            if(!state.popupRef){
+                const popup = document.createElement('div');
+                popup.id = CONFIG.POPUP_ID;
+                popup.style = `
+                    position: fixed; top:50%; left:50%; transform: translate(-50%,-50%);
+                    background:white; padding:24px; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+                    z-index:2147483646; width:90vw; max-width:500px; max-height:80vh; overflow-y:auto;
+                    display:block; border:2px solid #e5e7eb; font-family:system-ui,sans-serif;
+                `;
+                document.body.appendChild(popup);
+                state.popupRef = popup;
+            }
+
+            await this.updatePopup();
+        },
+
+        async updatePopup(){
+            if(!state.popupRef) return;
+            const themeList = state.themes.map(t=>{
+                const active = state.currentTheme?._id===t._id;
+                return `<div style="margin:6px 0;padding:8px;border:${active?'2px solid #10B981':'1px solid #e5e7eb'};border-radius:6px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+                    <span>${t.name}</span>
+                    ${active?'✅ Active':'<button style="background:#2563EB;color:white;padding:4px 8px;border:none;border-radius:4px;">Apply</button>'}
                 </div>`;
             }).join('');
-            container.querySelectorAll('.theme-item').forEach(item=>{
-                item.addEventListener('click',async()=>{
-                    const themeId=item.getAttribute('data-theme-id');
-                    await themeManager.applyTheme(themeId);
-                    this.updatePopupContent();
-                });
+            state.popupRef.innerHTML = `
+                <h2>🎨 GHL Theme Builder</h2>
+                <div><strong>Location:</strong> ${state.currentLocation?.name||'Detecting...'}</div>
+                <div><strong>Current Theme:</strong> ${state.currentTheme?.name||'None'}</div>
+                <h3>Available Themes</h3>
+                <div>${themeList || 'No themes found.'}</div>
+                <button id="close-popup-btn" style="margin-top:10px;padding:8px 12px;background:#6b7280;color:white;border:none;border-radius:6px;">Close</button>
+            `;
+            document.getElementById('close-popup-btn')?.addEventListener('click', uiService.closePopup);
+
+            // Attach apply theme buttons
+            state.popupRef.querySelectorAll('div > button').forEach((btn,i)=>{
+                btn.addEventListener('click',()=>themeManager.applyTheme(state.themes[i]._id).then(()=>uiService.updatePopup()));
             });
         },
-        showNotification(msg,type='info'){
-            const n=document.createElement('div'); n.innerHTML=msg;
-            const colors={success:'#10B981',error:'#DC2626',info:'#2563EB',warning:'#F59E0B'};
-            n.style.cssText=`position:fixed;top:80px;right:20px;background:${colors[type]};color:white;padding:12px 16px;border-radius:6px;z-index:2147483647;`;
-            document.body.appendChild(n); setTimeout(()=>n.remove(),3000);
-        }
+
+        closePopup(){ if(state.popupRef) state.popupRef.style.display='none'; }
     };
 
     // =========================
     // URL Location Service
     // =========================
-    const urlLocationService={
-        extractLocationIdFromURL(){ const match=window.location.href.match(/\/([a-zA-Z0-9]{15,})\//); return match?match[1]:null; },
-        getCurrentLocation(){ const id=this.extractLocationIdFromURL(); return id?{locationId:id,name:'GHL Location',url:window.location.href}:null; }
+    const urlLocationService = {
+        extractLocationIdFromURL(){
+            const patterns = [/\/location\/([^\/]+)\//];
+            for(let p of patterns){
+                const m = window.location.href.match(p);
+                if(m && m[1]) return m[1];
+            }
+            return null;
+        },
+        getCurrentLocation(){
+            const id = this.extractLocationIdFromURL();
+            return id ? { locationId:id, name:'GHL Location', url:window.location.href } : null;
+        }
     };
 
     // =========================
     // Initialize
     // =========================
-    async function initializeThemeBuilder(){
-        uiService.createFloatingButton();
-        state.currentLocation=urlLocationService.getCurrentLocation();
-        if(!state.currentLocation){console.log('No location detected'); return;}
-        await themeManager.loadThemes();
-        await themeManager.applyTheme(state.currentTheme?._id);
-        uiService.showNotification('🎨 Theme Builder Ready!','success');
+    async function init(){
+        state.currentLocation = urlLocationService.getCurrentLocation();
+        if(!state.currentLocation) return;
+
+        // Load theme from DB first for persistence
+        await themeManager.loadCurrentTheme();
+
+        // Load all themes for popup
+        await themeManager.loadAllThemes();
+
+        // Create floating button
+        uiService.createButton();
+
+        console.log('✅ GHL Theme Builder initialized with persistent theme');
     }
 
-    if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initializeThemeBuilder);} else {initializeThemeBuilder();}
+    if(document.readyState==='loading'){
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
 })();
