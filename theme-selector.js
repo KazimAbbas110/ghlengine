@@ -1077,27 +1077,68 @@
             };
         }
     };
-
-    // =========================
-    // URL Location Detection Service
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // // =========================
+    // // URL Location Detection Service
+    // // =========================
+    // const urlLocationService = {
+    //     extractLocationIdFromURL() {
+    //         try {
+    //             const currentURL = window.location.href;
+                
+    //             // Match GHL URL pattern: /location/{locationId}/launchpad
+    //             const urlPattern = /\/location\/([^\/]+)\/launchpad/;
+    //             const match = currentURL.match(urlPattern);
+                
+    //             if (match && match[1]) {
+    //                 const locationId = match[1];
+    //                 return locationId;
+    //             }
+                
+    //             return null;
+    //         } catch (error) {
+    //             console.error('❌ Error extracting location from URL:', error);
+    //             return null;
+    //         }
+    //     },
+  // =========================
+    // URL Location Service
     // =========================
     const urlLocationService = {
         extractLocationIdFromURL() {
             try {
                 const currentURL = window.location.href;
+                console.log('🔍 Checking URL:', currentURL);
                 
-                // Match GHL URL pattern: /location/{locationId}/launchpad
-                const urlPattern = /\/location\/([^\/]+)\/launchpad/;
-                const match = currentURL.match(urlPattern);
+                // Multiple URL patterns for GHL
+                const patterns = [
+                    /\/location\/([^\/]+)\/launchpad/,
+                    /\/location\/([^\/]+)\/dashboard/,
+                    /\/location\/([^\/]+)\/contacts/,
+                    /\/location\/([^\/]+)\/workflows/,
+                    /\/location\/([^\/]+)\/calendar/,
+                    /locationId=([^&]+)/,
+                    /location=([^&]+)/
+                ];
                 
-                if (match && match[1]) {
-                    const locationId = match[1];
-                    return locationId;
+                for (let pattern of patterns) {
+                    const match = currentURL.match(pattern);
+                    if (match && match[1]) {
+                        console.log('✅ Found location ID:', match[1]);
+                        return match[1];
+                    }
+                }
+                
+                // Fallback: check for any location-like pattern
+                const fallbackMatch = currentURL.match(/\/([a-zA-Z0-9]{15,})\//);
+                if (fallbackMatch) {
+                    console.log('🔄 Using fallback location ID:', fallbackMatch[1]);
+                    return fallbackMatch[1];
                 }
                 
                 return null;
             } catch (error) {
-                console.error('❌ Error extracting location from URL:', error);
+                console.error('❌ Error extracting location:', error);
                 return null;
             }
         },
