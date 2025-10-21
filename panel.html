@@ -897,16 +897,17 @@
             overflow: hidden;
             margin-top: 8px;
             background: white;
+            height: 300px;
         }
 
-        .ghl-sidebar-preview {
+        .ghl-live-preview {
+            height: 100%;
             display: flex;
-            height: 200px;
             font-family: 'Inter', sans-serif;
         }
 
         .ghl-sidebar {
-            width: 240px;
+            width: 280px;
             display: flex;
             flex-direction: column;
             background: #f8f9fa;
@@ -914,23 +915,28 @@
         }
 
         .ghl-sidebar-header {
-            padding: 16px;
+            padding: 20px;
             background: white;
             border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .ghl-sidebar-nav {
             flex: 1;
-            padding: 8px 0;
+            padding: 16px 0;
         }
 
         .ghl-nav-item {
-            padding: 10px 16px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             gap: 12px;
             cursor: pointer;
             transition: var(--transition);
+            margin: 4px 12px;
+            border-radius: 6px;
         }
 
         .ghl-nav-item:hover {
@@ -939,7 +945,6 @@
 
         .ghl-nav-item.active {
             background: rgba(67, 97, 238, 0.1);
-            border-right: 3px solid #4361ee;
         }
 
         .ghl-nav-title {
@@ -949,8 +954,9 @@
 
         .ghl-main-content {
             flex: 1;
-            padding: 20px;
+            padding: 24px;
             background: white;
+            overflow-y: auto;
         }
 
         .ghl-card {
@@ -962,23 +968,25 @@
         }
 
         .ghl-card-header {
-            padding: 16px;
+            padding: 16px 20px;
             background: #f8f9fa;
             border-bottom: 1px solid #e9ecef;
             font-weight: 600;
+            font-size: 16px;
         }
 
         .ghl-card-body {
-            padding: 16px;
+            padding: 20px;
         }
 
         .ghl-btn {
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 6px;
             border: none;
             font-weight: 500;
             cursor: pointer;
             transition: var(--transition);
+            font-size: 14px;
         }
 
         .ghl-btn-primary {
@@ -988,6 +996,41 @@
 
         .ghl-btn-primary:hover {
             background: #3a56d4;
+        }
+
+        .ghl-search-bar {
+            padding: 12px 16px;
+            background: white;
+            border-radius: 6px;
+            margin: 12px;
+            border: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ghl-search-placeholder {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .ghl-location-switcher {
+            padding: 16px;
+            background: white;
+            margin: 12px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .ghl-switcher-loc-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .ghl-switcher-loc-city {
+            font-size: 12px;
+            color: #6c757d;
         }
     </style>
 </head>
@@ -1097,12 +1140,9 @@
             <!-- Locations Grid -->
             <div id="realTimeLocationsContainer">
                 <div class="empty-state">
-                    <i class="fas fa-sitemap"></i>
-                    <h3>No Locations Loaded</h3>
-                    <p>Click "Refresh Data" to load your GHL locations</p>
-                    <button class="btn btn-primary" onclick="loadRealTimeLocations()">
-                        <i class="fas fa-sync-alt"></i> Load Locations
-                    </button>
+                    <i class="fas fa-sync-alt spinner"></i>
+                    <h3>Loading Locations</h3>
+                    <p>Fetching your GHL locations data...</p>
                 </div>
             </div>
 
@@ -1161,7 +1201,11 @@
             </div>
             <div class="theme-builder-section">
                 <div class="themes-grid" id="themesGridContainer">
-                    <!-- Themes will be populated here -->
+                    <div class="empty-state">
+                        <i class="fas fa-sync-alt spinner"></i>
+                        <h3>Loading Themes</h3>
+                        <p>Fetching your theme library...</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1190,12 +1234,6 @@
                         <div style="color: var(--gray); font-size: 13px;" id="modalLocationDetails">
                             Address and contact information will appear here
                         </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Theme Preview</label>
-                    <div id="themePreview" style="height: 100px; border-radius: var(--border-radius-sm); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
-                        Theme Preview
                     </div>
                 </div>
             </div>
@@ -1263,7 +1301,7 @@
 
     <!-- Create/Edit Theme Modal -->
     <div class="modal" id="createThemeModal">
-        <div class="modal-content" style="width: 700px;">
+        <div class="modal-content" style="width: 800px; max-width: 95vw;">
             <div class="modal-header">
                 <h3 id="createThemeModalTitle">Create New Theme</h3>
                 <button class="close-modal" onclick="closeCreateThemeModal()">
@@ -1278,42 +1316,21 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Primary Color</label>
-                        <div class="color-picker-group">
-                            <div class="color-picker" style="background: #4361ee;">
-                                <input type="color" id="primaryColor" value="#4361ee">
-                            </div>
-                            <input type="text" class="form-control color-value" id="primaryColorValue" value="#4361ee" readonly>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Secondary Color</label>
-                        <div class="color-picker-group">
-                            <div class="color-picker" style="background: #06d6a0;">
-                                <input type="color" id="secondaryColor" value="#06d6a0">
-                            </div>
-                            <input type="text" class="form-control color-value" id="secondaryColorValue" value="#06d6a0" readonly>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Sidebar Background</label>
+                        <label>Sidebar Container Background</label>
                         <div class="color-picker-group">
                             <div class="color-picker" style="background: #f8f9fa;">
-                                <input type="color" id="sidebarBgColor" value="#f8f9fa">
+                                <input type="color" id="sidebarContainerBg" value="#f8f9fa">
                             </div>
-                            <input type="text" class="form-control color-value" id="sidebarBgColorValue" value="#f8f9fa" readonly>
+                            <input type="text" class="form-control color-value" id="sidebarContainerBgValue" value="#f8f9fa" readonly>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Header Background</label>
+                        <label>Header Container Background</label>
                         <div class="color-picker-group">
                             <div class="color-picker" style="background: #ffffff;">
-                                <input type="color" id="headerBgColor" value="#ffffff">
+                                <input type="color" id="headerContainerBg" value="#ffffff">
                             </div>
-                            <input type="text" class="form-control color-value" id="headerBgColorValue" value="#ffffff" readonly>
+                            <input type="text" class="form-control color-value" id="headerContainerBgValue" value="#ffffff" readonly>
                         </div>
                     </div>
                 </div>
@@ -1331,42 +1348,102 @@
                     <div class="form-group">
                         <label>Active Menu Background</label>
                         <div class="color-picker-group">
-                            <div class="color-picker" style="background: #eef2ff;">
-                                <input type="color" id="activeMenuBgColor" value="#eef2ff">
+                            <div class="color-picker" style="background: #fdfafa;">
+                                <input type="color" id="activeMenuBg" value="#fdfafa">
                             </div>
-                            <input type="text" class="form-control color-value" id="activeMenuBgColorValue" value="#eef2ff" readonly>
+                            <input type="text" class="form-control color-value" id="activeMenuBgValue" value="#fdfafa" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Location Switcher Background</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #ffffff;">
+                                <input type="color" id="locationSwitcherBg" value="#ffffff">
+                            </div>
+                            <input type="text" class="form-control color-value" id="locationSwitcherBgValue" value="#ffffff" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Location Text Color</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #2b2d42;">
+                                <input type="color" id="locationTextColor" value="#2b2d42">
+                            </div>
+                            <input type="text" class="form-control color-value" id="locationTextColorValue" value="#2b2d42" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Search Bar Background</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #ffffff;">
+                                <input type="color" id="searchBarBg" value="#ffffff">
+                            </div>
+                            <input type="text" class="form-control color-value" id="searchBarBgValue" value="#ffffff" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Search Placeholder Color</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #6c757d;">
+                                <input type="color" id="searchPlaceholderColor" value="#6c757d">
+                            </div>
+                            <input type="text" class="form-control color-value" id="searchPlaceholderColorValue" value="#6c757d" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Card Header Background</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #000000;">
+                                <input type="color" id="cardHeaderBg" value="#000000">
+                            </div>
+                            <input type="text" class="form-control color-value" id="cardHeaderBgValue" value="#000000" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Card Header Text Color</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #ffffff;">
+                                <input type="color" id="cardHeaderTextColor" value="#ffffff">
+                            </div>
+                            <input type="text" class="form-control color-value" id="cardHeaderTextColorValue" value="#ffffff" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Main Container Background</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #ffffff;">
+                                <input type="color" id="mainContainerBg" value="#ffffff">
+                            </div>
+                            <input type="text" class="form-control color-value" id="mainContainerBgValue" value="#ffffff" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Divider & Cursor Color</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #2b2d42;">
+                                <input type="color" id="dividerColor" value="#2b2d42">
+                            </div>
+                            <input type="text" class="form-control color-value" id="dividerColorValue" value="#2b2d42" readonly>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Font Family</label>
-                    <select class="form-control" id="fontFamily">
-                        <option value="Inter, sans-serif">Inter (Default)</option>
-                        <option value="Arial, sans-serif">Arial</option>
-                        <option value="Helvetica, sans-serif">Helvetica</option>
-                        <option value="Georgia, serif">Georgia</option>
-                        <option value="'Times New Roman', serif">Times New Roman</option>
-                        <option value="'Courier New', monospace">Courier New</option>
-                        <option value="Verdana, sans-serif">Verdana</option>
-                        <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Border Radius</label>
-                    <select class="form-control" id="borderRadius">
-                        <option value="4px">Small (4px)</option>
-                        <option value="8px" selected>Medium (8px)</option>
-                        <option value="12px">Large (12px)</option>
-                        <option value="16px">Extra Large (16px)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
                     <label>Live GHL Preview</label>
                     <div class="ghl-preview-container">
-                        <div class="ghl-sidebar-preview" id="liveThemePreview">
+                        <div class="ghl-live-preview" id="liveThemePreview">
                             <!-- Preview will be generated by JavaScript -->
                         </div>
                     </div>
@@ -1411,7 +1488,7 @@
             };
 
             if (options.body && config.method !== 'GET') {
-                config.body = options.body;
+                config.body = JSON.stringify(options.body);
             }
 
             try {
@@ -1464,62 +1541,13 @@
             try {
                 showNotification('🔄 Loading your GHL locations...', 'info');
                 
-                let locationsData = [];
-                
-                try {
-                    const response = await apiCall('/locations/real-time');
-                    if (response.success && Array.isArray(response.data)) {
-                        locationsData = response.data;
-                    }
-                } catch (error) {
-                    console.log('Real-time locations endpoint failed');
+                const response = await apiCall('/locations/real-time');
+                if (response.success && Array.isArray(response.data)) {
+                    realTimeLocations = response.data;
+                } else {
+                    throw new Error('Invalid response format from locations API');
                 }
 
-                if (locationsData.length === 0) {
-                    locationsData = [
-                        {
-                            id: 'loc_001',
-                            name: 'Downtown Dental Clinic',
-                            address: '123 Main Street, New York, NY',
-                            phone: '(555) 123-4567',
-                            email: 'contact@downtowndental.com',
-                            currentTheme: null,
-                            hasCustomCSS: false,
-                            permissions: {
-                                themeBuilderAccess: true,
-                                chatWidget: { isActive: true }
-                            }
-                        },
-                        {
-                            id: 'loc_002',
-                            name: 'Uptown Medical Center', 
-                            address: '456 Oak Avenue, New York, NY',
-                            phone: '(555) 987-6543',
-                            email: 'info@uptownmedical.com',
-                            currentTheme: { _id: 'theme123', name: 'Blue Ocean Theme' },
-                            hasCustomCSS: true,
-                            permissions: {
-                                themeBuilderAccess: false,
-                                chatWidget: { isActive: true }
-                            }
-                        },
-                        {
-                            id: 'loc_003',
-                            name: 'City Law Firm',
-                            address: '789 Business Blvd, Chicago, IL',
-                            phone: '(555) 456-7890',
-                            email: 'info@citylawfirm.com',
-                            currentTheme: null,
-                            hasCustomCSS: false,
-                            permissions: {
-                                themeBuilderAccess: true,
-                                chatWidget: { isActive: false }
-                            }
-                        }
-                    ];
-                }
-
-                realTimeLocations = locationsData;
                 displayRealTimeLocations();
                 updateLocationDropdowns();
                 updateGlobalStats();
@@ -1822,67 +1850,22 @@
                     displayThemesGrid();
                     console.log(`✅ Loaded ${themes.length} themes`);
                 } else {
-                    themes = [
-                        { 
-                            _id: 'theme1', 
-                            name: 'Blue Ocean Theme',
-                            primaryColor: '#4361ee',
-                            secondaryColor: '#06d6a0',
-                            sidebarBgColor: '#f8f9fa',
-                            headerBgColor: '#ffffff',
-                            menuTextColor: '#2b2d42',
-                            activeMenuBgColor: '#eef2ff',
-                            fontFamily: 'Inter, sans-serif',
-                            borderRadius: '8px'
-                        },
-                        { 
-                            _id: 'theme2', 
-                            name: 'Dark Professional',
-                            primaryColor: '#3a0ca3',
-                            secondaryColor: '#f72585',
-                            sidebarBgColor: '#1a1a1a',
-                            headerBgColor: '#2d2d2d',
-                            menuTextColor: '#ffffff',
-                            activeMenuBgColor: '#3a0ca3',
-                            fontFamily: 'Arial, sans-serif',
-                            borderRadius: '4px'
-                        },
-                        { 
-                            _id: 'theme3', 
-                            name: 'Green Nature',
-                            primaryColor: '#2a9d8f',
-                            secondaryColor: '#e9c46a',
-                            sidebarBgColor: '#f8f9fa',
-                            headerBgColor: '#ffffff',
-                            menuTextColor: '#264653',
-                            activeMenuBgColor: '#2a9d8f',
-                            fontFamily: 'Georgia, serif',
-                            borderRadius: '12px'
-                        }
-                    ];
-                    populateThemeDropdowns();
-                    displayThemesGrid();
-                    console.log('Using sample themes for demonstration');
+                    throw new Error('Invalid response format from themes API');
                 }
             } catch (error) {
                 console.error('Failed to load themes:', error);
-                themes = [
-                    { 
-                        _id: 'theme1', 
-                        name: 'Blue Ocean Theme',
-                        primaryColor: '#4361ee',
-                        secondaryColor: '#06d6a0',
-                        sidebarBgColor: '#f8f9fa',
-                        headerBgColor: '#ffffff',
-                        menuTextColor: '#2b2d42',
-                        activeMenuBgColor: '#eef2ff',
-                        fontFamily: 'Inter, sans-serif',
-                        borderRadius: '8px'
-                    }
-                ];
-                populateThemeDropdowns();
-                displayThemesGrid();
-                showNotification('⚠️ Using sample themes - API unavailable', 'warning');
+                showNotification('❌ Error loading themes from API', 'error');
+                const container = document.getElementById('themesGridContainer');
+                if (container) container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Failed to Load Themes</h3>
+                        <p>${error.message}</p>
+                        <button class="btn btn-primary" onclick="loadThemes()">
+                            <i class="fas fa-sync-alt"></i> Try Again
+                        </button>
+                    </div>
+                `;
             }
         }
 
@@ -1924,14 +1907,14 @@
 
             container.innerHTML = themes.map(theme => `
                 <div class="theme-card" onclick="editTheme('${theme._id}')">
-                    <div class="theme-preview" style="background: linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor});">
-                        <div style="position: absolute; bottom: 12px; left: 12px; right: 12px; color: white; font-weight: 600; font-size: 14px;">
+                    <div class="theme-preview" style="background: linear-gradient(135deg, ${theme.sidebarContainerBg || '#f8f9fa'}, ${theme.headerContainerBg || '#ffffff'});">
+                        <div style="position: absolute; bottom: 12px; left: 12px; right: 12px; color: ${theme.menuTextColor || '#2b2d42'}; font-weight: 600; font-size: 14px;">
                             ${theme.name}
                         </div>
                     </div>
                     <div class="theme-info">
                         <h4>${theme.name}</h4>
-                        <p>Primary: <span style="color: ${theme.primaryColor};">${theme.primaryColor}</span></p>
+                        <p>Last updated: ${new Date(theme.updatedAt || theme.createdAt || Date.now()).toLocaleDateString()}</p>
                         <div class="theme-actions">
                             <button class="btn btn-outline btn-xs" onclick="event.stopPropagation(); applyThemeToAllLocations('${theme._id}')">
                                 <i class="fas fa-layer-group"></i> Apply to All
@@ -2006,36 +1989,18 @@
 
                 showNotification(`🎨 Applying theme to location...`, 'info');
                 
-                let response;
-                
-                try {
-                    response = await apiCall('/themes/apply', {
-                        method: 'POST',
-                        body: JSON.stringify({ 
-                            locationId, 
-                            themeId
-                        })
-                    });
-                } catch (error) {
-                    try {
-                        response = await apiCall(`/by-location/${locationId}/theme`, {
-                            method: 'PUT',
-                            body: JSON.stringify({ themeId })
-                        });
-                    } catch (fallbackError) {
-                        throw new Error('Both theme apply endpoints failed');
+                const response = await apiCall('/themes/apply', {
+                    method: 'POST',
+                    body: { 
+                        locationId, 
+                        themeId
                     }
-                }
+                });
 
                 if (response.success) {
                     showNotification(`✅ Theme applied successfully!`, 'success');
-                    const locationIndex = realTimeLocations.findIndex(loc => loc.id === locationId);
-                    if (locationIndex > -1) {
-                        const theme = themes.find(t => t._id === themeId);
-                        realTimeLocations[locationIndex].currentTheme = theme;
-                    }
-                    displayRealTimeLocations();
-                    updateGlobalStats();
+                    // Refresh locations to get updated theme data
+                    await loadRealTimeLocations();
                 } else {
                     throw new Error(response.error || response.message || 'Failed to apply theme');
                 }
@@ -2126,17 +2091,13 @@
                 
                 const response = await apiCall('/themes/remove', {
                     method: 'POST',
-                    body: JSON.stringify({ locationId })
+                    body: { locationId }
                 });
 
                 if (response.success) {
                     showNotification('✅ Theme removed successfully', 'success');
-                    const locationIndex = realTimeLocations.findIndex(loc => loc.id === locationId);
-                    if (locationIndex > -1) {
-                        realTimeLocations[locationIndex].currentTheme = null;
-                    }
-                    displayRealTimeLocations();
-                    updateGlobalStats();
+                    // Refresh locations to get updated theme data
+                    await loadRealTimeLocations();
                 } else {
                     throw new Error(response.error || response.message || 'Failed to remove theme');
                 }
@@ -2190,6 +2151,8 @@
             const status = document.getElementById(`${toggleId}-status`);
             if (checkbox && status) {
                 status.textContent = checkbox.checked ? 'Enabled' : 'Disabled';
+                status.style.background = checkbox.checked ? 'rgba(6, 214, 160, 0.1)' : 'var(--gray-light)';
+                status.style.color = checkbox.checked ? 'var(--success)' : 'var(--gray)';
             }
         }
 
@@ -2255,31 +2218,17 @@
 
                 const response = await apiCall(`/access/status/${currentModalLocationId}`, {
                     method: 'PUT',
-                    body: JSON.stringify({
+                    body: {
                         themeBuilderAccess: themeBuilderAccess,
                         chatWidgetEnabled: chatWidgetEnabled
-                    })
+                    }
                 });
 
                 if (response.success) {
                     showNotification('✅ Permissions updated successfully!', 'success');
-
-                    const locIndex = realTimeLocations.findIndex(l => l.id === currentModalLocationId);
-                    if (locIndex > -1) {
-                        if (!realTimeLocations[locIndex].permissions) {
-                            realTimeLocations[locIndex].permissions = {};
-                        }
-                        if (!realTimeLocations[locIndex].permissions.chatWidget) {
-                            realTimeLocations[locIndex].permissions.chatWidget = {};
-                        }
-
-                        realTimeLocations[locIndex].permissions.themeBuilderAccess = themeBuilderAccess;
-                        realTimeLocations[locIndex].permissions.chatWidget.isActive = chatWidgetEnabled;
-                    }
-
+                    // Refresh locations to get updated permissions
+                    await loadRealTimeLocations();
                     closePermissionsModal();
-                    displayRealTimeLocations();
-                    updateGlobalStats();
                 } else {
                     throw new Error(response.message || response.error || 'Failed to update permissions');
                 }
@@ -2329,20 +2278,22 @@
 
         function populateThemeForm(theme) {
             document.getElementById('themeName').value = theme.name || '';
-            document.getElementById('primaryColor').value = theme.primaryColor || '#4361ee';
-            document.getElementById('primaryColorValue').value = theme.primaryColor || '#4361ee';
-            document.getElementById('secondaryColor').value = theme.secondaryColor || '#06d6a0';
-            document.getElementById('secondaryColorValue').value = theme.secondaryColor || '#06d6a0';
-            document.getElementById('sidebarBgColor').value = theme.sidebarBgColor || '#f8f9fa';
-            document.getElementById('sidebarBgColorValue').value = theme.sidebarBgColor || '#f8f9fa';
-            document.getElementById('headerBgColor').value = theme.headerBgColor || '#ffffff';
-            document.getElementById('headerBgColorValue').value = theme.headerBgColor || '#ffffff';
-            document.getElementById('menuTextColor').value = theme.menuTextColor || '#2b2d42';
-            document.getElementById('menuTextColorValue').value = theme.menuTextColor || '#2b2d42';
-            document.getElementById('activeMenuBgColor').value = theme.activeMenuBgColor || '#eef2ff';
-            document.getElementById('activeMenuBgColorValue').value = theme.activeMenuBgColor || '#eef2ff';
-            document.getElementById('fontFamily').value = theme.fontFamily || 'Inter, sans-serif';
-            document.getElementById('borderRadius').value = theme.borderRadius || '8px';
+            
+            // Set all color values from theme
+            const colorFields = [
+                'sidebarContainerBg', 'headerContainerBg', 'menuTextColor', 'activeMenuBg',
+                'locationSwitcherBg', 'locationTextColor', 'searchBarBg', 'searchPlaceholderColor',
+                'cardHeaderBg', 'cardHeaderTextColor', 'mainContainerBg', 'dividerColor'
+            ];
+            
+            colorFields.forEach(field => {
+                const input = document.getElementById(field);
+                const valueInput = document.getElementById(field + 'Value');
+                if (input && valueInput && theme[field]) {
+                    input.value = theme[field];
+                    valueInput.value = theme[field];
+                }
+            });
 
             updateColorPickers();
             updateLivePreview();
@@ -2350,60 +2301,86 @@
 
         function resetThemeForm() {
             document.getElementById('themeName').value = '';
-            document.getElementById('primaryColor').value = '#4361ee';
-            document.getElementById('primaryColorValue').value = '#4361ee';
-            document.getElementById('secondaryColor').value = '#06d6a0';
-            document.getElementById('secondaryColorValue').value = '#06d6a0';
-            document.getElementById('sidebarBgColor').value = '#f8f9fa';
-            document.getElementById('sidebarBgColorValue').value = '#f8f9fa';
-            document.getElementById('headerBgColor').value = '#ffffff';
-            document.getElementById('headerBgColorValue').value = '#ffffff';
-            document.getElementById('menuTextColor').value = '#2b2d42';
-            document.getElementById('menuTextColorValue').value = '#2b2d42';
-            document.getElementById('activeMenuBgColor').value = '#eef2ff';
-            document.getElementById('activeMenuBgColorValue').value = '#eef2ff';
-            document.getElementById('fontFamily').value = 'Inter, sans-serif';
-            document.getElementById('borderRadius').value = '8px';
+            
+            // Reset all color values to defaults
+            const defaultColors = {
+                'sidebarContainerBg': '#f8f9fa',
+                'headerContainerBg': '#ffffff',
+                'menuTextColor': '#2b2d42',
+                'activeMenuBg': '#fdfafa',
+                'locationSwitcherBg': '#ffffff',
+                'locationTextColor': '#2b2d42',
+                'searchBarBg': '#ffffff',
+                'searchPlaceholderColor': '#6c757d',
+                'cardHeaderBg': '#000000',
+                'cardHeaderTextColor': '#ffffff',
+                'mainContainerBg': '#ffffff',
+                'dividerColor': '#2b2d42'
+            };
+            
+            Object.keys(defaultColors).forEach(field => {
+                const input = document.getElementById(field);
+                const valueInput = document.getElementById(field + 'Value');
+                if (input && valueInput) {
+                    input.value = defaultColors[field];
+                    valueInput.value = defaultColors[field];
+                }
+            });
 
             updateColorPickers();
             updateLivePreview();
         }
 
         function updateColorPickers() {
-            const primaryColor = document.getElementById('primaryColor').value;
-            const secondaryColor = document.getElementById('secondaryColor').value;
-            const sidebarBgColor = document.getElementById('sidebarBgColor').value;
-            const headerBgColor = document.getElementById('headerBgColor').value;
-            const menuTextColor = document.getElementById('menuTextColor').value;
-            const activeMenuBgColor = document.getElementById('activeMenuBgColor').value;
-
-            document.querySelector('#primaryColor').parentElement.style.background = primaryColor;
-            document.querySelector('#secondaryColor').parentElement.style.background = secondaryColor;
-            document.querySelector('#sidebarBgColor').parentElement.style.background = sidebarBgColor;
-            document.querySelector('#headerBgColor').parentElement.style.background = headerBgColor;
-            document.querySelector('#menuTextColor').parentElement.style.background = menuTextColor;
-            document.querySelector('#activeMenuBgColor').parentElement.style.background = activeMenuBgColor;
+            const colorFields = [
+                'sidebarContainerBg', 'headerContainerBg', 'menuTextColor', 'activeMenuBg',
+                'locationSwitcherBg', 'locationTextColor', 'searchBarBg', 'searchPlaceholderColor',
+                'cardHeaderBg', 'cardHeaderTextColor', 'mainContainerBg', 'dividerColor'
+            ];
+            
+            colorFields.forEach(field => {
+                const input = document.getElementById(field);
+                const picker = input?.parentElement;
+                if (picker && input.value) {
+                    picker.style.background = input.value;
+                }
+            });
         }
 
         function updateLivePreview() {
-            const primaryColor = document.getElementById('primaryColor').value;
-            const secondaryColor = document.getElementById('secondaryColor').value;
-            const sidebarBgColor = document.getElementById('sidebarBgColor').value;
-            const headerBgColor = document.getElementById('headerBgColor').value;
+            const sidebarContainerBg = document.getElementById('sidebarContainerBg').value;
+            const headerContainerBg = document.getElementById('headerContainerBg').value;
             const menuTextColor = document.getElementById('menuTextColor').value;
-            const activeMenuBgColor = document.getElementById('activeMenuBgColor').value;
-            const fontFamily = document.getElementById('fontFamily').value;
-            const borderRadius = document.getElementById('borderRadius').value;
+            const activeMenuBg = document.getElementById('activeMenuBg').value;
+            const locationSwitcherBg = document.getElementById('locationSwitcherBg').value;
+            const locationTextColor = document.getElementById('locationTextColor').value;
+            const searchBarBg = document.getElementById('searchBarBg').value;
+            const searchPlaceholderColor = document.getElementById('searchPlaceholderColor').value;
+            const cardHeaderBg = document.getElementById('cardHeaderBg').value;
+            const cardHeaderTextColor = document.getElementById('cardHeaderTextColor').value;
+            const mainContainerBg = document.getElementById('mainContainerBg').value;
+            const dividerColor = document.getElementById('dividerColor').value;
 
             const preview = document.getElementById('liveThemePreview');
             preview.innerHTML = `
-                <div class="ghl-sidebar" style="background: ${sidebarBgColor}; font-family: ${fontFamily};">
-                    <div class="ghl-sidebar-header" style="background: ${headerBgColor};">
-                        <div style="font-weight: 600; color: ${menuTextColor};">Location Name</div>
+                <div class="ghl-sidebar" style="background: ${sidebarContainerBg};">
+                    <div class="ghl-sidebar-header" style="background: ${headerContainerBg};">
+                        <div style="font-weight: 600; color: ${menuTextColor};">Business Name</div>
                     </div>
+                    
+                    <div class="ghl-location-switcher" style="background: ${locationSwitcherBg};">
+                        <div class="ghl-switcher-loc-name" style="color: ${locationTextColor};">Main Location</div>
+                        <div class="ghl-switcher-loc-city" style="color: ${locationTextColor};">New York, NY</div>
+                    </div>
+                    
+                    <div class="ghl-search-bar" style="background: ${searchBarBg};">
+                        <i class="fas fa-search" style="color: ${searchPlaceholderColor};"></i>
+                        <span class="ghl-search-placeholder" style="color: ${searchPlaceholderColor};">Search...</span>
+                    </div>
+                    
                     <div class="ghl-sidebar-nav">
-                        <div class="ghl-nav-item active" style="background: ${activeMenuBgColor}; border-right: 3px solid ${primaryColor};">
-                            <i class="fas fa-home" style="color: ${primaryColor};"></i>
+                        <div class="ghl-nav-item active" style="background: ${activeMenuBg};">
+                            <i class="fas fa-home" style="color: ${menuTextColor};"></i>
                             <span class="ghl-nav-title" style="color: ${menuTextColor};">Dashboard</span>
                         </div>
                         <div class="ghl-nav-item">
@@ -2420,19 +2397,19 @@
                         </div>
                     </div>
                 </div>
-                <div class="ghl-main-content">
-                    <div class="ghl-card" style="border-radius: ${borderRadius};">
-                        <div class="ghl-card-header" style="background: ${primaryColor}; color: white;">
-                            Card Header
+                <div class="ghl-main-content" style="background: ${mainContainerBg};">
+                    <div class="ghl-card">
+                        <div class="ghl-card-header" style="background: ${cardHeaderBg}; color: ${cardHeaderTextColor};">
+                            Dashboard Overview
                         </div>
                         <div class="ghl-card-body">
-                            <p style="color: ${menuTextColor}; margin-bottom: 12px;">This is a sample card with your theme colors applied.</p>
-                            <button class="ghl-btn ghl-btn-primary" style="background: ${primaryColor}; border-radius: ${borderRadius};">
-                                Primary Button
-                            </button>
-                            <button class="ghl-btn" style="background: ${secondaryColor}; color: white; border-radius: ${borderRadius}; margin-left: 8px;">
-                                Secondary Button
-                            </button>
+                            <p style="color: ${menuTextColor}; margin-bottom: 16px; border-bottom: 1px solid ${dividerColor}; padding-bottom: 12px;">
+                                Welcome to your GHL dashboard. This preview shows how your theme will look.
+                            </p>
+                            <div style="display: flex; gap: 12px;">
+                                <button class="ghl-btn ghl-btn-primary">Primary Action</button>
+                                <button class="ghl-btn" style="border: 1px solid ${dividerColor}; color: ${menuTextColor};">Secondary Action</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2448,14 +2425,18 @@
 
             const themeData = {
                 name: name,
-                primaryColor: document.getElementById('primaryColor').value,
-                secondaryColor: document.getElementById('secondaryColor').value,
-                sidebarBgColor: document.getElementById('sidebarBgColor').value,
-                headerBgColor: document.getElementById('headerBgColor').value,
+                sidebarContainerBg: document.getElementById('sidebarContainerBg').value,
+                headerContainerBg: document.getElementById('headerContainerBg').value,
                 menuTextColor: document.getElementById('menuTextColor').value,
-                activeMenuBgColor: document.getElementById('activeMenuBgColor').value,
-                fontFamily: document.getElementById('fontFamily').value,
-                borderRadius: document.getElementById('borderRadius').value
+                activeMenuBg: document.getElementById('activeMenuBg').value,
+                locationSwitcherBg: document.getElementById('locationSwitcherBg').value,
+                locationTextColor: document.getElementById('locationTextColor').value,
+                searchBarBg: document.getElementById('searchBarBg').value,
+                searchPlaceholderColor: document.getElementById('searchPlaceholderColor').value,
+                cardHeaderBg: document.getElementById('cardHeaderBg').value,
+                cardHeaderTextColor: document.getElementById('cardHeaderTextColor').value,
+                mainContainerBg: document.getElementById('mainContainerBg').value,
+                dividerColor: document.getElementById('dividerColor').value
             };
 
             try {
@@ -2465,12 +2446,12 @@
                 if (currentEditingTheme) {
                     response = await apiCall(`/themes/${currentEditingTheme}`, {
                         method: 'PUT',
-                        body: JSON.stringify(themeData)
+                        body: themeData
                     });
                 } else {
                     response = await apiCall('/themes', {
                         method: 'POST',
-                        body: JSON.stringify(themeData)
+                        body: themeData
                     });
                 }
 
@@ -2487,24 +2468,7 @@
                 }
             } catch (error) {
                 console.error('Save theme error:', error);
-                
-                if (error.message.includes('API')) {
-                    const newTheme = {
-                        _id: 'theme_' + Date.now(),
-                        ...themeData
-                    };
-                    themes.push(newTheme);
-                    populateThemeDropdowns();
-                    displayThemesGrid();
-                    showNotification(`✅ Theme ${currentEditingTheme ? 'updated' : 'created'} successfully!`, 'success');
-                    closeCreateThemeModal();
-                    
-                    if (!currentEditingTheme) {
-                        showViewThemes();
-                    }
-                } else {
-                    showNotification(`❌ Error: ${error.message}`, 'error');
-                }
+                showNotification(`❌ Error: ${error.message}`, 'error');
             }
         }
 
@@ -2516,7 +2480,7 @@
             const theme = themes.find(t => t._id === themeId);
             if (!theme) return;
 
-            const confirmDelete = confirm(`Are you sure you want to delete the theme "${theme.name}"?`);
+            const confirmDelete = confirm(`Are you sure you want to delete the theme "${theme.name}"? This action cannot be undone.`);
             if (!confirmDelete) return;
 
             try {
@@ -2534,15 +2498,7 @@
                 }
             } catch (error) {
                 console.error('Delete theme error:', error);
-                
-                if (error.message.includes('API')) {
-                    themes = themes.filter(t => t._id !== themeId);
-                    populateThemeDropdowns();
-                    displayThemesGrid();
-                    showNotification('✅ Theme deleted successfully!', 'success');
-                } else {
-                    showNotification(`❌ Error: ${error.message}`, 'error');
-                }
+                showNotification(`❌ Error: ${error.message}`, 'error');
             }
         }
 
@@ -2605,20 +2561,21 @@
 
             // Color picker event listeners
             const colorInputs = [
-                'primaryColor', 'secondaryColor', 'sidebarBgColor', 
-                'headerBgColor', 'menuTextColor', 'activeMenuBgColor'
+                'sidebarContainerBg', 'headerContainerBg', 'menuTextColor', 'activeMenuBg',
+                'locationSwitcherBg', 'locationTextColor', 'searchBarBg', 'searchPlaceholderColor',
+                'cardHeaderBg', 'cardHeaderTextColor', 'mainContainerBg', 'dividerColor'
             ];
             
             colorInputs.forEach(inputId => {
-                document.getElementById(inputId).addEventListener('input', (e) => {
-                    document.getElementById(inputId + 'Value').value = e.target.value;
-                    updateColorPickers();
-                    updateLivePreview();
-                });
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.addEventListener('input', (e) => {
+                        document.getElementById(inputId + 'Value').value = e.target.value;
+                        updateColorPickers();
+                        updateLivePreview();
+                    });
+                }
             });
-
-            document.getElementById('fontFamily').addEventListener('change', updateLivePreview);
-            document.getElementById('borderRadius').addEventListener('change', updateLivePreview);
 
             window.addEventListener('click', (event) => {
                 const modals = ['themeModal', 'permissionsModal', 'createThemeModal'];
