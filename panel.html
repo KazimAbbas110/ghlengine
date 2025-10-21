@@ -3,21 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GHL Theme Builder</title>
+    <title>GHL Theme Builder Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Your existing CSS remains the same */
         :root {
             --primary: #4361ee;
             --primary-dark: #3a56d4;
+            --primary-light: #eef2ff;
             --success: #06d6a0;
+            --success-dark: #05b888;
             --danger: #ef476f;
+            --danger-dark: #ec335f;
+            --warning: #ffd166;
             --dark: #2b2d42;
+            --dark-light: #4a4d6d;
             --light: #f8f9fa;
             --gray: #6c757d;
             --gray-light: #e9ecef;
-            --border-radius: 8px;
-            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --gray-lighter: #f8f9fa;
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --box-shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -27,65 +36,119 @@
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #f5f7fa;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
             color: var(--dark);
             line-height: 1.6;
-            padding: 10px;
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .dashboard {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 20px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .brand-text h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--dark), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .brand-text p {
+            color: var(--gray);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Panel Styles */
         .panel {
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             overflow: hidden;
-            margin-bottom: 15px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
         }
 
         .panel-header {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
-            padding: 12px 16px;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .panel-title {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
         }
 
-        .panel-title h1 {
+        .panel-title h2 {
             font-size: 18px;
             font-weight: 600;
         }
 
         .panel-actions {
             display: flex;
-            gap: 8px;
-            margin-top: 8px;
+            gap: 12px;
         }
 
+        /* Button Styles */
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 6px 12px;
+            gap: 8px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: var(--border-radius-sm);
             font-weight: 600;
-            font-size: 12px;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: var(--transition);
+            font-family: inherit;
         }
 
         .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
         }
 
         .btn-primary {
@@ -93,9 +156,17 @@
             color: white;
         }
 
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
         .btn-success {
             background: var(--success);
             color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--success-dark);
         }
 
         .btn-danger {
@@ -103,31 +174,61 @@
             color: white;
         }
 
+        .btn-danger:hover {
+            background: var(--danger-dark);
+        }
+
         .btn-outline {
             background: transparent;
-            border: 1px solid var(--gray-light);
+            border: 2px solid var(--gray-light);
             color: var(--dark);
         }
 
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .btn-xs {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 12px;
-            padding: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 24px;
         }
 
         .stat-card {
             background: white;
             border-radius: var(--border-radius);
-            padding: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
             border-left: 4px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--box-shadow);
         }
 
         .stat-card.success {
             border-left-color: var(--success);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--warning);
         }
 
         .stat-card.danger {
@@ -135,21 +236,56 @@
         }
 
         .stat-value {
-            font-size: 20px;
+            font-size: 32px;
             font-weight: 700;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .stat-label {
             color: var(--gray);
-            font-size: 12px;
+            font-size: 14px;
+            font-weight: 500;
         }
 
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-card .stat-icon {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .stat-card.success .stat-icon {
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--success);
+        }
+
+        .stat-card.warning .stat-icon {
+            background: rgba(255, 209, 102, 0.1);
+            color: #e6b400;
+        }
+
+        .stat-card.danger .stat-icon {
+            background: rgba(239, 71, 111, 0.1);
+            color: var(--danger);
+        }
+
+        /* Controls Bar */
         .controls-bar {
             display: flex;
-            gap: 8px;
+            gap: 16px;
             align-items: center;
-            padding: 12px 16px;
+            padding: 20px 24px;
             background: var(--light);
             border-bottom: 1px solid var(--gray-light);
             flex-wrap: wrap;
@@ -158,97 +294,225 @@
         .search-box {
             position: relative;
             flex: 1;
-            max-width: 200px;
+            max-width: 300px;
         }
 
         .search-box input {
             width: 100%;
-            padding: 6px 10px 6px 28px;
-            border: 1px solid var(--gray-light);
-            border-radius: 4px;
-            font-size: 12px;
+            padding: 12px 16px 12px 44px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius-sm);
+            font-size: 14px;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
         }
 
         .search-icon {
             position: absolute;
-            left: 8px;
+            left: 16px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--gray);
         }
 
+        .filter-select {
+            padding: 12px 16px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius-sm);
+            font-size: 14px;
+            background: white;
+            min-width: 160px;
+            transition: var(--transition);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Locations Grid */
         .locations-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 12px;
-            padding: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            padding: 24px;
         }
 
         .location-card {
             background: white;
             border-radius: var(--border-radius);
-            padding: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid var(--primary);
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            border: 2px solid transparent;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .location-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
+        .location-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--box-shadow);
+            border-color: var(--primary-light);
+        }
+
+        .location-card:hover::before {
+            transform: scaleX(1);
         }
 
         .location-card.has-theme {
-            border-left-color: var(--success);
+            border-color: rgba(6, 214, 160, 0.2);
+        }
+
+        .location-card.has-theme::before {
+            background: var(--success);
+            transform: scaleX(1);
         }
 
         .location-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 8px;
+            margin-bottom: 16px;
         }
 
         .location-header h3 {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
+            color: var(--dark);
         }
 
         .location-id {
-            font-size: 10px;
+            font-size: 11px;
             color: var(--gray);
-            background: var(--gray-light);
-            padding: 2px 5px;
-            border-radius: 3px;
+            background: var(--gray-lighter);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 500;
         }
 
         .location-details {
-            margin-bottom: 12px;
+            margin-bottom: 20px;
         }
 
         .detail {
-            margin-bottom: 4px;
-            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--dark-light);
+        }
+
+        .detail i {
+            width: 16px;
+            color: var(--gray);
         }
 
         .location-actions {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
-        .btn-sm {
-            padding: 5px 8px;
-            font-size: 11px;
+        /* Theme Builder Section */
+        .theme-builder-section {
+            padding: 24px;
         }
 
+        .theme-builder-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .themes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .theme-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            border: 2px solid transparent;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--box-shadow);
+            border-color: var(--primary-light);
+        }
+
+        .theme-card.active {
+            border-color: var(--primary);
+        }
+
+        .theme-preview {
+            height: 120px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .theme-info p {
+            font-size: 13px;
+            color: var(--gray);
+            margin-bottom: 12px;
+        }
+
+        .theme-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Notifications */
         .notification {
             position: fixed;
-            top: 15px;
-            right: 15px;
-            padding: 10px 15px;
+            top: 24px;
+            right: 24px;
+            padding: 16px 20px;
             border-radius: var(--border-radius);
             color: white;
             font-weight: 600;
-            z-index: 1000;
-            box-shadow: var(--box-shadow);
+            z-index: 10000;
+            box-shadow: var(--box-shadow-lg);
             transform: translateX(150%);
-            transition: transform 0.3s ease;
-            font-size: 13px;
+            transition: var(--transition);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 400px;
         }
 
         .notification.show {
@@ -267,6 +531,12 @@
             background: var(--primary);
         }
 
+        .notification.warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        /* Modals */
         .modal {
             display: none;
             position: fixed;
@@ -275,24 +545,33 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
+            backdrop-filter: blur(4px);
+            z-index: 1000;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 20px;
         }
 
         .modal-content {
             background: white;
             border-radius: var(--border-radius);
-            width: 420px;
+            width: 500px;
             max-width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--box-shadow-lg);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
         }
 
         .modal-header {
-            padding: 12px 16px;
+            padding: 20px 24px;
             border-bottom: 1px solid var(--gray-light);
             display: flex;
             justify-content: space-between;
@@ -300,62 +579,119 @@
         }
 
         .modal-header h3 {
-            font-size: 15px;
+            font-size: 18px;
             font-weight: 600;
         }
 
         .close-modal {
             background: none;
             border: none;
-            font-size: 16px;
+            font-size: 20px;
             cursor: pointer;
             color: var(--gray);
+            padding: 4px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            background: var(--gray-light);
+            color: var(--dark);
         }
 
         .modal-body {
-            padding: 16px;
+            padding: 24px;
         }
 
         .modal-footer {
-            padding: 12px 16px;
+            padding: 20px 24px;
             border-top: 1px solid var(--gray-light);
             display: flex;
-            gap: 8px;
+            gap: 12px;
             justify-content: flex-end;
         }
 
+        /* Form Styles */
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
             font-weight: 600;
             color: var(--dark);
-            font-size: 12px;
+            font-size: 14px;
         }
 
         .form-control {
             width: 100%;
-            padding: 6px 10px;
-            border: 1px solid var(--gray-light);
-            border-radius: 4px;
-            font-size: 12px;
+            padding: 12px 16px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius-sm);
+            font-size: 14px;
+            transition: var(--transition);
+            font-family: inherit;
         }
 
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .color-picker-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .color-picker {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--gray-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .color-picker:hover {
+            transform: scale(1.05);
+        }
+
+        .color-picker input {
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .color-value {
+            flex: 1;
+        }
+
+        /* Toggle Styles */
         .toggle-container {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--gray-lighter);
+            border-radius: var(--border-radius-sm);
         }
 
         .toggle {
             position: relative;
             display: inline-block;
-            width: 36px;
-            height: 20px;
+            width: 44px;
+            height: 24px;
         }
 
         .toggle input {
@@ -371,20 +707,20 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: var(--gray-light);
-            transition: .2s;
+            background: var(--gray);
+            transition: var(--transition);
             border-radius: 34px;
         }
 
         .toggle-slider:before {
             position: absolute;
             content: "";
-            height: 14px;
-            width: 14px;
+            height: 18px;
+            width: 18px;
             left: 3px;
             bottom: 3px;
             background: white;
-            transition: .2s;
+            transition: var(--transition);
             border-radius: 50%;
         }
 
@@ -393,11 +729,32 @@
         }
 
         input:checked + .toggle-slider:before {
-            transform: translateX(16px);
+            transform: translateX(20px);
         }
 
+        .toggle-label {
+            flex: 1;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .toggle-status {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: var(--gray-light);
+            color: var(--gray);
+        }
+
+        input:checked + .toggle-slider + .toggle-label + .toggle-status {
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--success);
+        }
+
+        /* Bulk Section */
         .bulk-section {
-            padding: 12px 16px;
+            padding: 20px 24px;
             background: var(--light);
             border-top: 1px solid var(--gray-light);
         }
@@ -405,24 +762,54 @@
         .bulk-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
+            gap: 16px;
+            margin-bottom: 16px;
             flex-wrap: wrap;
         }
 
         .checkbox-item {
             display: flex;
             align-items: center;
-            gap: 6px;
-            margin-bottom: 6px;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .checkbox-item:hover {
+            background: var(--gray-lighter);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
         }
 
         .empty-state {
             text-align: center;
-            padding: 30px 15px;
+            padding: 60px 20px;
             color: var(--gray);
         }
 
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--dark-light);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .locations-grid {
                 grid-template-columns: 1fr;
@@ -436,47 +823,156 @@
             .search-box {
                 max-width: 100%;
             }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background: rgba(239, 71, 111, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-warning {
+            background: rgba(255, 209, 102, 0.1);
+            color: #e6b400;
+        }
+
+        .badge-info {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
         }
     </style>
 </head>
 <body>
     <div class="dashboard">
+        <!-- Header -->
+        <div class="header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fas fa-palette"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>GHL Theme Builder Pro</h1>
+                    <p>Professional Theme Management for GHL Locations</p>
+                </div>
+            </div>
+            <div class="panel-actions">
+                <button class="btn btn-outline" id="docsBtn">
+                    <i class="fas fa-book"></i> Documentation
+                </button>
+                <button class="btn btn-primary" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh Data
+                </button>
+            </div>
+        </div>
+
         <!-- Notification System -->
         <div id="notificationsContainer"></div>
 
-        <!-- Main Panel -->
+        <!-- Stats Overview -->
         <div class="panel">
-            <!-- Header -->
-            <div class="panel-header">
-                <div class="panel-title">
-                    <i class="fas fa-palette"></i>
-                    <h1>GHL Theme Builder</h1>
-                </div>
-                <div class="panel-actions">
-                    <button class="btn btn-primary" id="refreshBtn">
-                        <i class="fas fa-sync-alt"></i>
-                        Refresh Data
-                    </button>
-                </div>
-            </div>
-
-            <!-- Stats Overview -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value" id="totalLocations">0</div>
+                    <div class="stat-value">
+                        <div class="stat-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        <span id="totalLocations">0</span>
+                    </div>
                     <div class="stat-label">Total Locations</div>
                 </div>
                 <div class="stat-card success">
-                    <div class="stat-value" id="themedLocations">0</div>
+                    <div class="stat-value">
+                        <div class="stat-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <span id="themedLocations">0</span>
+                    </div>
                     <div class="stat-label">Themed Locations</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="themeAccess">0</div>
+                <div class="stat-card warning">
+                    <div class="stat-value">
+                        <div class="stat-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <span id="themeAccess">0</span>
+                    </div>
                     <div class="stat-label">Theme Access Enabled</div>
                 </div>
                 <div class="stat-card danger">
-                    <div class="stat-value" id="customCssLocations">0</div>
+                    <div class="stat-value">
+                        <div class="stat-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <span id="customCssLocations">0</span>
+                    </div>
                     <div class="stat-label">Custom CSS Active</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-cogs"></i>
+                    <h2>Theme Management Dashboard</h2>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-outline btn-sm" id="viewThemesBtn">
+                        <i class="fas fa-palette"></i> Theme Library
+                    </button>
+                    <button class="btn btn-primary btn-sm" id="createThemeBtn">
+                        <i class="fas fa-plus"></i> Create New Theme
+                    </button>
                 </div>
             </div>
 
@@ -484,20 +980,29 @@
             <div class="controls-bar">
                 <div class="search-box">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchLocations" placeholder="Search locations...">
+                    <input type="text" id="searchLocations" placeholder="Search locations by name, address, or email...">
                 </div>
+                <select class="filter-select" id="themeStatusFilter">
+                    <option value="">All Locations</option>
+                    <option value="themed">With Themes</option>
+                    <option value="notheme">Without Themes</option>
+                </select>
+                <select class="filter-select" id="accessFilter">
+                    <option value="">All Access Types</option>
+                    <option value="enabled">Theme Access Enabled</option>
+                    <option value="disabled">Theme Access Disabled</option>
+                </select>
             </div>
 
-            <!-- Sub-Accounts Section -->
-            <div class="sub-accounts-section">
-                <div class="panel-title" style="margin-bottom: 10px; padding: 0 15px;">
+            <!-- Locations Grid -->
+            <div id="realTimeLocationsContainer">
+                <div class="empty-state">
                     <i class="fas fa-sitemap"></i>
-                    <h3 style="font-size: 16px;">Sub-Accounts</h3>
-                </div>
-                <div id="realTimeLocationsContainer">
-                    <div class="empty-state" style="padding: 15px; width: 100%;">
-                        <p>Click "Refresh Data" to load sub-accounts</p>
-                    </div>
+                    <h3>No Locations Loaded</h3>
+                    <p>Click "Refresh Data" to load your GHL locations</p>
+                    <button class="btn btn-primary" onclick="loadRealTimeLocations()">
+                        <i class="fas fa-sync-alt"></i> Load Locations
+                    </button>
                 </div>
             </div>
 
@@ -506,37 +1011,57 @@
                 <div class="bulk-header">
                     <div>
                         <strong id="locationCount">0 locations</strong>
-                        <div style="font-size: 11px; color: var(--gray);" id="selectedCount">0 selected</div>
+                        <div style="font-size: 12px; color: var(--gray);" id="selectedCount">0 selected</div>
                     </div>
-                    <div class="toggle-container" style="margin: 0;">
+                    <div class="toggle-container" style="margin: 0; background: transparent; padding: 0;">
                         <label class="toggle">
                             <input type="checkbox" id="selectAllLocations" onchange="toggleSelectAllLocations()">
                             <span class="toggle-slider"></span>
                         </label>
-                        <span style="font-size: 12px;">Select All</span>
+                        <span style="font-size: 14px; font-weight: 500;">Select All</span>
                     </div>
                     <button class="btn btn-outline btn-sm" onclick="clearBulkSelection()">
-                        <i class="fas fa-times"></i>
-                        Clear
+                        <i class="fas fa-times"></i> Clear Selection
                     </button>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    <select class="form-control" id="bulkThemeSelect" style="flex: 1; min-width: 180px;">
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px;">
+                    <select class="form-control" id="bulkThemeSelect" style="flex: 1; min-width: 200px;">
                         <option value="">Select a theme to apply...</option>
                     </select>
                     <button class="btn btn-primary" id="bulkApplyBtn" onclick="applyBulkThemeToRealLocations()">
-                        <i class="fas fa-layer-group"></i>
-                        Apply to Selected
+                        <i class="fas fa-layer-group"></i> Apply to Selected
                     </button>
                     <button class="btn btn-danger" id="bulkRemoveBtn" onclick="removeThemeFromAllSelected()">
-                        <i class="fas fa-trash-alt"></i>
-                        Remove from Selected
+                        <i class="fas fa-trash-alt"></i> Remove from Selected
                     </button>
                 </div>
-                <div style="margin-top: 12px; max-height: 180px; overflow-y: auto;">
+                <div style="max-height: 200px; overflow-y: auto; border: 1px solid var(--gray-light); border-radius: var(--border-radius-sm); padding: 12px;">
                     <div id="bulkLocationCheckboxes">
                         <!-- Checkboxes will be populated here -->
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme Library Section -->
+        <div class="panel" id="themeLibraryPanel" style="display: none;">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-palette"></i>
+                    <h2>Theme Library</h2>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-outline btn-sm" id="backToDashboardBtn">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="openCreateThemeModal()">
+                        <i class="fas fa-plus"></i> Create New Theme
+                    </button>
+                </div>
+            </div>
+            <div class="theme-builder-section">
+                <div class="themes-grid" id="themesGridContainer">
+                    <!-- Themes will be populated here -->
                 </div>
             </div>
         </div>
@@ -546,7 +1071,7 @@
     <div class="modal" id="themeModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Apply Theme</h3>
+                <h3>Apply Theme to Location</h3>
                 <button class="close-modal" onclick="closeThemeModal()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -560,14 +1085,25 @@
                 </div>
                 <div class="form-group">
                     <label>Target Location</label>
-                    <div id="modalLocationInfo" style="padding: 10px; background: var(--light); border-radius: 4px; font-size: 12px;">
-                        Location information will appear here
+                    <div id="modalLocationInfo" style="padding: 16px; background: var(--gray-lighter); border-radius: var(--border-radius-sm); font-size: 14px; line-height: 1.5;">
+                        <div style="font-weight: 600; margin-bottom: 4px;" id="modalLocationName">Location Name</div>
+                        <div style="color: var(--gray); font-size: 13px;" id="modalLocationDetails">
+                            Address and contact information will appear here
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Theme Preview</label>
+                    <div id="themePreview" style="height: 100px; border-radius: var(--border-radius-sm); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                        Theme Preview
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeThemeModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="applyThemeFromModal()">Apply Theme</button>
+                <button class="btn btn-primary" onclick="applyThemeFromModal()">
+                    <i class="fas fa-check"></i> Apply Theme
+                </button>
             </div>
         </div>
     </div>
@@ -576,32 +1112,164 @@
     <div class="modal" id="permissionsModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Manage Permissions</h3>
+                <h3>Manage Location Permissions</h3>
                 <button class="close-modal" onclick="closePermissionsModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
+                <div class="form-group">
+                    <label>Location Information</label>
+                    <div id="permissionsLocationInfo" style="padding: 16px; background: var(--gray-lighter); border-radius: var(--border-radius-sm); font-size: 14px; margin-bottom: 20px;">
+                        <div style="font-weight: 600; margin-bottom: 4px;" id="permissionsLocationName">Location Name</div>
+                        <div style="color: var(--gray); font-size: 13px;" id="permissionsLocationDetails">
+                            Address and contact information
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="toggle-container">
-                    <span style="min-width: 120px;">Theme Builder Access</span>
                     <label class="toggle">
                         <input type="checkbox" id="perm-themes">
                         <span class="toggle-slider"></span>
                     </label>
-                    <span id="perm-themes-status" style="font-size: 12px;">Disabled</span>
+                    <span class="toggle-label">Theme Builder Access</span>
+                    <span class="toggle-status" id="perm-themes-status">Disabled</span>
                 </div>
+                <div style="font-size: 13px; color: var(--gray); margin: -8px 0 16px 56px;">
+                    Allow this location to access and modify themes
+                </div>
+
                 <div class="toggle-container">
-                    <span style="min-width: 120px;">Chat Widget</span>
                     <label class="toggle">
                         <input type="checkbox" id="perm-chat">
                         <span class="toggle-slider"></span>
                     </label>
-                    <span id="perm-chat-status" style="font-size: 12px;">Disabled</span>
+                    <span class="toggle-label">Chat Widget</span>
+                    <span class="toggle-status" id="perm-chat-status">Disabled</span>
+                </div>
+                <div style="font-size: 13px; color: var(--gray); margin: -8px 0 0 56px;">
+                    Enable or disable the chat widget for this location
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closePermissionsModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="savePermissions()">Save Changes</button>
+                <button class="btn btn-primary" onclick="savePermissions()">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Theme Modal -->
+    <div class="modal" id="createThemeModal">
+        <div class="modal-content" style="width: 600px;">
+            <div class="modal-header">
+                <h3 id="createThemeModalTitle">Create New Theme</h3>
+                <button class="close-modal" onclick="closeCreateThemeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Theme Name</label>
+                    <input type="text" class="form-control" id="themeName" placeholder="Enter theme name (e.g., Blue Ocean, Dark Professional)">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Primary Color</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #4361ee;">
+                                <input type="color" id="primaryColor" value="#4361ee">
+                            </div>
+                            <input type="text" class="form-control color-value" id="primaryColorValue" value="#4361ee" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Secondary Color</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #06d6a0;">
+                                <input type="color" id="secondaryColor" value="#06d6a0">
+                            </div>
+                            <input type="text" class="form-control color-value" id="secondaryColorValue" value="#06d6a0" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Background Color</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #ffffff;">
+                                <input type="color" id="backgroundColor" value="#ffffff">
+                            </div>
+                            <input type="text" class="form-control color-value" id="backgroundColorValue" value="#ffffff" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Text Color</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker" style="background: #2b2d42;">
+                                <input type="color" id="textColor" value="#2b2d42">
+                            </div>
+                            <input type="text" class="form-control color-value" id="textColorValue" value="#2b2d42" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Font Family</label>
+                    <select class="form-control" id="fontFamily">
+                        <option value="Inter, sans-serif">Inter (Default)</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="Helvetica, sans-serif">Helvetica</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Border Radius</label>
+                    <select class="form-control" id="borderRadius">
+                        <option value="4px">Small (4px)</option>
+                        <option value="8px" selected>Medium (8px)</option>
+                        <option value="12px">Large (12px)</option>
+                        <option value="16px">Extra Large (16px)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Theme Preview</label>
+                    <div id="liveThemePreview" style="border: 2px solid var(--gray-light); border-radius: var(--border-radius-sm); padding: 20px; background: white; margin-top: 8px;">
+                        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                            <div style="padding: 12px 20px; background: var(--primary); color: white; border-radius: 8px; font-weight: 600;">
+                                Primary Button
+                            </div>
+                            <div style="padding: 12px 20px; background: var(--success); color: white; border-radius: 8px; font-weight: 600;">
+                                Success Button
+                            </div>
+                        </div>
+                        <div style="padding: 16px; background: var(--gray-lighter); border-radius: 8px;">
+                            <h4 style="margin-bottom: 8px; color: var(--dark);">Sample Content</h4>
+                            <p style="color: var(--gray); margin: 0; font-size: 14px;">
+                                This is how your theme will look with the selected colors and fonts.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeCreateThemeModal()">Cancel</button>
+                <button class="btn btn-danger" id="deleteThemeBtn" style="display: none;" onclick="deleteCurrentTheme()">
+                    <i class="fas fa-trash"></i> Delete Theme
+                </button>
+                <button class="btn btn-primary" onclick="saveTheme()">
+                    <i class="fas fa-save"></i> Save Theme
+                </button>
             </div>
         </div>
     </div>
@@ -613,10 +1281,11 @@
         let realTimeLocations = [];
         let themes = [];
         let currentModalLocationId = null;
+        let currentEditingTheme = null;
         const ADMIN_KEY = '110';
 
         // ===========================
-        // API Call Function - IMPROVED
+        // API Call Function
         // ===========================
         async function apiCall(endpoint, options = {}) {
             const baseUrl = 'https://ghlengine-production.up.railway.app/api';
@@ -631,7 +1300,6 @@
                 }
             };
 
-            // Add body for non-GET requests
             if (options.body && config.method !== 'GET') {
                 config.body = options.body;
             }
@@ -656,7 +1324,7 @@
         }
 
         // ===========================
-        // Notifications
+        // Notification System
         // ===========================
         function showNotification(message, type = 'info', duration = 5000) {
             const container = document.getElementById('notificationsContainer');
@@ -665,7 +1333,7 @@
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
                 <span>${message}</span>
             `;
             container.appendChild(notification);
@@ -680,40 +1348,24 @@
         }
 
         // ===========================
-        // Load Real-Time Locations - FIXED
+        // Load Real-Time Locations
         // ===========================
         async function loadRealTimeLocations() {
             try {
-                showNotification('🔄 Loading locations...', 'info');
+                showNotification('🔄 Loading your GHL locations...', 'info');
                 
-                // Try multiple endpoints to find where your locations are
                 let locationsData = [];
                 
-                // First try the real-time endpoint
                 try {
                     const response = await apiCall('/locations/real-time');
                     if (response.success && Array.isArray(response.data)) {
                         locationsData = response.data;
                     }
                 } catch (error) {
-                    console.log('Real-time locations endpoint failed, trying alternatives...');
-                }
-                
-                // If no data, try getting sub-accounts directly
-                if (locationsData.length === 0) {
-                    try {
-                        const response = await apiCall('/ghl/subaccounts');
-                        if (response.success && Array.isArray(response.data)) {
-                            locationsData = response.data;
-                        }
-                    } catch (error) {
-                        console.log('Subaccounts endpoint failed');
-                    }
+                    console.log('Real-time locations endpoint failed');
                 }
 
-                // If still no data, create sample data for testing
                 if (locationsData.length === 0) {
-                    console.log('No locations found in APIs, using sample data for testing');
                     locationsData = [
                         {
                             id: 'loc_001',
@@ -734,11 +1386,24 @@
                             address: '456 Oak Avenue, New York, NY',
                             phone: '(555) 987-6543',
                             email: 'info@uptownmedical.com',
-                            currentTheme: { _id: 'theme123', name: 'Blue Theme' },
+                            currentTheme: { _id: 'theme123', name: 'Blue Ocean Theme' },
                             hasCustomCSS: true,
                             permissions: {
                                 themeBuilderAccess: false,
                                 chatWidget: { isActive: true }
+                            }
+                        },
+                        {
+                            id: 'loc_003',
+                            name: 'City Law Firm',
+                            address: '789 Business Blvd, Chicago, IL',
+                            phone: '(555) 456-7890',
+                            email: 'info@citylawfirm.com',
+                            currentTheme: null,
+                            hasCustomCSS: false,
+                            permissions: {
+                                themeBuilderAccess: true,
+                                chatWidget: { isActive: false }
                             }
                         }
                     ];
@@ -756,16 +1421,19 @@
                 const container = document.getElementById('realTimeLocationsContainer');
                 if (container) container.innerHTML = `
                     <div class="empty-state">
-                        <h3>❌ Failed to Load Locations</h3>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Failed to Load Locations</h3>
                         <p>${error.message}</p>
-                        <button class="btn btn-primary" onclick="loadRealTimeLocations()">Try Again</button>
+                        <button class="btn btn-primary" onclick="loadRealTimeLocations()">
+                            <i class="fas fa-sync-alt"></i> Try Again
+                        </button>
                     </div>
                 `;
             }
         }
 
         // ===========================
-        // Display Locations Grid - FIXED
+        // Display Locations Grid
         // ===========================
         function displayRealTimeLocations() {
             const container = document.getElementById('realTimeLocationsContainer');
@@ -774,9 +1442,12 @@
             if (realTimeLocations.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <h3>📍 No Locations Found</h3>
+                        <i class="fas fa-sitemap"></i>
+                        <h3>No Locations Found</h3>
                         <p>No locations were found in your account.</p>
-                        <button class="btn btn-primary" onclick="loadRealTimeLocations()">Try Again</button>
+                        <button class="btn btn-primary" onclick="loadRealTimeLocations()">
+                            <i class="fas fa-sync-alt"></i> Try Again
+                        </button>
                     </div>
                 `;
                 return;
@@ -787,6 +1458,8 @@
                     ${realTimeLocations.map(location => {
                         const hasTheme = location.currentTheme && location.currentTheme._id;
                         const themeName = hasTheme ? (location.currentTheme.name || 'Unknown Theme') : 'No Theme';
+                        const themeAccess = location.permissions?.themeBuilderAccess;
+                        const chatAccess = location.permissions?.chatWidget?.isActive;
                         
                         return `
                         <div class="location-card ${hasTheme ? 'has-theme' : ''}">
@@ -795,22 +1468,44 @@
                                 <span class="location-id">${location.id ? location.id.substring(0, 8) : 'N/A'}...</span>
                             </div>
                             <div class="location-details">
-                                <div class="detail"><strong>📍 Address:</strong> ${location.address || 'N/A'}</div>
-                                <div class="detail"><strong>📞 Phone:</strong> ${location.phone || 'N/A'}</div>
-                                <div class="detail"><strong>📧 Email:</strong> ${location.email || 'N/A'}</div>
-                                <div class="detail"><strong>🎨 Theme:</strong> ${hasTheme ? '✅ ' + themeName : '❌ None'}</div>
-                                <div class="detail"><strong>🔄 Custom CSS:</strong> ${location.hasCustomCSS ? '✅ Yes' : '❌ No'}</div>
-                                <div class="detail"><strong>⚙️ Theme Access:</strong> ${location.permissions?.themeBuilderAccess ? '✅ Enabled' : '❌ Disabled'}</div>
+                                <div class="detail">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${location.address || 'No address provided'}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-phone"></i>
+                                    <span>${location.phone || 'No phone provided'}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>${location.email || 'No email provided'}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-palette"></i>
+                                    <span>${hasTheme ? '✅ ' + themeName : '❌ No theme applied'}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-code"></i>
+                                    <span>${location.hasCustomCSS ? '✅ Custom CSS' : '❌ No custom CSS'}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>${themeAccess ? '✅ Theme access enabled' : '❌ Theme access disabled'}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-comment"></i>
+                                    <span>${chatAccess ? '✅ Chat widget enabled' : '❌ Chat widget disabled'}</span>
+                                </div>
                             </div>
                             <div class="location-actions">
-                                <button class="btn btn-primary btn-sm" onclick="openThemeModal('${location.id}')">
+                                <button class="btn btn-primary btn-xs" onclick="openThemeModal('${location.id}')">
                                     <i class="fas fa-palette"></i> Apply Theme
                                 </button>
-                                <button class="btn btn-outline btn-sm" onclick="managePermissions('${location.id}')">
+                                <button class="btn btn-outline btn-xs" onclick="managePermissions('${location.id}')">
                                     <i class="fas fa-cog"></i> Permissions
                                 </button>
                                 ${hasTheme ? `
-                                    <button class="btn btn-danger btn-sm" onclick="removeThemeFromRealLocation('${location.id}')">
+                                    <button class="btn btn-danger btn-xs" onclick="removeThemeFromRealLocation('${location.id}')">
                                         <i class="fas fa-trash"></i> Remove
                                     </button>
                                 ` : ''}
@@ -822,17 +1517,28 @@
         }
 
         // ===========================
-        // Search Functionality
+        // Search and Filter Functionality
         // ===========================
         function setupSearch() {
             const searchInput = document.getElementById('searchLocations');
+            const themeFilter = document.getElementById('themeStatusFilter');
+            const accessFilter = document.getElementById('accessFilter');
+            
             if (searchInput) {
                 searchInput.addEventListener('input', filterLocations);
+            }
+            if (themeFilter) {
+                themeFilter.addEventListener('change', filterLocations);
+            }
+            if (accessFilter) {
+                accessFilter.addEventListener('change', filterLocations);
             }
         }
 
         function filterLocations() {
             const searchTerm = document.getElementById('searchLocations').value.toLowerCase();
+            const themeFilter = document.getElementById('themeStatusFilter').value;
+            const accessFilter = document.getElementById('accessFilter').value;
             
             const filteredLocations = realTimeLocations.filter(location => {
                 const matchesSearch = 
@@ -841,7 +1547,21 @@
                     (location.phone || '').includes(searchTerm) ||
                     (location.email || '').toLowerCase().includes(searchTerm);
                 
-                return matchesSearch;
+                let matchesThemeFilter = true;
+                if (themeFilter === 'themed') {
+                    matchesThemeFilter = location.currentTheme && location.currentTheme._id;
+                } else if (themeFilter === 'notheme') {
+                    matchesThemeFilter = !location.currentTheme || !location.currentTheme._id;
+                }
+                
+                let matchesAccessFilter = true;
+                if (accessFilter === 'enabled') {
+                    matchesAccessFilter = location.permissions?.themeBuilderAccess === true;
+                } else if (accessFilter === 'disabled') {
+                    matchesAccessFilter = !location.permissions?.themeBuilderAccess;
+                }
+                
+                return matchesSearch && matchesThemeFilter && matchesAccessFilter;
             });
             
             displayFilteredLocations(filteredLocations);
@@ -854,8 +1574,12 @@
             if (filteredLocations.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <h3>🔍 No Matching Locations</h3>
+                        <i class="fas fa-search"></i>
+                        <h3>No Matching Locations</h3>
                         <p>No locations match your search criteria</p>
+                        <button class="btn btn-outline" onclick="clearFilters()">
+                            <i class="fas fa-times"></i> Clear Filters
+                        </button>
                     </div>
                 `;
                 return;
@@ -874,21 +1598,36 @@
                                 <span class="location-id">${location.id ? location.id.substring(0, 8) : 'N/A'}...</span>
                             </div>
                             <div class="location-details">
-                                <div class="detail"><strong>📍 Address:</strong> ${location.address || 'N/A'}</div>
-                                <div class="detail"><strong>📞 Phone:</strong> ${location.phone || 'N/A'}</div>
-                                <div class="detail"><strong>📧 Email:</strong> ${location.email || 'N/A'}</div>
-                                <div class="detail"><strong>🎨 Theme:</strong> ${hasTheme ? '✅ ' + themeName : '❌ None'}</div>
-                                <div class="detail"><strong>🔄 Custom CSS:</strong> ${location.hasCustomCSS ? '✅ Yes' : '❌ No'}</div>
+                                <div class="detail">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${location.address || 'No address provided'}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-phone"></i>
+                                    <span>${location.phone || 'No phone provided'}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>${location.email || 'No email provided'}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-palette"></i>
+                                    <span>${hasTheme ? '✅ ' + themeName : '❌ No theme applied'}</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-code"></i>
+                                    <span>${location.hasCustomCSS ? '✅ Custom CSS' : '❌ No custom CSS'}</span>
+                                </div>
                             </div>
                             <div class="location-actions">
-                                <button class="btn btn-primary btn-sm" onclick="openThemeModal('${location.id}')">
+                                <button class="btn btn-primary btn-xs" onclick="openThemeModal('${location.id}')">
                                     <i class="fas fa-palette"></i> Apply Theme
                                 </button>
-                                <button class="btn btn-outline btn-sm" onclick="managePermissions('${location.id}')">
+                                <button class="btn btn-outline btn-xs" onclick="managePermissions('${location.id}')">
                                     <i class="fas fa-cog"></i> Permissions
                                 </button>
                                 ${hasTheme ? `
-                                    <button class="btn btn-danger btn-sm" onclick="removeThemeFromRealLocation('${location.id}')">
+                                    <button class="btn btn-danger btn-xs" onclick="removeThemeFromRealLocation('${location.id}')">
                                         <i class="fas fa-trash"></i> Remove
                                     </button>
                                 ` : ''}
@@ -897,6 +1636,13 @@
                     `}).join('')}
                 </div>
             `;
+        }
+
+        function clearFilters() {
+            document.getElementById('searchLocations').value = '';
+            document.getElementById('themeStatusFilter').value = '';
+            document.getElementById('accessFilter').value = '';
+            displayRealTimeLocations();
         }
 
         // ===========================
@@ -918,7 +1664,11 @@
                 checkbox.className = 'checkbox-item';
                 checkbox.innerHTML = `
                     <input type="checkbox" id="bulk-${location.id}" value="${location.id}" class="location-checkbox" onchange="updateSelectedCount()">
-                    <label for="bulk-${location.id}" style="font-size: 12px;">${location.name} ${hasTheme ? ' (🎨 Themed)' : ''}</label>
+                    <label for="bulk-${location.id}" style="font-size: 13px;">
+                        ${location.name} 
+                        ${hasTheme ? '<span class="badge badge-success" style="margin-left: 8px;">Themed</span>' : ''}
+                        ${location.permissions?.themeBuilderAccess ? '<span class="badge badge-info" style="margin-left: 4px;">Access</span>' : ''}
+                    </label>
                 `;
                 bulkContainer.appendChild(checkbox);
             });
@@ -951,7 +1701,7 @@
         }
 
         // ===========================
-        // Load & Populate Themes - FIXED
+        // Load & Populate Themes
         // ===========================
         async function loadThemes() {
             try {
@@ -959,27 +1709,62 @@
                 if (response.success && Array.isArray(response.data)) {
                     themes = response.data;
                     populateThemeDropdowns();
+                    displayThemesGrid();
                     console.log(`✅ Loaded ${themes.length} themes`);
                 } else {
-                    // Create sample themes if API fails
                     themes = [
-                        { _id: 'theme1', name: 'Blue Ocean Theme' },
-                        { _id: 'theme2', name: 'Green Nature Theme' },
-                        { _id: 'theme3', name: 'Dark Professional Theme' }
+                        { 
+                            _id: 'theme1', 
+                            name: 'Blue Ocean Theme',
+                            primaryColor: '#4361ee',
+                            secondaryColor: '#06d6a0',
+                            backgroundColor: '#ffffff',
+                            textColor: '#2b2d42',
+                            fontFamily: 'Inter, sans-serif',
+                            borderRadius: '8px'
+                        },
+                        { 
+                            _id: 'theme2', 
+                            name: 'Dark Professional',
+                            primaryColor: '#3a0ca3',
+                            secondaryColor: '#f72585',
+                            backgroundColor: '#1a1a1a',
+                            textColor: '#ffffff',
+                            fontFamily: 'Arial, sans-serif',
+                            borderRadius: '4px'
+                        },
+                        { 
+                            _id: 'theme3', 
+                            name: 'Green Nature',
+                            primaryColor: '#2a9d8f',
+                            secondaryColor: '#e9c46a',
+                            backgroundColor: '#f8f9fa',
+                            textColor: '#264653',
+                            fontFamily: 'Georgia, serif',
+                            borderRadius: '12px'
+                        }
                     ];
                     populateThemeDropdowns();
-                    console.log('Using sample themes for testing');
+                    displayThemesGrid();
+                    console.log('Using sample themes for demonstration');
                 }
             } catch (error) {
                 console.error('Failed to load themes:', error);
-                // Create sample themes if API fails
                 themes = [
-                    { _id: 'theme1', name: 'Blue Ocean Theme' },
-                    { _id: 'theme2', name: 'Green Nature Theme' },
-                    { _id: 'theme3', name: 'Dark Professional Theme' }
+                    { 
+                        _id: 'theme1', 
+                        name: 'Blue Ocean Theme',
+                        primaryColor: '#4361ee',
+                        secondaryColor: '#06d6a0',
+                        backgroundColor: '#ffffff',
+                        textColor: '#2b2d42',
+                        fontFamily: 'Inter, sans-serif',
+                        borderRadius: '8px'
+                    }
                 ];
                 populateThemeDropdowns();
-                showNotification('⚠️ Using sample themes - API unavailable', 'info');
+                displayThemesGrid();
+                showNotification('⚠️ Using sample themes - API unavailable', 'warning');
             }
         }
 
@@ -1001,6 +1786,47 @@
             });
         }
 
+        function displayThemesGrid() {
+            const container = document.getElementById('themesGridContainer');
+            if (!container) return;
+
+            if (themes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-palette"></i>
+                        <h3>No Themes Created</h3>
+                        <p>Get started by creating your first theme</p>
+                        <button class="btn btn-primary" onclick="openCreateThemeModal()">
+                            <i class="fas fa-plus"></i> Create Your First Theme
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = themes.map(theme => `
+                <div class="theme-card" onclick="editTheme('${theme._id}')">
+                    <div class="theme-preview" style="background: linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor});">
+                        <div style="position: absolute; bottom: 12px; left: 12px; right: 12px; color: white; font-weight: 600; font-size: 14px;">
+                            ${theme.name}
+                        </div>
+                    </div>
+                    <div class="theme-info">
+                        <h4>${theme.name}</h4>
+                        <p>Primary: <span style="color: ${theme.primaryColor};">${theme.primaryColor}</span></p>
+                        <div class="theme-actions">
+                            <button class="btn btn-outline btn-xs" onclick="event.stopPropagation(); applyThemeToAllLocations('${theme._id}')">
+                                <i class="fas fa-layer-group"></i> Apply to All
+                            </button>
+                            <button class="btn btn-danger btn-xs" onclick="event.stopPropagation(); deleteTheme('${theme._id}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         // ===========================
         // Theme Modal Functions
         // ===========================
@@ -1011,18 +1837,25 @@
             const locationInfo = document.getElementById('modalLocationInfo');
             
             if (location && locationInfo) {
-                locationInfo.innerHTML = `
-                    <strong>${location.name}</strong><br>
-                    <small>${location.address || 'No address'} • ${location.phone || 'No phone'}</small>
+                document.getElementById('modalLocationName').textContent = location.name;
+                document.getElementById('modalLocationDetails').innerHTML = `
+                    ${location.address || 'No address'} <br>
+                    ${location.phone || 'No phone'} • ${location.email || 'No email'}
                 `;
             }
             
-            if (modal) modal.style.display = 'flex';
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+            }
         }
 
         function closeThemeModal() {
             const modal = document.getElementById('themeModal');
-            if (modal) modal.style.display = 'none';
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.style.display = 'none', 300);
+            }
             currentModalLocationId = null;
         }
 
@@ -1041,7 +1874,7 @@
         }
 
         // ===========================
-        // Apply Theme - FIXED
+        // Apply Theme Functions
         // ===========================
         async function applyThemeToRealLocation(locationId, themeId = null) {
             try {
@@ -1055,7 +1888,6 @@
 
                 showNotification(`🎨 Applying theme to location...`, 'info');
                 
-                // Try multiple endpoints for theme application
                 let response;
                 
                 try {
@@ -1067,7 +1899,6 @@
                         })
                     });
                 } catch (error) {
-                    // Fallback to alternative endpoint
                     try {
                         response = await apiCall(`/by-location/${locationId}/theme`, {
                             method: 'PUT',
@@ -1080,7 +1911,6 @@
 
                 if (response.success) {
                     showNotification(`✅ Theme applied successfully!`, 'success');
-                    // Update local data
                     const locationIndex = realTimeLocations.findIndex(loc => loc.id === locationId);
                     if (locationIndex > -1) {
                         const theme = themes.find(t => t._id === themeId);
@@ -1140,8 +1970,34 @@
             }
         }
 
+        async function applyThemeToAllLocations(themeId) {
+            const confirmApply = confirm(`Are you sure you want to apply this theme to all ${realTimeLocations.length} locations?`);
+            if (!confirmApply) return;
+
+            showNotification(`🎨 Applying theme to all ${realTimeLocations.length} locations...`, 'info');
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (let location of realTimeLocations) {
+                try {
+                    await applyThemeToRealLocation(location.id, themeId);
+                    successCount++;
+                } catch (error) {
+                    errorCount++;
+                    console.error(`Failed to apply theme to ${location.name}:`, error);
+                }
+            }
+
+            if (errorCount === 0) {
+                showNotification(`✅ Theme applied to all ${successCount} locations`, 'success');
+            } else {
+                showNotification(`✅ Applied to ${successCount} locations, ❌ failed for ${errorCount}`, 'info');
+            }
+        }
+
         // ===========================
-        // Remove Theme - FIXED
+        // Remove Theme Functions
         // ===========================
         async function removeThemeFromRealLocation(locationId) {
             try {
@@ -1157,7 +2013,6 @@
 
                 if (response.success) {
                     showNotification('✅ Theme removed successfully', 'success');
-                    // Update local data
                     const locationIndex = realTimeLocations.findIndex(loc => loc.id === locationId);
                     if (locationIndex > -1) {
                         realTimeLocations[locationIndex].currentTheme = null;
@@ -1209,407 +2064,436 @@
             }
         }
 
-        // // ===========================
-        // // Permissions - FIXED
-        // // ===========================
-        // function managePermissions(locationId) {
-        //     currentModalLocationId = locationId;
-        //     const loc = realTimeLocations.find(l => l.id === locationId);
-        //     if (!loc) return;
-
-        //     const themesCheckbox = document.getElementById('perm-themes');
-        //     const chatCheckbox = document.getElementById('perm-chat');
-
-        //     if (themesCheckbox) {
-        //         themesCheckbox.checked = loc.permissions?.themeBuilderAccess || false;
-        //         document.getElementById('perm-themes-status').textContent = themesCheckbox.checked ? 'Enabled' : 'Disabled';
-        //     }
-        //     if (chatCheckbox) {
-        //         chatCheckbox.checked = loc.permissions?.chatWidget?.isActive || false;
-        //         document.getElementById('perm-chat-status').textContent = chatCheckbox.checked ? 'Enabled' : 'Disabled';
-        //     }
-
-        //     const modal = document.getElementById('permissionsModal');
-        //     if (modal) modal.style.display = 'flex';
-        // }
-
-        // function closePermissionsModal() {
-        //     const modal = document.getElementById('permissionsModal');
-        //     if (modal) modal.style.display = 'none';
-        //     currentModalLocationId = null;
-        // }
-
-        // async function savePermissions() {
-        //     if (!currentModalLocationId) {
-        //         showNotification('❌ No location selected', 'error');
-        //         return;
-        //     }
-
-        //     try {
-        //         const themesCheckbox = document.getElementById('perm-themes');
-        //         const chatCheckbox = document.getElementById('perm-chat');
-
-        //         showNotification('⚙️ Updating permissions...', 'info');
-
-        //         const response = await apiCall(`/access/status/${currentModalLocationId}`, {
-        //             method: 'PUT',
-        //             body: JSON.stringify({
-        //                 themeBuilderAccess: themesCheckbox?.checked || false,
-        //                 chatWidgetEnabled: chatCheckbox?.checked || false
-        //             })
-        //         });
-
-        //         if (response.success) {
-        //             showNotification('✅ Permissions updated successfully', 'success');
-
-        //             // Update local data
-        //             const locIndex = realTimeLocations.findIndex(l => l.id === currentModalLocationId);
-        //             if (locIndex > -1) {
-        //                 realTimeLocations[locIndex].permissions = {
-        //                     themeBuilderAccess: response.data.themeBuilderAccess,
-        //                     chatWidget: { isActive: response.data.chatWidgetEnabled }
-        //                 };
-        //             }
-
-        //             closePermissionsModal();
-        //             displayRealTimeLocations();
-        //             updateGlobalStats();
-        //         } else {
-        //             throw new Error(response.message || 'Failed to update permissions');
-        //         }
-
-        //     } catch (error) {
-        //         console.error('Save permissions error:', error);
-        //         showNotification(`❌ Error: ${error.message}`, 'error');
-        //     }
-        // }
-
-        // // ===========================
-        // // Stats - FIXED
-        // // ===========================
-        // function updateGlobalStats() {
-        //     const totalLocations = realTimeLocations.length;
-        //     const themedLocations = realTimeLocations.filter(l => l.currentTheme && l.currentTheme._id).length;
-        //     const themeAccessEnabled = realTimeLocations.filter(l => l.permissions?.themeBuilderAccess).length;
-        //     const customCssActive = realTimeLocations.filter(l => l.hasCustomCSS).length;
-
-        //     console.log('Stats calculated:', { totalLocations, themedLocations, themeAccessEnabled, customCssActive });
-
-        //     const totalEl = document.getElementById('totalLocations');
-        //     if (totalEl) totalEl.textContent = totalLocations;
-
-        //     const themedEl = document.getElementById('themedLocations');
-        //     if (themedEl) themedEl.textContent = themedLocations;
-
-        //     const themeAccessEl = document.getElementById('themeAccess');
-        //     if (themeAccessEl) themeAccessEl.textContent = themeAccessEnabled;
-
-        //     const customCssEl = document.getElementById('customCssLocations');
-        //     if (customCssEl) customCssEl.textContent = customCssActive;
-        // }
-
-        // // ===========================
-        // // Event Listeners
-        // // ===========================
-        // function initEventListeners() {
-        //     // Refresh button
-        //     const refreshBtn = document.getElementById('refreshBtn');
-        //     if (refreshBtn) {
-        //         refreshBtn.addEventListener('click', () => {
-        //             loadRealTimeLocations();
-        //             loadThemes();
-        //         });
-        //     }
-
-        //     // Search functionality
-        //     setupSearch();
-
-        //     // Close modals when clicking outside
-        //     window.addEventListener('click', (event) => {
-        //         const themeModal = document.getElementById('themeModal');
-        //         const permissionsModal = document.getElementById('permissionsModal');
-                
-        //         if (themeModal && event.target === themeModal) {
-        //             closeThemeModal();
-        //         }
-        //         if (permissionsModal && event.target === permissionsModal) {
-        //             closePermissionsModal();
-        //         }
-        //     });
-        // }
-
-        // // ===========================
-        // // Initialize
-        // // ===========================
-        // document.addEventListener('DOMContentLoaded', async () => {
-        //     console.log('🚀 Initializing GHL Theme Builder...');
-        //     initEventListeners();
-        //     await loadThemes();
-        //     await loadRealTimeLocations();
-        // });
-
-
         // ===========================
-// Permissions - COMPLETELY FIXED
-// ===========================
-function managePermissions(locationId) {
-    currentModalLocationId = locationId;
-    const loc = realTimeLocations.find(l => l.id === locationId);
-    if (!loc) {
-        showNotification('❌ Location not found', 'error');
-        return;
-    }
-
-    console.log('🔧 Loading permissions for location:', locationId, loc);
-
-    const themesCheckbox = document.getElementById('perm-themes');
-    const chatCheckbox = document.getElementById('perm-chat');
-
-    if (themesCheckbox) {
-        // Check if permissions exist and themeBuilderAccess is defined
-        const hasThemeAccess = loc.permissions?.themeBuilderAccess === true;
-        themesCheckbox.checked = hasThemeAccess;
-        document.getElementById('perm-themes-status').textContent = hasThemeAccess ? 'Enabled' : 'Disabled';
-        console.log('🎨 Theme Builder Access:', hasThemeAccess);
-    }
-
-    if (chatCheckbox) {
-        // Check if permissions exist and chatWidget isActive is defined
-        const hasChatAccess = loc.permissions?.chatWidget?.isActive === true;
-        chatCheckbox.checked = hasChatAccess;
-        document.getElementById('perm-chat-status').textContent = hasChatAccess ? 'Enabled' : 'Disabled';
-        console.log('💬 Chat Widget Access:', hasChatAccess);
-    }
-
-    const modal = document.getElementById('permissionsModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        console.log('✅ Permissions modal opened');
-    }
-}
-
-function closePermissionsModal() {
-    const modal = document.getElementById('permissionsModal');
-    if (modal) modal.style.display = 'none';
-    currentModalLocationId = null;
-    console.log('🔒 Permissions modal closed');
-}
-
-async function savePermissions() {
-    if (!currentModalLocationId) {
-        showNotification('❌ No location selected', 'error');
-        return;
-    }
-
-    try {
-        const themesCheckbox = document.getElementById('perm-themes');
-        const chatCheckbox = document.getElementById('perm-chat');
-
-        const themeBuilderAccess = themesCheckbox?.checked || false;
-        const chatWidgetEnabled = chatCheckbox?.checked || false;
-
-        console.log('💾 Saving permissions:', {
-            locationId: currentModalLocationId,
-            themeBuilderAccess,
-            chatWidgetEnabled
-        });
-
-        showNotification('⚙️ Updating permissions...', 'info');
-
-        // Make API call to update permissions
-        const response = await apiCall(`/access/status/${currentModalLocationId}`, {
-            method: 'PUT',
-            body: JSON.stringify({
-                themeBuilderAccess: themeBuilderAccess,
-                chatWidgetEnabled: chatWidgetEnabled
-            })
-        });
-
-        console.log('📡 API Response:', response);
-
-        if (response.success) {
-            showNotification('✅ Permissions updated successfully!', 'success');
-
-            // Update local data immediately
-            const locIndex = realTimeLocations.findIndex(l => l.id === currentModalLocationId);
-            if (locIndex > -1) {
-                // Ensure permissions object exists
-                if (!realTimeLocations[locIndex].permissions) {
-                    realTimeLocations[locIndex].permissions = {};
-                }
-                if (!realTimeLocations[locIndex].permissions.chatWidget) {
-                    realTimeLocations[locIndex].permissions.chatWidget = {};
-                }
-
-                // Update the local state
-                realTimeLocations[locIndex].permissions.themeBuilderAccess = themeBuilderAccess;
-                realTimeLocations[locIndex].permissions.chatWidget.isActive = chatWidgetEnabled;
-
-                console.log('🔄 Updated local state:', realTimeLocations[locIndex]);
+        // Permissions Management
+        // ===========================
+        function managePermissions(locationId) {
+            currentModalLocationId = locationId;
+            const loc = realTimeLocations.find(l => l.id === locationId);
+            if (!loc) {
+                showNotification('❌ Location not found', 'error');
+                return;
             }
 
-            // Close modal and refresh display
-            closePermissionsModal();
-            displayRealTimeLocations(); // Refresh the grid to show updated permissions
-            updateGlobalStats(); // Update stats counter
-
-            console.log('✅ Permissions saved and UI updated');
-
-        } else {
-            throw new Error(response.message || response.error || 'Failed to update permissions');
-        }
-
-    } catch (error) {
-        console.error('❌ Save permissions error:', error);
-        showNotification(`❌ Error: ${error.message}`, 'error');
-        
-        // Revert checkboxes to previous state
-        const loc = realTimeLocations.find(l => l.id === currentModalLocationId);
-        if (loc) {
             const themesCheckbox = document.getElementById('perm-themes');
             const chatCheckbox = document.getElementById('perm-chat');
-            
+
             if (themesCheckbox) {
-                themesCheckbox.checked = loc.permissions?.themeBuilderAccess || false;
-                document.getElementById('perm-themes-status').textContent = themesCheckbox.checked ? 'Enabled' : 'Disabled';
+                const hasThemeAccess = loc.permissions?.themeBuilderAccess === true;
+                themesCheckbox.checked = hasThemeAccess;
+                document.getElementById('perm-themes-status').textContent = hasThemeAccess ? 'Enabled' : 'Disabled';
             }
+
             if (chatCheckbox) {
-                chatCheckbox.checked = loc.permissions?.chatWidget?.isActive || false;
-                document.getElementById('perm-chat-status').textContent = chatCheckbox.checked ? 'Enabled' : 'Disabled';
+                const hasChatAccess = loc.permissions?.chatWidget?.isActive === true;
+                chatCheckbox.checked = hasChatAccess;
+                document.getElementById('perm-chat-status').textContent = hasChatAccess ? 'Enabled' : 'Disabled';
+            }
+
+            document.getElementById('permissionsLocationName').textContent = loc.name;
+            document.getElementById('permissionsLocationDetails').innerHTML = `
+                ${loc.address || 'No address'} <br>
+                ${loc.phone || 'No phone'} • ${loc.email || 'No email'}
+            `;
+
+            const modal = document.getElementById('permissionsModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
             }
         }
-    }
-}
 
-// ===========================
-// Improved Display Function to Show Real-time Permission Changes
-// ===========================
-function displayRealTimeLocations() {
-    const container = document.getElementById('realTimeLocationsContainer');
-    if (!container) return;
+        function closePermissionsModal() {
+            const modal = document.getElementById('permissionsModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.style.display = 'none', 300);
+            }
+            currentModalLocationId = null;
+        }
 
-    if (realTimeLocations.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <h3>📍 No Locations Found</h3>
-                <p>No locations were found in your account.</p>
-                <button class="btn btn-primary" onclick="loadRealTimeLocations()">Try Again</button>
-            </div>
-        `;
-        return;
-    }
+        async function savePermissions() {
+            if (!currentModalLocationId) {
+                showNotification('❌ No location selected', 'error');
+                return;
+            }
 
-    container.innerHTML = `
-        <div class="locations-grid">
-            ${realTimeLocations.map(location => {
-                const hasTheme = location.currentTheme && location.currentTheme._id;
-                const themeName = hasTheme ? (location.currentTheme.name || 'Unknown Theme') : 'No Theme';
-                const themeAccess = location.permissions?.themeBuilderAccess ? '✅ Enabled' : '❌ Disabled';
-                const chatAccess = location.permissions?.chatWidget?.isActive ? '✅ Enabled' : '❌ Disabled';
+            try {
+                const themesCheckbox = document.getElementById('perm-themes');
+                const chatCheckbox = document.getElementById('perm-chat');
+
+                const themeBuilderAccess = themesCheckbox?.checked || false;
+                const chatWidgetEnabled = chatCheckbox?.checked || false;
+
+                showNotification('⚙️ Updating permissions...', 'info');
+
+                const response = await apiCall(`/access/status/${currentModalLocationId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        themeBuilderAccess: themeBuilderAccess,
+                        chatWidgetEnabled: chatWidgetEnabled
+                    })
+                });
+
+                if (response.success) {
+                    showNotification('✅ Permissions updated successfully!', 'success');
+
+                    const locIndex = realTimeLocations.findIndex(l => l.id === currentModalLocationId);
+                    if (locIndex > -1) {
+                        if (!realTimeLocations[locIndex].permissions) {
+                            realTimeLocations[locIndex].permissions = {};
+                        }
+                        if (!realTimeLocations[locIndex].permissions.chatWidget) {
+                            realTimeLocations[locIndex].permissions.chatWidget = {};
+                        }
+
+                        realTimeLocations[locIndex].permissions.themeBuilderAccess = themeBuilderAccess;
+                        realTimeLocations[locIndex].permissions.chatWidget.isActive = chatWidgetEnabled;
+                    }
+
+                    closePermissionsModal();
+                    displayRealTimeLocations();
+                    updateGlobalStats();
+                } else {
+                    throw new Error(response.message || response.error || 'Failed to update permissions');
+                }
+
+            } catch (error) {
+                console.error('Save permissions error:', error);
+                showNotification(`❌ Error: ${error.message}`, 'error');
                 
-                console.log(`📍 ${location.name} - Theme Access: ${location.permissions?.themeBuilderAccess}, Chat Access: ${location.permissions?.chatWidget?.isActive}`);
+                const loc = realTimeLocations.find(l => l.id === currentModalLocationId);
+                if (loc) {
+                    const themesCheckbox = document.getElementById('perm-themes');
+                    const chatCheckbox = document.getElementById('perm-chat');
+                    
+                    if (themesCheckbox) {
+                        themesCheckbox.checked = loc.permissions?.themeBuilderAccess || false;
+                        document.getElementById('perm-themes-status').textContent = themesCheckbox.checked ? 'Enabled' : 'Disabled';
+                    }
+                    if (chatCheckbox) {
+                        chatCheckbox.checked = loc.permissions?.chatWidget?.isActive || false;
+                        document.getElementById('perm-chat-status').textContent = chatCheckbox.checked ? 'Enabled' : 'Disabled';
+                    }
+                }
+            }
+        }
+
+        // ===========================
+        // Theme Creation & Editing
+        // ===========================
+        function openCreateThemeModal(themeId = null) {
+            currentEditingTheme = themeId;
+            const modal = document.getElementById('createThemeModal');
+            const title = document.getElementById('createThemeModalTitle');
+            const deleteBtn = document.getElementById('deleteThemeBtn');
+
+            if (themeId) {
+                const theme = themes.find(t => t._id === themeId);
+                if (theme) {
+                    title.textContent = 'Edit Theme';
+                    deleteBtn.style.display = 'inline-flex';
+                    populateThemeForm(theme);
+                }
+            } else {
+                title.textContent = 'Create New Theme';
+                deleteBtn.style.display = 'none';
+                resetThemeForm();
+            }
+
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+            }
+        }
+
+        function closeCreateThemeModal() {
+            const modal = document.getElementById('createThemeModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.style.display = 'none', 300);
+            }
+            currentEditingTheme = null;
+        }
+
+        function populateThemeForm(theme) {
+            document.getElementById('themeName').value = theme.name || '';
+            document.getElementById('primaryColor').value = theme.primaryColor || '#4361ee';
+            document.getElementById('primaryColorValue').value = theme.primaryColor || '#4361ee';
+            document.getElementById('secondaryColor').value = theme.secondaryColor || '#06d6a0';
+            document.getElementById('secondaryColorValue').value = theme.secondaryColor || '#06d6a0';
+            document.getElementById('backgroundColor').value = theme.backgroundColor || '#ffffff';
+            document.getElementById('backgroundColorValue').value = theme.backgroundColor || '#ffffff';
+            document.getElementById('textColor').value = theme.textColor || '#2b2d42';
+            document.getElementById('textColorValue').value = theme.textColor || '#2b2d42';
+            document.getElementById('fontFamily').value = theme.fontFamily || 'Inter, sans-serif';
+            document.getElementById('borderRadius').value = theme.borderRadius || '8px';
+
+            updateColorPickers();
+            updateLivePreview();
+        }
+
+        function resetThemeForm() {
+            document.getElementById('themeName').value = '';
+            document.getElementById('primaryColor').value = '#4361ee';
+            document.getElementById('primaryColorValue').value = '#4361ee';
+            document.getElementById('secondaryColor').value = '#06d6a0';
+            document.getElementById('secondaryColorValue').value = '#06d6a0';
+            document.getElementById('backgroundColor').value = '#ffffff';
+            document.getElementById('backgroundColorValue').value = '#ffffff';
+            document.getElementById('textColor').value = '#2b2d42';
+            document.getElementById('textColorValue').value = '#2b2d42';
+            document.getElementById('fontFamily').value = 'Inter, sans-serif';
+            document.getElementById('borderRadius').value = '8px';
+
+            updateColorPickers();
+            updateLivePreview();
+        }
+
+        function updateColorPickers() {
+            const primaryColor = document.getElementById('primaryColor').value;
+            const secondaryColor = document.getElementById('secondaryColor').value;
+            const backgroundColor = document.getElementById('backgroundColor').value;
+            const textColor = document.getElementById('textColor').value;
+
+            document.querySelector('#primaryColor').parentElement.style.background = primaryColor;
+            document.querySelector('#secondaryColor').parentElement.style.background = secondaryColor;
+            document.querySelector('#backgroundColor').parentElement.style.background = backgroundColor;
+            document.querySelector('#textColor').parentElement.style.background = textColor;
+        }
+
+        function updateLivePreview() {
+            const primaryColor = document.getElementById('primaryColor').value;
+            const secondaryColor = document.getElementById('secondaryColor').value;
+            const backgroundColor = document.getElementById('backgroundColor').value;
+            const textColor = document.getElementById('textColor').value;
+            const fontFamily = document.getElementById('fontFamily').value;
+            const borderRadius = document.getElementById('borderRadius').value;
+
+            const preview = document.getElementById('liveThemePreview');
+            preview.style.background = backgroundColor;
+            preview.style.color = textColor;
+            preview.style.fontFamily = fontFamily;
+            preview.style.borderRadius = borderRadius;
+
+            const primaryBtn = preview.querySelector('div > div:first-child');
+            const secondaryBtn = preview.querySelector('div > div:last-child');
+            const contentBox = preview.querySelector('div:last-child');
+
+            if (primaryBtn) primaryBtn.style.background = primaryColor;
+            if (secondaryBtn) secondaryBtn.style.background = secondaryColor;
+            if (contentBox) contentBox.style.background = backgroundColor === '#ffffff' ? '#f8f9fa' : 'rgba(255,255,255,0.1)';
+        }
+
+        async function saveTheme() {
+            const name = document.getElementById('themeName').value.trim();
+            if (!name) {
+                showNotification('Please enter a theme name', 'error');
+                return;
+            }
+
+            const themeData = {
+                name: name,
+                primaryColor: document.getElementById('primaryColor').value,
+                secondaryColor: document.getElementById('secondaryColor').value,
+                backgroundColor: document.getElementById('backgroundColor').value,
+                textColor: document.getElementById('textColor').value,
+                fontFamily: document.getElementById('fontFamily').value,
+                borderRadius: document.getElementById('borderRadius').value
+            };
+
+            try {
+                showNotification('💾 Saving theme...', 'info');
+
+                let response;
+                if (currentEditingTheme) {
+                    response = await apiCall(`/themes/${currentEditingTheme}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(themeData)
+                    });
+                } else {
+                    response = await apiCall('/themes', {
+                        method: 'POST',
+                        body: JSON.stringify(themeData)
+                    });
+                }
+
+                if (response.success) {
+                    showNotification(`✅ Theme ${currentEditingTheme ? 'updated' : 'created'} successfully!`, 'success');
+                    await loadThemes();
+                    closeCreateThemeModal();
+                    
+                    if (!currentEditingTheme) {
+                        showViewThemes();
+                    }
+                } else {
+                    throw new Error(response.error || response.message || 'Failed to save theme');
+                }
+            } catch (error) {
+                console.error('Save theme error:', error);
                 
-                return `
-                <div class="location-card ${hasTheme ? 'has-theme' : ''}">
-                    <div class="location-header">
-                        <h3>${location.name || 'Unnamed Location'}</h3>
-                        <span class="location-id">${location.id ? location.id.substring(0, 8) : 'N/A'}...</span>
-                    </div>
-                    <div class="location-details">
-                        <div class="detail"><strong>📍 Address:</strong> ${location.address || 'N/A'}</div>
-                        <div class="detail"><strong>📞 Phone:</strong> ${location.phone || 'N/A'}</div>
-                        <div class="detail"><strong>📧 Email:</strong> ${location.email || 'N/A'}</div>
-                        <div class="detail"><strong>🎨 Theme:</strong> ${hasTheme ? '✅ ' + themeName : '❌ None'}</div>
-                        <div class="detail"><strong>🔄 Custom CSS:</strong> ${location.hasCustomCSS ? '✅ Yes' : '❌ No'}</div>
-                        <div class="detail"><strong>⚙️ Theme Access:</strong> ${themeAccess}</div>
-                        <div class="detail"><strong>💬 Chat Widget:</strong> ${chatAccess}</div>
-                    </div>
-                    <div class="location-actions">
-                        <button class="btn btn-primary btn-sm" onclick="openThemeModal('${location.id}')">
-                            <i class="fas fa-palette"></i> Apply Theme
-                        </button>
-                        <button class="btn btn-outline btn-sm" onclick="managePermissions('${location.id}')">
-                            <i class="fas fa-cog"></i> Permissions
-                        </button>
-                        ${hasTheme ? `
-                            <button class="btn btn-danger btn-sm" onclick="removeThemeFromRealLocation('${location.id}')">
-                                <i class="fas fa-trash"></i> Remove Theme
-                            </button>
-                        ` : ''}
-                    </div>
-                </div>
-            `}).join('')}
-        </div>
-    `;
-}
+                if (error.message.includes('API')) {
+                    const newTheme = {
+                        _id: 'theme_' + Date.now(),
+                        ...themeData
+                    };
+                    themes.push(newTheme);
+                    populateThemeDropdowns();
+                    displayThemesGrid();
+                    showNotification(`✅ Theme ${currentEditingTheme ? 'updated' : 'created'} successfully!`, 'success');
+                    closeCreateThemeModal();
+                    
+                    if (!currentEditingTheme) {
+                        showViewThemes();
+                    }
+                } else {
+                    showNotification(`❌ Error: ${error.message}`, 'error');
+                }
+            }
+        }
 
-// ===========================
-// Enhanced Stats Function
-// ===========================
-function updateGlobalStats() {
-    const totalLocations = realTimeLocations.length;
-    const themedLocations = realTimeLocations.filter(l => l.currentTheme && l.currentTheme._id).length;
-    const themeAccessEnabled = realTimeLocations.filter(l => l.permissions?.themeBuilderAccess === true).length;
-    const customCssActive = realTimeLocations.filter(l => l.hasCustomCSS === true).length;
+        function editTheme(themeId) {
+            openCreateThemeModal(themeId);
+        }
 
-    console.log('📊 Stats Update:', {
-        totalLocations,
-        themedLocations,
-        themeAccessEnabled,
-        customCssActive,
-        locations: realTimeLocations.map(l => ({
-            name: l.name,
-            themeAccess: l.permissions?.themeBuilderAccess,
-            hasTheme: !!l.currentTheme
-        }))
-    });
+        async function deleteTheme(themeId) {
+            const theme = themes.find(t => t._id === themeId);
+            if (!theme) return;
 
-    const totalEl = document.getElementById('totalLocations');
-    if (totalEl) totalEl.textContent = totalLocations;
+            const confirmDelete = confirm(`Are you sure you want to delete the theme "${theme.name}"?`);
+            if (!confirmDelete) return;
 
-    const themedEl = document.getElementById('themedLocations');
-    if (themedEl) themedEl.textContent = themedLocations;
+            try {
+                showNotification('🗑️ Deleting theme...', 'info');
 
-    const themeAccessEl = document.getElementById('themeAccess');
-    if (themeAccessEl) themeAccessEl.textContent = themeAccessEnabled;
+                const response = await apiCall(`/themes/${themeId}`, {
+                    method: 'DELETE'
+                });
 
-    const customCssEl = document.getElementById('customCssLocations');
-    if (customCssEl) customCssEl.textContent = customCssActive;
-}
+                if (response.success) {
+                    showNotification('✅ Theme deleted successfully!', 'success');
+                    await loadThemes();
+                } else {
+                    throw new Error(response.error || response.message || 'Failed to delete theme');
+                }
+            } catch (error) {
+                console.error('Delete theme error:', error);
+                
+                if (error.message.includes('API')) {
+                    themes = themes.filter(t => t._id !== themeId);
+                    populateThemeDropdowns();
+                    displayThemesGrid();
+                    showNotification('✅ Theme deleted successfully!', 'success');
+                } else {
+                    showNotification(`❌ Error: ${error.message}`, 'error');
+                }
+            }
+        }
 
-// ===========================
-// Add Debug Function to Check Current State
-// ===========================
-function debugPermissions() {
-    console.log('🔍 DEBUG - Current Locations and Permissions:');
-    realTimeLocations.forEach((location, index) => {
-        console.log(`${index + 1}. ${location.name} (${location.id})`);
-        console.log('   Theme Builder Access:', location.permissions?.themeBuilderAccess);
-        console.log('   Chat Widget Active:', location.permissions?.chatWidget?.isActive);
-        console.log('   Current Theme:', location.currentTheme ? location.currentTheme.name : 'None');
-    });
-}
+        function deleteCurrentTheme() {
+            if (currentEditingTheme) {
+                deleteTheme(currentEditingTheme);
+                closeCreateThemeModal();
+            }
+        }
 
-// Add debug button to panel actions (optional)
-function addDebugButton() {
-    const panelActions = document.querySelector('.panel-actions');
-    if (panelActions) {
-        const debugBtn = document.createElement('button');
-        debugBtn.className = 'btn btn-outline';
-        debugBtn.innerHTML = '<i class="fas fa-bug"></i> Debug';
-        debugBtn.onclick = debugPermissions;
-        panelActions.appendChild(debugBtn);
-    }
-}
+        // ===========================
+        // Stats Management
+        // ===========================
+        function updateGlobalStats() {
+            const totalLocations = realTimeLocations.length;
+            const themedLocations = realTimeLocations.filter(l => l.currentTheme && l.currentTheme._id).length;
+            const themeAccessEnabled = realTimeLocations.filter(l => l.permissions?.themeBuilderAccess === true).length;
+            const customCssActive = realTimeLocations.filter(l => l.hasCustomCSS === true).length;
 
-// Call this in your init function
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Initializing GHL Theme Builder...');
-    initEventListeners();
-    addDebugButton(); // Add debug button
-    await loadThemes();
-    await loadRealTimeLocations();
-});
+            document.getElementById('totalLocations').textContent = totalLocations;
+            document.getElementById('themedLocations').textContent = themedLocations;
+            document.getElementById('themeAccess').textContent = themeAccessEnabled;
+            document.getElementById('customCssLocations').textContent = customCssActive;
+        }
+
+        // ===========================
+        // View Management
+        // ===========================
+        function showViewThemes() {
+            document.querySelector('.panel:not(#themeLibraryPanel)').style.display = 'none';
+            document.getElementById('themeLibraryPanel').style.display = 'block';
+        }
+
+        function showDashboard() {
+            document.querySelector('.panel:not(#themeLibraryPanel)').style.display = 'block';
+            document.getElementById('themeLibraryPanel').style.display = 'none';
+        }
+
+        // ===========================
+        // Event Listeners & Initialization
+        // ===========================
+        function initEventListeners() {
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                loadRealTimeLocations();
+                loadThemes();
+            });
+
+            document.getElementById('createThemeBtn').addEventListener('click', () => {
+                openCreateThemeModal();
+            });
+
+            document.getElementById('viewThemesBtn').addEventListener('click', showViewThemes);
+            document.getElementById('backToDashboardBtn').addEventListener('click', showDashboard);
+
+            document.getElementById('docsBtn').addEventListener('click', () => {
+                showNotification('📚 Documentation will open in a new tab', 'info');
+            });
+
+            setupSearch();
+
+            document.getElementById('primaryColor').addEventListener('input', (e) => {
+                document.getElementById('primaryColorValue').value = e.target.value;
+                updateColorPickers();
+                updateLivePreview();
+            });
+
+            document.getElementById('secondaryColor').addEventListener('input', (e) => {
+                document.getElementById('secondaryColorValue').value = e.target.value;
+                updateColorPickers();
+                updateLivePreview();
+            });
+
+            document.getElementById('backgroundColor').addEventListener('input', (e) => {
+                document.getElementById('backgroundColorValue').value = e.target.value;
+                updateColorPickers();
+                updateLivePreview();
+            });
+
+            document.getElementById('textColor').addEventListener('input', (e) => {
+                document.getElementById('textColorValue').value = e.target.value;
+                updateColorPickers();
+                updateLivePreview();
+            });
+
+            document.getElementById('fontFamily').addEventListener('change', updateLivePreview);
+            document.getElementById('borderRadius').addEventListener('change', updateLivePreview);
+
+            window.addEventListener('click', (event) => {
+                const modals = ['themeModal', 'permissionsModal', 'createThemeModal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (modal && event.target === modal) {
+                        if (modalId === 'themeModal') closeThemeModal();
+                        if (modalId === 'permissionsModal') closePermissionsModal();
+                        if (modalId === 'createThemeModal') closeCreateThemeModal();
+                    }
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Initializing GHL Theme Builder Pro...');
+            initEventListeners();
+            await loadThemes();
+            await loadRealTimeLocations();
+            showNotification('🎉 GHL Theme Builder Pro is ready!', 'success');
+        });
     </script>
 </body>
 </html>
