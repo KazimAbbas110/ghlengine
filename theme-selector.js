@@ -2196,10 +2196,9 @@
 
 
 
-
 /* =========================
    Professional GHL Theme Builder
-   Fixed API Integration Version
+   Fixed Duplicate & Loading Issues
 ========================= */
 
 (function(){
@@ -2213,7 +2212,7 @@
         PREVIEW_STYLE_ID: "ghl-theme-preview",
         BACKEND_API: "https://ghlengine-production.up.railway.app/api",
         AUTH_TOKEN: "110",
-        VERSION: "3.4.0"
+        VERSION: "3.5.0"
     };
 
     // =========================
@@ -2297,7 +2296,6 @@
                 }
 
                 // For now, we'll assume access is granted if we have a location
-                // In production, you would make an API call to verify access
                 return {
                     permitted: true,
                     location: currentLocation,
@@ -2321,7 +2319,7 @@
     };
 
     // =========================
-    // API Service - FIXED VERSION
+    // API Service - FIXED DUPLICATE ISSUES
     // =========================
     const apiService = {
         async call(endpoint, options = {}) {
@@ -2356,11 +2354,25 @@
             }
         },
 
-        // FIXED: Proper theme creation with hex color validation
+        // FIXED: Generate unique theme names to avoid duplicates
         async createTheme(themeData) {
-            // Validate and convert colors to hex format
+            // Ensure unique name by checking existing themes first
+            const existingThemes = await this.getAllThemes();
+            let uniqueName = themeData.name;
+            let counter = 1;
+            
+            // Check if name already exists and make it unique
+            if (existingThemes.success && existingThemes.data) {
+                const existingNames = existingThemes.data.map(theme => theme.name);
+                while (existingNames.includes(uniqueName)) {
+                    uniqueName = `${themeData.name} (${counter})`;
+                    counter++;
+                }
+            }
+
             const validatedData = {
                 ...themeData,
+                name: uniqueName, // Use unique name
                 backgroundColor: this.validateHexColor(themeData.backgroundColor),
                 textColor: this.validateHexColor(themeData.textColor),
                 sidebarGradientStart: this.validateHexColor(themeData.sidebarGradientStart),
@@ -2369,7 +2381,7 @@
                 headerGradientEnd: this.validateHexColor(themeData.headerGradientEnd)
             };
 
-            console.log('🎨 Creating theme with validated data:', validatedData);
+            console.log('🎨 Creating theme with unique name:', validatedData.name);
             return this.call('/themes', {
                 method: 'POST',
                 body: validatedData
@@ -2403,15 +2415,24 @@
             return this.call('/themes');
         },
 
-        // FIXED: Added missing function
         async getThemeById(themeId) {
             if (!themeId) throw new Error('No theme ID provided');
             return this.call(`/themes/${themeId}`);
         },
 
+        // FIXED: Enhanced theme loading for location
         async getThemeByLocation(locationId) {
             if (!locationId) throw new Error('No location ID provided');
-            return this.call(`/themes/by-location/${locationId}`);
+            try {
+                const response = await this.call(`/themes/by-location/${locationId}`);
+                return response;
+            } catch (error) {
+                // If no theme found for location, return empty
+                if (error.message.includes('404') || error.message.includes('not found')) {
+                    return { success: true, data: null };
+                }
+                throw error;
+            }
         },
 
         async applyThemeToLocation(themeId, locationId) {
@@ -2496,6 +2517,7 @@
                 style.id = CONFIG.STYLE_ID;
                 style.textContent = css;
                 document.head.appendChild(style);
+                console.log('✅ Theme CSS applied:', theme.name);
             }
         },
 
@@ -2522,7 +2544,7 @@
     };
 
     // =========================
-    // Theme Manager - FIXED API Integration
+    // Theme Manager - COMPLETELY FIXED
     // =========================
     const themeManager = {
         async loadThemes() {
@@ -2537,8 +2559,6 @@
                         themesArray = response.data;
                     } else if (Array.isArray(response.themes)) {
                         themesArray = response.themes;
-                    } else if (response.data && Array.isArray(response.data.themes)) {
-                        themesArray = response.data.themes;
                     } else {
                         themesArray = [response.data || response.theme].filter(Boolean);
                     }
@@ -2648,16 +2668,19 @@
 
                 console.log('🔄 Creating custom theme:', themeData.name);
 
-                // FIXED: Proper backend-compatible payload
+                // FIXED: Generate timestamp for unique names
+                const timestamp = new Date().getTime();
+                const uniqueName = themeData.name.includes('(') ? themeData.name : `${themeData.name} ${timestamp}`;
+
                 const completeThemeData = {
-                    name: themeData.name,
-                    description: themeData.description || "Custom theme created through theme builder",
+                    name: uniqueName,
+                    description: "Custom theme created through theme builder",
                     locationId: state.currentLocation.locationId,
                     userId: CONFIG.AUTH_TOKEN,
                     companyId: "default-company",
                     textColor: themeData.textColor,
                     backgroundColor: themeData.backgroundColor,
-                    fontFamily: themeData.fontFamily.split(',')[0].trim(), // Take first font only
+                    fontFamily: themeData.fontFamily.split(',')[0].trim(),
                     sidebarGradientStart: themeData.sidebarGradientStart,
                     sidebarGradientEnd: themeData.sidebarGradientEnd,
                     headerGradientStart: themeData.headerGradientStart,
@@ -2675,7 +2698,7 @@
                 }
 
                 if (createdTheme && createdTheme._id) {
-                    console.log(`✅ Custom theme created: ${themeData.name}`);
+                    console.log(`✅ Custom theme created: ${uniqueName}`);
                     
                     // Reload themes and apply the new one
                     await this.loadThemes();
@@ -2772,8 +2795,8 @@
                 borderRadius: '8px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
                 zIndex: 100000,
-                width: '400px',
-                maxHeight: '80vh',
+                width: '420px',
+                maxHeight: '85vh',
                 overflowY: 'auto',
                 border: '1px solid #e5e7eb',
                 fontFamily: 'system-ui, -apple-system, sans-serif'
@@ -2816,9 +2839,9 @@
 
                 <div style="margin-bottom: 16px;">
                     <h4 style="margin: 0 0 8px 0; color: #374151; font-size: 14px; font-weight: 600;">
-                        Available Themes
+                        Available Themes (${state.themes.length})
                     </h4>
-                    <div id="theme-buttons-container" style="min-height: 80px; max-height: 150px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px; padding: 8px;">
+                    <div id="theme-buttons-container" style="min-height: 80px; max-height: 150px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px; padding: 8px; background: #fafafa;">
                         <div style="text-align: center; color: #6b7280; padding: 10px; font-size: 12px;">
                             Loading themes from database...
                         </div>
@@ -2831,11 +2854,11 @@
                     </h4>
                     
                     <div style="margin-bottom: 10px;">
-                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Theme Name</label>
+                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Theme Name *</label>
                         <input type="text" id="custom-theme-name" 
-                               placeholder="Enter theme name" 
+                               placeholder="Enter unique theme name" 
                                style="width: 100%; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;"
-                               value="Custom Theme ${new Date().toLocaleDateString()}">
+                               value="My Custom Theme">
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
@@ -2860,17 +2883,18 @@
                         </div>
                     </div>
 
-                    <div style="margin-bottom: 10px;">
-                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Background Color</label>
-                        <input type="color" id="background-color" value="#FFFFFF" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Background Color</label>
+                            <input type="color" id="background-color" value="#FFFFFF" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Text Color</label>
+                            <input type="color" id="text-color" value="#FFFFFF" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        </div>
                     </div>
 
-                    <div style="margin-bottom: 10px;">
-                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Text Color</label>
-                        <input type="color" id="text-color" value="#FFFFFF" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
-                    </div>
-
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px;">
                         <button id="preview-theme" 
                                 style="flex: 1; padding: 8px 12px; background: #F59E0B; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
                             👀 Preview
@@ -2975,7 +2999,7 @@
                 if (state.themes.length === 0) {
                     container.innerHTML = `
                         <div style="text-align: center; color: #6b7280; padding: 20px; font-size: 11px;">
-                            No themes found in database. Create one!
+                            No themes found in database. Create your first theme!
                         </div>
                     `;
                     return;
@@ -2990,9 +3014,10 @@
                              style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 4px 0; padding: 6px 8px; border-radius: 4px; border: ${isActive ? '1px solid #10B981' : '1px solid #e5e7eb'}; background: ${isActive ? '#f0fdf4' : '#f9fafb'}; cursor: pointer; transition: all 0.2s ease; font-size: 11px;">
                             <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
                                 <div style="width: 12px; height: 12px; border-radius: 50%; background: ${color};"></div>
-                                <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${theme.name}</div>
+                                <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${theme.name}">${theme.name}</div>
                             </div>
-                            ${isActive ? '<span style="color: #10B981; font-weight: 600; font-size: 10px;">Active</span>' : ''}
+                            ${isActive ? '<span style="color: #10B981; font-weight: 600; font-size: 10px;">Active</span>' : 
+                              '<button style="background: #2563EB; color: white; border: none; border-radius: 3px; padding: 2px 6px; font-size: 9px; cursor: pointer;">Apply</button>'}
                         </div>
                     `;
                 }).join('');
@@ -3160,6 +3185,5 @@
         initializeThemeBuilder();
     }
 
-    console.log(`🎨 Professional GHL Theme Builder v${CONFIG.VERSION} - Fixed API Integration`);
+    console.log(`🎨 Professional GHL Theme Builder v${CONFIG.VERSION} - Fixed Duplicate & Loading Issues`);
 })();
-
