@@ -2199,7 +2199,7 @@
 
 /* =========================
    Professional GHL Theme Builder
-   Compact & API-Integrated Version
+   Fixed API Integration Version
 ========================= */
 
 (function(){
@@ -2213,36 +2213,7 @@
         PREVIEW_STYLE_ID: "ghl-theme-preview",
         BACKEND_API: "https://ghlengine-production.up.railway.app/api",
         AUTH_TOKEN: "110",
-        VERSION: "3.3.0"
-    };
-
-    // =========================
-    // Real GHL Color Classes
-    // =========================
-    const GHL_COLORS = {
-        primary: [
-            { name: "GHL Blue", value: "#2563EB", class: "bg-blue-600" },
-            { name: "GHL Purple", value: "#7C3AED", class: "bg-purple-600" },
-            { name: "GHL Green", value: "#059669", class: "bg-emerald-600" },
-            { name: "GHL Red", value: "#DC2626", class: "bg-red-600" },
-            { name: "GHL Orange", value: "#EA580C", class: "bg-orange-600" },
-            { name: "GHL Pink", value: "#DB2777", class: "bg-pink-600" }
-        ],
-        gradients: [
-            { name: "Blue Gradient", start: "#2563EB", end: "#1D4ED8", class: "from-blue-600 to-blue-700" },
-            { name: "Purple Gradient", start: "#7C3AED", end: "#6D28D9", class: "from-purple-600 to-purple-700" },
-            { name: "Emerald Gradient", start: "#059669", end: "#047857", class: "from-emerald-600 to-emerald-700" },
-            { name: "Rose Gradient", start: "#E11D48", end: "#BE123C", class: "from-rose-600 to-rose-700" },
-            { name: "Indigo Gradient", start: "#4F46E5", end: "#4338CA", class: "from-indigo-600 to-indigo-700" },
-            { name: "Teal Gradient", start: "#0D9488", end: "#0F766E", class: "from-teal-600 to-teal-700" }
-        ],
-        backgrounds: [
-            { name: "White", value: "#FFFFFF", class: "bg-white" },
-            { name: "Light Gray", value: "#F3F4F6", class: "bg-gray-100" },
-            { name: "Glass Effect", value: "rgba(255,255,255,0.33)", class: "bg-white bg-opacity-30" },
-            { name: "Light Blue", value: "#DBEAFE", class: "bg-blue-50" },
-            { name: "Light Purple", value: "#F3E8FF", class: "bg-purple-50" }
-        ]
+        VERSION: "3.4.0"
     };
 
     // =========================
@@ -2254,12 +2225,15 @@
         currentTheme: null,
         currentLocation: null,
         themes: [],
+        accessInfo: null,
         isLoading: false,
         customTheme: {
             name: "",
-            sidebarGradient: GHL_COLORS.gradients[0],
-            headerGradient: GHL_COLORS.gradients[0],
-            backgroundColor: GHL_COLORS.backgrounds[2],
+            sidebarGradientStart: "#2563EB",
+            sidebarGradientEnd: "#1D4ED8",
+            headerGradientStart: "#2563EB",
+            headerGradientEnd: "#1D4ED8",
+            backgroundColor: "#FFFFFF",
             textColor: "#FFFFFF",
             fontFamily: "Inter, sans-serif"
         }
@@ -2312,7 +2286,42 @@
     };
 
     // =========================
-    // API Service
+    // Access Control Service
+    // =========================
+    const accessService = {
+        async checkThemeBuilderAccess() {
+            try {
+                const currentLocation = urlLocationService.getCurrentLocation();
+                if (!currentLocation || !currentLocation.locationId) {
+                    throw new Error('Could not detect current GHL location from URL');
+                }
+
+                // For now, we'll assume access is granted if we have a location
+                // In production, you would make an API call to verify access
+                return {
+                    permitted: true,
+                    location: currentLocation,
+                    accessInfo: {
+                        themeBuilderAccess: true,
+                        userId: CONFIG.AUTH_TOKEN,
+                        companyId: "default-company"
+                    }
+                };
+
+            } catch (error) {
+                console.error('❌ Access check failed:', error);
+                return {
+                    permitted: false,
+                    location: null,
+                    accessInfo: null,
+                    error: error.message
+                };
+            }
+        }
+    };
+
+    // =========================
+    // API Service - FIXED VERSION
     // =========================
     const apiService = {
         async call(endpoint, options = {}) {
@@ -2330,13 +2339,16 @@
             };
 
             try {
+                console.log(`🔄 API Call: ${config.method} ${url}`, config.body ? { body: config.body } : '');
                 const response = await fetch(url, config);
                 const data = await response.json();
                 
                 if (!response.ok) {
+                    console.error(`❌ API Error ${response.status}:`, data);
                     throw new Error(data.message || data.error || `HTTP ${response.status}`);
                 }
                 
+                console.log(`✅ API Success:`, data);
                 return data;
             } catch (error) {
                 console.error(`❌ API Error ${endpoint}:`, error);
@@ -2344,8 +2356,57 @@
             }
         },
 
+        // FIXED: Proper theme creation with hex color validation
+        async createTheme(themeData) {
+            // Validate and convert colors to hex format
+            const validatedData = {
+                ...themeData,
+                backgroundColor: this.validateHexColor(themeData.backgroundColor),
+                textColor: this.validateHexColor(themeData.textColor),
+                sidebarGradientStart: this.validateHexColor(themeData.sidebarGradientStart),
+                sidebarGradientEnd: this.validateHexColor(themeData.sidebarGradientEnd),
+                headerGradientStart: this.validateHexColor(themeData.headerGradientStart),
+                headerGradientEnd: this.validateHexColor(themeData.headerGradientEnd)
+            };
+
+            console.log('🎨 Creating theme with validated data:', validatedData);
+            return this.call('/themes', {
+                method: 'POST',
+                body: validatedData
+            });
+        },
+
+        // Validate and convert to hex format
+        validateHexColor(color) {
+            if (!color) return '#FFFFFF';
+            
+            // If it's already hex, return it
+            if (color.startsWith('#')) {
+                return color.length === 7 ? color : '#FFFFFF';
+            }
+            
+            // If it's rgba, convert to hex (simple conversion without alpha)
+            if (color.startsWith('rgba')) {
+                const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (match) {
+                    const r = parseInt(match[1]).toString(16).padStart(2, '0');
+                    const g = parseInt(match[2]).toString(16).padStart(2, '0');
+                    const b = parseInt(match[3]).toString(16).padStart(2, '0');
+                    return `#${r}${g}${b}`.toUpperCase();
+                }
+            }
+            
+            return '#FFFFFF';
+        },
+
         async getAllThemes() {
             return this.call('/themes');
+        },
+
+        // FIXED: Added missing function
+        async getThemeById(themeId) {
+            if (!themeId) throw new Error('No theme ID provided');
+            return this.call(`/themes/${themeId}`);
         },
 
         async getThemeByLocation(locationId) {
@@ -2357,14 +2418,10 @@
             if (!locationId) throw new Error('No location ID provided');
             return this.call('/themes/apply', {
                 method: 'POST',
-                body: { locationId, themeId }
-            });
-        },
-
-        async createTheme(themeData) {
-            return this.call('/themes', {
-                method: 'POST',
-                body: themeData
+                body: {
+                    locationId: locationId,
+                    themeId: themeId
+                }
             });
         },
 
@@ -2389,15 +2446,15 @@
             return `
 /* GHL Theme Builder v${CONFIG.VERSION} - ${comment} */
 .transition-slowest .flex-col > .overflow-hidden {
-    background: linear-gradient(135deg, ${theme.sidebarGradient.start} 0%, ${theme.sidebarGradient.end} 100%) !important;
+    background: linear-gradient(135deg, ${theme.sidebarGradientStart} 0%, ${theme.sidebarGradientEnd} 100%) !important;
 }
 
 .sidebar-v2-location .hl_header .container-fluid {
-    background: linear-gradient(135deg, ${theme.headerGradient.start} 0%, ${theme.headerGradient.end} 100%) !important;
+    background: linear-gradient(135deg, ${theme.headerGradientStart} 0%, ${theme.headerGradientEnd} 100%) !important;
 }
 
 .notification-banner-top-bar {
-    background: linear-gradient(135deg, ${theme.headerGradient.start} 0%, ${theme.headerGradient.end} 100%) !important;
+    background: linear-gradient(135deg, ${theme.headerGradientStart} 0%, ${theme.headerGradientEnd} 100%) !important;
 }
 
 .crm-opportunities-status .hl-text,
@@ -2418,7 +2475,7 @@
 .sidebar-v2-location #sidebar-v2 #globalSearchOpener,
 .sidebar-v2-location #sidebar-v2 #quickActions,
 .sidebar-v2-location #sidebar-v2 #backButtonv2 {
-    background-color: ${theme.backgroundColor.value} !important;
+    background-color: ${theme.backgroundColor} !important;
 }
 
 .hl_switcher-loc-name,
@@ -2465,7 +2522,7 @@
     };
 
     // =========================
-    // Theme Manager
+    // Theme Manager - FIXED API Integration
     // =========================
     const themeManager = {
         async loadThemes() {
@@ -2473,21 +2530,25 @@
                 state.isLoading = true;
                 const response = await apiService.getAllThemes();
                 
-                if (response.success) {
+                if (response && response.success) {
                     let themesArray = [];
                     
                     if (Array.isArray(response.data)) {
                         themesArray = response.data;
                     } else if (Array.isArray(response.themes)) {
                         themesArray = response.themes;
+                    } else if (response.data && Array.isArray(response.data.themes)) {
+                        themesArray = response.data.themes;
                     } else {
                         themesArray = [response.data || response.theme].filter(Boolean);
                     }
 
                     state.themes = themesArray;
+                    console.log(`✅ Loaded ${state.themes.length} themes from backend`);
                     return state.themes;
+                } else {
+                    throw new Error(response?.message || 'Invalid response format');
                 }
-                throw new Error('Invalid themes response');
             } catch (error) {
                 console.error('❌ Failed to load themes:', error);
                 state.themes = [];
@@ -2499,20 +2560,30 @@
 
         async applyTheme(themeId) {
             try {
-                if (!state.currentLocation) throw new Error('No current location');
+                if (!state.currentLocation) throw new Error('No current location detected');
                 
-                const response = await apiService.getThemeById(themeId);
-                let theme = response.success ? (response.data || response.theme) : null;
+                console.log(`🔄 Applying theme ${themeId} to location ${state.currentLocation.locationId}`);
                 
-                if (!theme) throw new Error('Theme not found');
+                // First get theme details
+                const themeResponse = await apiService.getThemeById(themeId);
+                let theme = null;
+                
+                if (themeResponse && themeResponse.success) {
+                    theme = themeResponse.data || themeResponse.theme;
+                }
+                
+                if (!theme) throw new Error('Theme not found in database');
 
+                // Apply theme to location
                 const applyResponse = await apiService.applyThemeToLocation(themeId, state.currentLocation.locationId);
-                if (applyResponse.success) {
+                if (applyResponse && applyResponse.success) {
                     state.currentTheme = theme;
                     themeCSSService.applyThemeCSS(theme);
+                    console.log(`✅ Theme "${theme.name}" applied successfully`);
                     return true;
+                } else {
+                    throw new Error(applyResponse?.message || 'Failed to apply theme');
                 }
-                throw new Error('Failed to apply theme');
             } catch (error) {
                 console.error('❌ Failed to apply theme:', error);
                 throw error;
@@ -2521,15 +2592,19 @@
 
         async removeTheme() {
             try {
-                if (!state.currentLocation) throw new Error('No current location');
+                if (!state.currentLocation) throw new Error('No current location detected');
                 
+                console.log(`🔄 Removing theme from location ${state.currentLocation.locationId}`);
                 const removeResponse = await apiService.removeThemeFromLocation(state.currentLocation.locationId);
-                if (removeResponse.success) {
+                
+                if (removeResponse && removeResponse.success) {
                     state.currentTheme = null;
                     themeCSSService.removeThemeCSS();
+                    console.log('✅ Theme removed successfully');
                     return true;
+                } else {
+                    throw new Error(removeResponse?.message || 'Failed to remove theme');
                 }
-                throw new Error('Failed to remove theme');
             } catch (error) {
                 console.error('❌ Failed to remove theme:', error);
                 throw error;
@@ -2538,21 +2613,27 @@
 
         async loadCurrentTheme() {
             try {
-                if (!state.currentLocation) return;
-                
+                if (!state.currentLocation) {
+                    console.log('❌ No current location for theme loading');
+                    return;
+                }
+
+                console.log(`🔄 Loading current theme for location ${state.currentLocation.locationId}`);
                 const themeResponse = await apiService.getThemeByLocation(state.currentLocation.locationId);
-                let theme = null;
                 
-                if (themeResponse.success) {
-                    theme = themeResponse.theme || themeResponse.data;
+                let theme = null;
+                if (themeResponse && themeResponse.success) {
+                    theme = themeResponse.data || themeResponse.theme;
                 }
 
                 if (theme && theme._id) {
                     state.currentTheme = theme;
                     themeCSSService.applyThemeCSS(theme);
+                    console.log(`✅ Current theme loaded: ${theme.name}`);
                 } else {
                     state.currentTheme = null;
                     themeCSSService.removeThemeCSS();
+                    console.log('ℹ️ No theme applied to this location');
                 }
             } catch (error) {
                 console.error('❌ Failed to load current theme:', error);
@@ -2563,35 +2644,47 @@
 
         async createCustomTheme(themeData) {
             try {
-                if (!state.currentLocation) throw new Error('No current location');
+                if (!state.currentLocation) throw new Error('No current location detected');
 
+                console.log('🔄 Creating custom theme:', themeData.name);
+
+                // FIXED: Proper backend-compatible payload
                 const completeThemeData = {
                     name: themeData.name,
-                    description: "Custom theme created through theme builder",
+                    description: themeData.description || "Custom theme created through theme builder",
                     locationId: state.currentLocation.locationId,
                     userId: CONFIG.AUTH_TOKEN,
                     companyId: "default-company",
                     textColor: themeData.textColor,
-                    backgroundColor: themeData.backgroundColor.value,
-                    fontFamily: themeData.fontFamily,
-                    sidebarGradientStart: themeData.sidebarGradient.start,
-                    sidebarGradientEnd: themeData.sidebarGradient.end,
-                    headerGradientStart: themeData.headerGradient.start,
-                    headerGradientEnd: themeData.headerGradient.end,
+                    backgroundColor: themeData.backgroundColor,
+                    fontFamily: themeData.fontFamily.split(',')[0].trim(), // Take first font only
+                    sidebarGradientStart: themeData.sidebarGradientStart,
+                    sidebarGradientEnd: themeData.sidebarGradientEnd,
+                    headerGradientStart: themeData.headerGradientStart,
+                    headerGradientEnd: themeData.headerGradientEnd,
                     category: "dashboard",
                     isActive: true,
                     isGlobal: false
                 };
 
                 const createResponse = await apiService.createTheme(completeThemeData);
-                let createdTheme = createResponse.success ? (createResponse.data || createResponse.theme) : null;
+                let createdTheme = null;
+                
+                if (createResponse && createResponse.success) {
+                    createdTheme = createResponse.data || createResponse.theme;
+                }
 
-                if (createdTheme) {
+                if (createdTheme && createdTheme._id) {
+                    console.log(`✅ Custom theme created: ${themeData.name}`);
+                    
+                    // Reload themes and apply the new one
                     await this.loadThemes();
                     await this.applyTheme(createdTheme._id);
+                    
                     return createdTheme;
+                } else {
+                    throw new Error(createResponse?.message || 'Failed to create theme');
                 }
-                throw new Error('Failed to create theme');
             } catch (error) {
                 console.error('❌ Failed to create custom theme:', error);
                 throw error;
@@ -2600,7 +2693,7 @@
     };
 
     // =========================
-    // Compact UI Service
+    // Professional UI Service
     // =========================
     const uiService = {
         createFloatingButton() {
@@ -2679,8 +2772,8 @@
                 borderRadius: '8px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
                 zIndex: 100000,
-                width: '380px',
-                maxHeight: '70vh',
+                width: '400px',
+                maxHeight: '80vh',
                 overflowY: 'auto',
                 border: '1px solid #e5e7eb',
                 fontFamily: 'system-ui, -apple-system, sans-serif'
@@ -2704,26 +2797,30 @@
             if (!state.popupRef) return;
 
             const currentLocationName = state.currentLocation?.name || 'Detecting...';
+            const currentLocationId = state.currentLocation?.locationId || 'Not detected';
+            const accessStatus = state.accessInfo?.themeBuilderAccess ? '✅ Enabled' : '❌ Disabled';
             const currentThemeName = state.currentTheme?.name || 'None';
 
             state.popupRef.innerHTML = `
                 <div style="margin-bottom: 16px;">
                     <h3 style="margin: 0 0 6px 0; color: #1f2937; font-size: 16px; font-weight: 600;">
-                        🎨 Theme Builder
+                        🎨 Professional Theme Builder
                     </h3>
-                    <div style="color: #6b7280; font-size: 12px; line-height: 1.4;">
+                    <div style="color: #6b7280; font-size: 11px; line-height: 1.4; background: #f8fafc; padding: 8px; border-radius: 4px;">
                         <div><strong>Location:</strong> ${currentLocationName}</div>
-                        <div><strong>Current Theme:</strong> ${currentThemeName}</div>
+                        <div><strong>Location ID:</strong> ${currentLocationId}</div>
+                        <div><strong>Access:</strong> ${accessStatus}</div>
+                        <div><strong>Current Theme:</strong> <span style="color: ${state.currentTheme ? '#10B981' : '#DC2626'}">${currentThemeName}</span></div>
                     </div>
                 </div>
 
                 <div style="margin-bottom: 16px;">
                     <h4 style="margin: 0 0 8px 0; color: #374151; font-size: 14px; font-weight: 600;">
-                        Quick Themes
+                        Available Themes
                     </h4>
-                    <div id="theme-buttons-container" style="min-height: 60px; max-height: 120px; overflow-y: auto; margin-bottom: 12px;">
+                    <div id="theme-buttons-container" style="min-height: 80px; max-height: 150px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px; padding: 8px;">
                         <div style="text-align: center; color: #6b7280; padding: 10px; font-size: 12px;">
-                            Loading themes...
+                            Loading themes from database...
                         </div>
                     </div>
                 </div>
@@ -2734,38 +2831,43 @@
                     </h4>
                     
                     <div style="margin-bottom: 10px;">
+                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Theme Name</label>
                         <input type="text" id="custom-theme-name" 
-                               placeholder="Theme name" 
+                               placeholder="Enter theme name" 
                                style="width: 100%; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;"
                                value="Custom Theme ${new Date().toLocaleDateString()}">
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
                         <div>
-                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Sidebar</label>
-                            <select id="sidebar-gradient" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
-                                ${GHL_COLORS.gradients.map((grad, index) => 
-                                    `<option value="${index}">${grad.name}</option>`
-                                ).join('')}
-                            </select>
+                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Sidebar Start</label>
+                            <input type="color" id="sidebar-start" value="#2563EB" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
                         </div>
                         <div>
-                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Header</label>
-                            <select id="header-gradient" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
-                                ${GHL_COLORS.gradients.map((grad, index) => 
-                                    `<option value="${index}">${grad.name}</option>`
-                                ).join('')}
-                            </select>
+                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Sidebar End</label>
+                            <input type="color" id="sidebar-end" value="#1D4ED8" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Header Start</label>
+                            <input type="color" id="header-start" value="#2563EB" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Header End</label>
+                            <input type="color" id="header-end" value="#1D4ED8" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
                         </div>
                     </div>
 
                     <div style="margin-bottom: 10px;">
-                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Background</label>
-                        <select id="background-color" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
-                            ${GHL_COLORS.backgrounds.map((bg, index) => 
-                                `<option value="${index}">${bg.name}</option>`
-                            ).join('')}
-                        </select>
+                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Background Color</label>
+                        <input type="color" id="background-color" value="#FFFFFF" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Text Color</label>
+                        <input type="color" id="text-color" value="#FFFFFF" style="width: 100%; height: 30px; border: 1px solid #d1d5db; border-radius: 4px;">
                     </div>
 
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
@@ -2775,7 +2877,7 @@
                         </button>
                         <button id="create-theme" 
                                 style="flex: 1; padding: 8px 12px; background: #8B5CF6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
-                            🎨 Create
+                            🎨 Create & Apply
                         </button>
                         ${state.currentTheme ? `
                         <button id="remove-theme" 
@@ -2783,6 +2885,10 @@
                             🗑️ Remove
                         </button>
                         ` : ''}
+                        <button id="refresh-data" 
+                                style="flex: 1; padding: 8px 12px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
+                            🔄 Refresh
+                        </button>
                         <button id="close-popup" 
                                 style="flex: 1; padding: 8px 12px; background: transparent; color: #6b7280; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
                             Close
@@ -2800,73 +2906,59 @@
             const createBtn = document.getElementById('create-theme');
             const closeBtn = document.getElementById('close-popup');
             const removeBtn = document.getElementById('remove-theme');
+            const refreshBtn = document.getElementById('refresh-data');
 
-            if (previewBtn) {
-                previewBtn.addEventListener('click', () => this.previewCustomTheme());
-            }
+            if (previewBtn) previewBtn.addEventListener('click', () => this.previewCustomTheme());
+            if (createBtn) createBtn.addEventListener('click', () => this.createCustomTheme());
+            if (closeBtn) closeBtn.addEventListener('click', () => this.closePopup());
+            if (removeBtn) removeBtn.addEventListener('click', () => this.confirmRemoveTheme());
+            if (refreshBtn) refreshBtn.addEventListener('click', () => this.refreshData());
 
-            if (createBtn) {
-                createBtn.addEventListener('click', () => this.createCustomTheme());
-            }
-
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => this.closePopup());
-            }
-
-            if (removeBtn) {
-                removeBtn.addEventListener('click', () => this.confirmRemoveTheme());
-            }
-
-            // Add change listeners for real-time preview
-            const sidebarSelect = document.getElementById('sidebar-gradient');
-            const headerSelect = document.getElementById('header-gradient');
-            const backgroundSelect = document.getElementById('background-color');
-
-            if (sidebarSelect) {
-                sidebarSelect.addEventListener('change', () => this.updateCustomTheme());
-            }
-            if (headerSelect) {
-                headerSelect.addEventListener('change', () => this.updateCustomTheme());
-            }
-            if (backgroundSelect) {
-                backgroundSelect.addEventListener('change', () => this.updateCustomTheme());
-            }
+            // Real-time preview on color changes
+            const colorInputs = ['sidebar-start', 'sidebar-end', 'header-start', 'header-end', 'background-color', 'text-color'];
+            colorInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', () => this.updateCustomThemeFromInputs());
+                }
+            });
         },
 
-        updateCustomTheme() {
-            const sidebarSelect = document.getElementById('sidebar-gradient');
-            const headerSelect = document.getElementById('header-gradient');
-            const backgroundSelect = document.getElementById('background-color');
+        updateCustomThemeFromInputs() {
+            const nameInput = document.getElementById('custom-theme-name');
+            const sidebarStart = document.getElementById('sidebar-start');
+            const sidebarEnd = document.getElementById('sidebar-end');
+            const headerStart = document.getElementById('header-start');
+            const headerEnd = document.getElementById('header-end');
+            const backgroundColor = document.getElementById('background-color');
+            const textColor = document.getElementById('text-color');
 
-            if (sidebarSelect && headerSelect && backgroundSelect) {
-                state.customTheme.sidebarGradient = GHL_COLORS.gradients[sidebarSelect.value];
-                state.customTheme.headerGradient = GHL_COLORS.gradients[headerSelect.value];
-                state.customTheme.backgroundColor = GHL_COLORS.backgrounds[backgroundSelect.value];
-            }
+            if (nameInput) state.customTheme.name = nameInput.value;
+            if (sidebarStart) state.customTheme.sidebarGradientStart = sidebarStart.value;
+            if (sidebarEnd) state.customTheme.sidebarGradientEnd = sidebarEnd.value;
+            if (headerStart) state.customTheme.headerGradientStart = headerStart.value;
+            if (headerEnd) state.customTheme.headerGradientEnd = headerEnd.value;
+            if (backgroundColor) state.customTheme.backgroundColor = backgroundColor.value;
+            if (textColor) state.customTheme.textColor = textColor.value;
         },
 
         previewCustomTheme() {
-            this.updateCustomTheme();
+            this.updateCustomThemeFromInputs();
             themeCSSService.previewThemeCSS(state.customTheme);
-            this.showNotification('Theme preview active - hover to see changes', 'info');
+            this.showNotification('Theme preview active - close popup to cancel', 'info');
         },
 
         async createCustomTheme() {
-            this.updateCustomTheme();
-            
-            const nameInput = document.getElementById('custom-theme-name');
-            if (nameInput) {
-                state.customTheme.name = nameInput.value.trim();
-            }
+            this.updateCustomThemeFromInputs();
 
-            if (!state.customTheme.name) {
+            if (!state.customTheme.name.trim()) {
                 this.showNotification('Please enter a theme name', 'error');
                 return;
             }
 
             try {
                 await themeManager.createCustomTheme(state.customTheme);
-                this.showNotification('Custom theme created and applied!', 'success');
+                this.showNotification('Custom theme created and applied successfully!', 'success');
                 this.closePopup();
             } catch (error) {
                 this.showNotification(`Failed to create theme: ${error.message}`, 'error');
@@ -2882,14 +2974,14 @@
                 
                 if (state.themes.length === 0) {
                     container.innerHTML = `
-                        <div style="text-align: center; color: #6b7280; padding: 10px; font-size: 11px;">
-                            No themes found. Create one!
+                        <div style="text-align: center; color: #6b7280; padding: 20px; font-size: 11px;">
+                            No themes found in database. Create one!
                         </div>
                     `;
                     return;
                 }
 
-                container.innerHTML = state.themes.slice(0, 5).map(theme => {
+                container.innerHTML = state.themes.map(theme => {
                     const isActive = state.currentTheme && state.currentTheme._id === theme._id;
                     const color = theme.sidebarGradientStart || '#2563EB';
                     
@@ -2913,7 +3005,7 @@
                     item.addEventListener('click', () => {
                         themeManager.applyTheme(themeId)
                             .then(() => {
-                                this.showNotification(`"${theme.name}" applied!`, 'success');
+                                this.showNotification(`"${theme.name}" applied to ${state.currentLocation.name}!`, 'success');
                                 this.updatePopupContent();
                             })
                             .catch(error => {
@@ -2924,10 +3016,22 @@
 
             } catch (error) {
                 container.innerHTML = `
-                    <div style="text-align: center; color: #DC2626; padding: 10px; font-size: 11px;">
-                        Failed to load themes
+                    <div style="text-align: center; color: #DC2626; padding: 20px; font-size: 11px;">
+                        Failed to load themes: ${error.message}
                     </div>
                 `;
+            }
+        },
+
+        async refreshData() {
+            this.showNotification('Refreshing data from database...', 'info');
+            try {
+                await themeManager.loadThemes();
+                await themeManager.loadCurrentTheme();
+                await this.updatePopupContent();
+                this.showNotification('Data refreshed successfully!', 'success');
+            } catch (error) {
+                this.showNotification(`Refresh failed: ${error.message}`, 'error');
             }
         },
 
@@ -2937,11 +3041,11 @@
             if (confirm(`Remove "${state.currentTheme.name}" from ${state.currentLocation.name}?`)) {
                 themeManager.removeTheme()
                     .then(() => {
-                        this.showNotification('Theme removed!', 'success');
+                        this.showNotification('Theme removed successfully!', 'success');
                         this.updatePopupContent();
                     })
                     .catch(error => {
-                        this.showNotification(`Failed to remove: ${error.message}`, 'error');
+                        this.showNotification(`Failed to remove theme: ${error.message}`, 'error');
                     });
             }
         },
@@ -2998,25 +3102,37 @@
             return;
         }
 
-        console.log(`🚀 Initializing Compact GHL Theme Builder v${CONFIG.VERSION}...`);
+        console.log(`🚀 Initializing Professional GHL Theme Builder v${CONFIG.VERSION}...`);
 
         try {
             // Get current location
             const currentLocation = urlLocationService.getCurrentLocation();
             if (!currentLocation || !currentLocation.locationId) {
-                console.log('❌ No location detected');
+                console.log('❌ No GHL location detected in URL');
                 return;
             }
 
             state.currentLocation = currentLocation;
 
-            // Load and apply current theme
-            await themeManager.loadCurrentTheme();
+            // Check access
+            const accessCheck = await accessService.checkThemeBuilderAccess();
+            if (!accessCheck.permitted) {
+                console.log('❌ Theme Builder access not permitted for this location');
+                return;
+            }
+
+            state.accessInfo = accessCheck.accessInfo;
+
+            // Load current theme and available themes
+            await Promise.all([
+                themeManager.loadCurrentTheme(),
+                themeManager.loadThemes()
+            ]);
 
             // Create UI
             uiService.createFloatingButton();
             
-            console.log('✅ Compact Theme Builder initialized');
+            console.log('✅ Professional Theme Builder initialized successfully');
 
         } catch (error) {
             console.error('❌ Failed to initialize Theme Builder:', error);
@@ -3030,8 +3146,11 @@
         init: initializeThemeBuilder,
         open: () => uiService.openPopup(),
         close: () => uiService.closePopup(),
+        refresh: () => uiService.refreshData(),
         getCurrentTheme: () => state.currentTheme,
-        getCurrentLocation: () => state.currentLocation
+        getCurrentLocation: () => state.currentLocation,
+        getThemes: () => state.themes,
+        debug: () => console.log('Theme Builder State:', state)
     };
 
     // Auto-initialize
@@ -3041,8 +3160,6 @@
         initializeThemeBuilder();
     }
 
-    console.log(`🎨 Compact GHL Theme Builder v${CONFIG.VERSION} - Ready`);
+    console.log(`🎨 Professional GHL Theme Builder v${CONFIG.VERSION} - Fixed API Integration`);
 })();
-
-
 
