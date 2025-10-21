@@ -982,1210 +982,1210 @@
 
 
 
-// (function(){
-//     // =========================
-//     // Configuration - Updated with caching
-//     // =========================
-//     const CONFIG = {
-//         BTN_ID: "ghl-theme-builder-btn",
-//         POPUP_ID: "ghl-theme-builder-popup",
-//         STYLE_ID: "ghl-theme-style",
-//         PREVIEW_STYLE_ID: "ghl-theme-preview",
-//         BACKEND_API: "https://ghlengine-production.up.railway.app/api",
-//         AUTH_TOKEN: "110",
-//         VERSION: "3.2.0", // Updated version
-//         CACHE_DURATION: 5 * 60 * 1000, // 5 minutes cache
-//         DEBOUNCE_DELAY: 300 // ms for preview debouncing
-//     };
+(function(){
+    // =========================
+    // Configuration - Updated with caching
+    // =========================
+    const CONFIG = {
+        BTN_ID: "ghl-theme-builder-btn",
+        POPUP_ID: "ghl-theme-builder-popup",
+        STYLE_ID: "ghl-theme-style",
+        PREVIEW_STYLE_ID: "ghl-theme-preview",
+        BACKEND_API: "https://ghlengine-production.up.railway.app/api",
+        AUTH_TOKEN: "110",
+        VERSION: "3.2.0", // Updated version
+        CACHE_DURATION: 5 * 60 * 1000, // 5 minutes cache
+        DEBOUNCE_DELAY: 300 // ms for preview debouncing
+    };
 
-//     // =========================
-//     // State Management - Updated with cache
-//     // =========================
-//     const state = {
-//         btnRef: null,
-//         popupRef: null,
-//         currentTheme: null,
-//         currentLocation: null,
-//         themes: [],
-//         accessInfo: null,
-//         isLoading: false,
-//         isInitialized: false,
-//         isPreviewing: false,
-//         previewTheme: null,
-//         cache: {
-//             themes: null,
-//             themesTimestamp: 0,
-//             currentTheme: null,
-//             currentThemeTimestamp: 0
-//         }
-//     };
+    // =========================
+    // State Management - Updated with cache
+    // =========================
+    const state = {
+        btnRef: null,
+        popupRef: null,
+        currentTheme: null,
+        currentLocation: null,
+        themes: [],
+        accessInfo: null,
+        isLoading: false,
+        isInitialized: false,
+        isPreviewing: false,
+        previewTheme: null,
+        cache: {
+            themes: null,
+            themesTimestamp: 0,
+            currentTheme: null,
+            currentThemeTimestamp: 0
+        }
+    };
 
-//     // =========================
-//     // Cache Service for Speed Optimization
-//     // =========================
-//     const cacheService = {
-//         getThemes() {
-//             if (state.cache.themes && 
-//                 Date.now() - state.cache.themesTimestamp < CONFIG.CACHE_DURATION) {
-//                 console.log('📦 Using cached themes');
-//                 return state.cache.themes;
-//             }
-//             return null;
-//         },
+    // =========================
+    // Cache Service for Speed Optimization
+    // =========================
+    const cacheService = {
+        getThemes() {
+            if (state.cache.themes && 
+                Date.now() - state.cache.themesTimestamp < CONFIG.CACHE_DURATION) {
+                console.log('📦 Using cached themes');
+                return state.cache.themes;
+            }
+            return null;
+        },
 
-//         setThemes(themes) {
-//             state.cache.themes = themes;
-//             state.cache.themesTimestamp = Date.now();
-//         },
+        setThemes(themes) {
+            state.cache.themes = themes;
+            state.cache.themesTimestamp = Date.now();
+        },
 
-//         getCurrentTheme() {
-//             if (state.cache.currentTheme && 
-//                 Date.now() - state.cache.currentThemeTimestamp < CONFIG.CACHE_DURATION) {
-//                 console.log('📦 Using cached current theme');
-//                 return state.cache.currentTheme;
-//             }
-//             return null;
-//         },
+        getCurrentTheme() {
+            if (state.cache.currentTheme && 
+                Date.now() - state.cache.currentThemeTimestamp < CONFIG.CACHE_DURATION) {
+                console.log('📦 Using cached current theme');
+                return state.cache.currentTheme;
+            }
+            return null;
+        },
 
-//         setCurrentTheme(theme) {
-//             state.cache.currentTheme = theme;
-//             state.cache.currentThemeTimestamp = Date.now();
-//         },
+        setCurrentTheme(theme) {
+            state.cache.currentTheme = theme;
+            state.cache.currentThemeTimestamp = Date.now();
+        },
 
-//         clearCache() {
-//             state.cache.themes = null;
-//             state.cache.themesTimestamp = 0;
-//             state.cache.currentTheme = null;
-//             state.cache.currentThemeTimestamp = 0;
-//             console.log('🗑️ Cache cleared');
-//         }
-//     };
+        clearCache() {
+            state.cache.themes = null;
+            state.cache.themesTimestamp = 0;
+            state.cache.currentTheme = null;
+            state.cache.currentThemeTimestamp = 0;
+            console.log('🗑️ Cache cleared');
+        }
+    };
 
-//     // =========================
-//     // Debounce Service for Performance
-//     // =========================
-//     const debounceService = {
-//         debounce(func, wait) {
-//             let timeout;
-//             return function executedFunction(...args) {
-//                 const later = () => {
-//                     clearTimeout(timeout);
-//                     func(...args);
-//                 };
-//                 clearTimeout(timeout);
-//                 timeout = setTimeout(later, wait);
-//             };
-//         }
-//     };
+    // =========================
+    // Debounce Service for Performance
+    // =========================
+    const debounceService = {
+        debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    };
 
-//     // =========================
-//     // URL Location Detection Service
-//     // =========================
-//     const urlLocationService = {
-//         extractLocationIdFromURL() {
-//             try {
-//                 const currentURL = window.location.href;
+    // =========================
+    // URL Location Detection Service
+    // =========================
+    const urlLocationService = {
+        extractLocationIdFromURL() {
+            try {
+                const currentURL = window.location.href;
                 
-//                 // Match GHL URL pattern: /location/{locationId}/launchpad
-//                 const urlPattern = /\/location\/([^\/]+)\/launchpad/;
-//                 const match = currentURL.match(urlPattern);
+                // Match GHL URL pattern: /location/{locationId}/launchpad
+                const urlPattern = /\/location\/([^\/]+)\/launchpad/;
+                const match = currentURL.match(urlPattern);
                 
-//                 if (match && match[1]) {
-//                     const locationId = match[1];
-//                     return locationId;
-//                 }
+                if (match && match[1]) {
+                    const locationId = match[1];
+                    return locationId;
+                }
                 
-//                 return null;
-//             } catch (error) {
-//                 console.error('❌ Error extracting location from URL:', error);
-//                 return null;
-//             }
-//         },
+                return null;
+            } catch (error) {
+                console.error('❌ Error extracting location from URL:', error);
+                return null;
+            }
+        },
 
-//         getCurrentLocationName() {
-//             try {
-//                 const selectors = [
-//                     '.hl_switcher-loc-name',
-//                     '[data-location-name]',
-//                     '.location-name',
-//                     '.current-location'
-//                 ];
+        getCurrentLocationName() {
+            try {
+                const selectors = [
+                    '.hl_switcher-loc-name',
+                    '[data-location-name]',
+                    '.location-name',
+                    '.current-location'
+                ];
 
-//                 for (let selector of selectors) {
-//                     const element = document.querySelector(selector);
-//                     if (element && element.textContent) {
-//                         const name = element.textContent.trim();
-//                         if (name && name.length > 0 && name !== 'GHL') {
-//                             return name;
-//                         }
-//                     }
-//                 }
+                for (let selector of selectors) {
+                    const element = document.querySelector(selector);
+                    if (element && element.textContent) {
+                        const name = element.textContent.trim();
+                        if (name && name.length > 0 && name !== 'GHL') {
+                            return name;
+                        }
+                    }
+                }
 
-//                 return 'Current Location';
-//             } catch (error) {
-//                 console.error('❌ Error getting location name from DOM:', error);
-//                 return 'Current Location';
-//             }
-//         },
+                return 'Current Location';
+            } catch (error) {
+                console.error('❌ Error getting location name from DOM:', error);
+                return 'Current Location';
+            }
+        },
 
-//         getCurrentLocation() {
-//             const locationId = this.extractLocationIdFromURL();
-//             if (!locationId) {
-//                 return null;
-//             }
+        getCurrentLocation() {
+            const locationId = this.extractLocationIdFromURL();
+            if (!locationId) {
+                return null;
+            }
 
-//             return {
-//                 locationId: locationId,
-//                 name: this.getCurrentLocationName(),
-//                 url: window.location.href
-//             };
-//         },
+            return {
+                locationId: locationId,
+                name: this.getCurrentLocationName(),
+                url: window.location.href
+            };
+        },
 
-//         // Monitor URL changes for SPA navigation
-//         startUrlChangeMonitoring() {
-//             let currentUrl = window.location.href;
+        // Monitor URL changes for SPA navigation
+        startUrlChangeMonitoring() {
+            let currentUrl = window.location.href;
             
-//             const observeUrlChanges = () => {
-//                 const newUrl = window.location.href;
-//                 if (newUrl !== currentUrl) {
-//                     currentUrl = newUrl;
+            const observeUrlChanges = () => {
+                const newUrl = window.location.href;
+                if (newUrl !== currentUrl) {
+                    currentUrl = newUrl;
                     
-//                     // Check if we're on a location page and reload theme if needed
-//                     const newLocation = this.getCurrentLocation();
-//                     if (newLocation && newLocation.locationId) {
-//                         console.log('📍 New location detected in URL, reloading theme...');
-//                         cacheService.clearCache(); // Clear cache on location change
-//                         themeManager.loadCurrentTheme();
-//                     } else {
-//                         // Not on a location page, remove theme
-//                         themeCSSService.removeThemeCSS();
-//                         state.currentTheme = null;
-//                         cacheService.setCurrentTheme(null);
-//                     }
-//                 }
-//             };
+                    // Check if we're on a location page and reload theme if needed
+                    const newLocation = this.getCurrentLocation();
+                    if (newLocation && newLocation.locationId) {
+                        console.log('📍 New location detected in URL, reloading theme...');
+                        cacheService.clearCache(); // Clear cache on location change
+                        themeManager.loadCurrentTheme();
+                    } else {
+                        // Not on a location page, remove theme
+                        themeCSSService.removeThemeCSS();
+                        state.currentTheme = null;
+                        cacheService.setCurrentTheme(null);
+                    }
+                }
+            };
 
-//             // Check for URL changes every second
-//             setInterval(observeUrlChanges, 1000);
-//         }
-//     };
+            // Check for URL changes every second
+            setInterval(observeUrlChanges, 1000);
+        }
+    };
 
-//     // =========================
-//     // API Service - Enhanced with better error handling
-//     // =========================
-//     const apiService = {
-//         async call(endpoint, options = {}) {
-//             const url = `${CONFIG.BACKEND_API}${endpoint}`;
-//             const headers = {
-//                 'Content-Type': 'application/json',
-//                 'Authorization': `Bearer ${CONFIG.AUTH_TOKEN}`,
-//                 ...options.headers
-//             };
+    // =========================
+    // API Service - Enhanced with better error handling
+    // =========================
+    const apiService = {
+        async call(endpoint, options = {}) {
+            const url = `${CONFIG.BACKEND_API}${endpoint}`;
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${CONFIG.AUTH_TOKEN}`,
+                ...options.headers
+            };
 
-//             const config = {
-//                 method: options.method || 'GET',
-//                 headers,
-//                 ...(options.body && { body: JSON.stringify(options.body) })
-//             };
+            const config = {
+                method: options.method || 'GET',
+                headers,
+                ...(options.body && { body: JSON.stringify(options.body) })
+            };
 
-//             try {
-//                 const response = await fetch(url, config);
-//                 const data = await response.json();
+            try {
+                const response = await fetch(url, config);
+                const data = await response.json();
                 
-//                 if (!response.ok) {
-//                     console.error(`❌ API Error ${endpoint}:`, {
-//                         status: response.status,
-//                         statusText: response.statusText,
-//                         data: data
-//                     });
+                if (!response.ok) {
+                    console.error(`❌ API Error ${endpoint}:`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        data: data
+                    });
                     
-//                     const errorMessage = data.message || data.error || `HTTP ${response.status}: ${response.statusText}`;
-//                     throw new Error(errorMessage);
-//                 }
+                    const errorMessage = data.message || data.error || `HTTP ${response.status}: ${response.statusText}`;
+                    throw new Error(errorMessage);
+                }
                 
-//                 return data;
-//             } catch (error) {
-//                 console.error(`❌ API Error ${endpoint}:`, error);
-//                 throw error;
-//             }
-//         },
+                return data;
+            } catch (error) {
+                console.error(`❌ API Error ${endpoint}:`, error);
+                throw error;
+            }
+        },
 
-//         // Enhanced createTheme with validation and fixed payload
-//         async createTheme(themeData) {
-//             // Validate required fields
-//             const requiredFields = ['name', 'locationId', 'textColor', 'backgroundColor', 'fontFamily'];
-//             const missingFields = requiredFields.filter(field => !themeData[field]);
+        // Enhanced createTheme with validation and fixed payload
+        async createTheme(themeData) {
+            // Validate required fields
+            const requiredFields = ['name', 'locationId', 'textColor', 'backgroundColor', 'fontFamily'];
+            const missingFields = requiredFields.filter(field => !themeData[field]);
             
-//             if (missingFields.length > 0) {
-//                 throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-//             }
+            if (missingFields.length > 0) {
+                throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+            }
 
-//             // Clean up data for backend - FIX for 400 error
-//             const cleanedData = {
-//                 ...themeData,
-//                 backgroundColor: themeData.backgroundColor.replace('33', ''), // Remove alpha channel
-//                 fontFamily: themeData.fontFamily.split(',')[0].trim(), // Only first font family
-//                 isActive: true,
-//                 isGlobal: false
-//             };
+            // Clean up data for backend - FIX for 400 error
+            const cleanedData = {
+                ...themeData,
+                backgroundColor: themeData.backgroundColor.replace('33', ''), // Remove alpha channel
+                fontFamily: themeData.fontFamily.split(',')[0].trim(), // Only first font family
+                isActive: true,
+                isGlobal: false
+            };
 
-//             return this.call('/themes', {
-//                 method: 'POST',
-//                 body: cleanedData
-//             });
-//         },
+            return this.call('/themes', {
+                method: 'POST',
+                body: cleanedData
+            });
+        },
 
-//         // Enhanced removeTheme with better error handling for 500 errors
-//         async removeThemeFromLocation(locationId) {
-//             if (!locationId) throw new Error('No location ID provided');
+        // Enhanced removeTheme with better error handling for 500 errors
+        async removeThemeFromLocation(locationId) {
+            if (!locationId) throw new Error('No location ID provided');
             
-//             try {
-//                 return await this.call('/themes/remove', {
-//                     method: 'POST',
-//                     body: { locationId: locationId }
-//                 });
-//             } catch (error) {
-//                 // If it's a 500 error, we'll handle it gracefully
-//                 if (error.message.includes('500')) {
-//                     console.warn('⚠️ Backend returned 500 on theme removal, but proceeding...');
-//                     return { success: true, message: 'Theme removed locally due to backend error' };
-//                 }
-//                 throw error;
-//             }
-//         },
+            try {
+                return await this.call('/themes/remove', {
+                    method: 'POST',
+                    body: { locationId: locationId }
+                });
+            } catch (error) {
+                // If it's a 500 error, we'll handle it gracefully
+                if (error.message.includes('500')) {
+                    console.warn('⚠️ Backend returned 500 on theme removal, but proceeding...');
+                    return { success: true, message: 'Theme removed locally due to backend error' };
+                }
+                throw error;
+            }
+        },
 
-//         // Keep other methods
-//         async getAccessStatus(locationId) {
-//             if (!locationId) throw new Error('No location ID provided');
-//             return this.call(`/access/status/${locationId}`);
-//         },
+        // Keep other methods
+        async getAccessStatus(locationId) {
+            if (!locationId) throw new Error('No location ID provided');
+            return this.call(`/access/status/${locationId}`);
+        },
 
-//         async getAllThemes() {
-//             return this.call('/themes');
-//         },
+        async getAllThemes() {
+            return this.call('/themes');
+        },
 
-//         async getThemeById(themeId) {
-//             return this.call(`/themes/${themeId}`);
-//         },
+        async getThemeById(themeId) {
+            return this.call(`/themes/${themeId}`);
+        },
 
-//         async applyThemeToLocation(themeId, locationId) {
-//             if (!locationId) throw new Error('No location ID provided');
-//             return this.call('/themes/apply', {
-//                 method: 'POST',
-//                 body: {
-//                     locationId: locationId,
-//                     themeId: themeId
-//                 }
-//             });
-//         },
+        async applyThemeToLocation(themeId, locationId) {
+            if (!locationId) throw new Error('No location ID provided');
+            return this.call('/themes/apply', {
+                method: 'POST',
+                body: {
+                    locationId: locationId,
+                    themeId: themeId
+                }
+            });
+        },
 
-//         async getThemeByLocation(locationId) {
-//             if (!locationId) throw new Error('No location ID provided');
-//             return this.call(`/themes/by-location/${locationId}`);
-//         },
+        async getThemeByLocation(locationId) {
+            if (!locationId) throw new Error('No location ID provided');
+            return this.call(`/themes/by-location/${locationId}`);
+        },
 
-//         async updateTheme(themeId, themeData) {
-//             return this.call(`/themes/${themeId}`, {
-//                 method: 'PUT',
-//                 body: themeData
-//             });
-//         }
-//     };
+        async updateTheme(themeId, themeData) {
+            return this.call(`/themes/${themeId}`, {
+                method: 'PUT',
+                body: themeData
+            });
+        }
+    };
 
-//     // =========================
-//     // Access Control Service
-//     // =========================
-//     const accessService = {
-//         async checkThemeBuilderAccess() {
-//             try {
-//                 // Get current location from URL
-//                 const currentLocation = urlLocationService.getCurrentLocation();
-//                 if (!currentLocation || !currentLocation.locationId) {
-//                     throw new Error('Could not detect current GHL location from URL');
-//                 }
+    // =========================
+    // Access Control Service
+    // =========================
+    const accessService = {
+        async checkThemeBuilderAccess() {
+            try {
+                // Get current location from URL
+                const currentLocation = urlLocationService.getCurrentLocation();
+                if (!currentLocation || !currentLocation.locationId) {
+                    throw new Error('Could not detect current GHL location from URL');
+                }
 
-//                 // Check access status via API
-//                 const accessResponse = await apiService.getAccessStatus(currentLocation.locationId);
-//                 if (!accessResponse.success || !accessResponse.data) {
-//                     throw new Error('Access status API call failed');
-//                 }
+                // Check access status via API
+                const accessResponse = await apiService.getAccessStatus(currentLocation.locationId);
+                if (!accessResponse.success || !accessResponse.data) {
+                    throw new Error('Access status API call failed');
+                }
 
-//                 const accessInfo = accessResponse.data;
-//                 const isPermitted = accessInfo.themeBuilderAccess === true;
+                const accessInfo = accessResponse.data;
+                const isPermitted = accessInfo.themeBuilderAccess === true;
 
-//                 return {
-//                     permitted: isPermitted,
-//                     location: currentLocation,
-//                     accessInfo: accessInfo
-//                 };
+                return {
+                    permitted: isPermitted,
+                    location: currentLocation,
+                    accessInfo: accessInfo
+                };
 
-//             } catch (error) {
-//                 console.error('❌ Access check failed:', error);
-//                 return {
-//                     permitted: false,
-//                     location: null,
-//                     accessInfo: null,
-//                     error: error.message
-//                 };
-//             }
-//         }
-//     };
+            } catch (error) {
+                console.error('❌ Access check failed:', error);
+                return {
+                    permitted: false,
+                    location: null,
+                    accessInfo: null,
+                    error: error.message
+                };
+            }
+        }
+    };
 
-//     // =========================
-//     // Theme CSS Service
-//     // =========================
-//     const themeCSSService = {
-//         generateCSS(theme, isPreview = false) {
-//             if (!theme) return '';
+    // =========================
+    // Theme CSS Service
+    // =========================
+    const themeCSSService = {
+        generateCSS(theme, isPreview = false) {
+            if (!theme) return '';
             
-//             const variables = {
-//                 textColor: theme.textColor || '#ffffff',
-//                 backgroundColor: theme.backgroundColor || 'rgba(255, 255, 255, 0.33)',
-//                 fontFamily: theme.fontFamily || 'Roboto, sans-serif',
-//                 sidebarGradientStart: theme.sidebarGradientStart || '#8e2de2',
-//                 sidebarGradientEnd: theme.sidebarGradientEnd || '#4a00e0',
-//                 headerGradientStart: theme.headerGradientStart || '#8e2de2',
-//                 headerGradientEnd: theme.headerGradientEnd || '#4a00e0'
-//             };
+            const variables = {
+                textColor: theme.textColor || '#ffffff',
+                backgroundColor: theme.backgroundColor || 'rgba(255, 255, 255, 0.33)',
+                fontFamily: theme.fontFamily || 'Roboto, sans-serif',
+                sidebarGradientStart: theme.sidebarGradientStart || '#8e2de2',
+                sidebarGradientEnd: theme.sidebarGradientEnd || '#4a00e0',
+                headerGradientStart: theme.headerGradientStart || '#8e2de2',
+                headerGradientEnd: theme.headerGradientEnd || '#4a00e0'
+            };
 
-//             const comment = isPreview ? 'PREVIEW' : 'ACTIVE';
+            const comment = isPreview ? 'PREVIEW' : 'ACTIVE';
             
-//             return `
-// /* GHL Theme Builder v${CONFIG.VERSION} - ${comment} - Location: ${state.currentLocation?.locationId} */
-// :root {
-//     --ghl-text-color: ${variables.textColor};
-//     --ghl-bg-color: ${variables.backgroundColor};
-//     --ghl-font-family: ${variables.fontFamily};
-//     --ghl-sidebar-start: ${variables.sidebarGradientStart};
-//     --ghl-sidebar-end: ${variables.sidebarGradientEnd};
-//     --ghl-header-start: ${variables.headerGradientStart};
-//     --ghl-header-end: ${variables.headerGradientEnd};
-// }
+            return `
+/* GHL Theme Builder v${CONFIG.VERSION} - ${comment} - Location: ${state.currentLocation?.locationId} */
+:root {
+    --ghl-text-color: ${variables.textColor};
+    --ghl-bg-color: ${variables.backgroundColor};
+    --ghl-font-family: ${variables.fontFamily};
+    --ghl-sidebar-start: ${variables.sidebarGradientStart};
+    --ghl-sidebar-end: ${variables.sidebarGradientEnd};
+    --ghl-header-start: ${variables.headerGradientStart};
+    --ghl-header-end: ${variables.headerGradientEnd};
+}
 
-// .transition-slowest .flex-col > .overflow-hidden {
-//     background: linear-gradient(135deg, var(--ghl-sidebar-start) 0%, var(--ghl-sidebar-end) 100%) !important;
-// }
+.transition-slowest .flex-col > .overflow-hidden {
+    background: linear-gradient(135deg, var(--ghl-sidebar-start) 0%, var(--ghl-sidebar-end) 100%) !important;
+}
 
-// .sidebar-v2-location .hl_header .container-fluid {
-//     background: linear-gradient(135deg, var(--ghl-header-start) 0%, var(--ghl-header-end) 100%) !important;
-// }
+.sidebar-v2-location .hl_header .container-fluid {
+    background: linear-gradient(135deg, var(--ghl-header-start) 0%, var(--ghl-header-end) 100%) !important;
+}
 
-// .notification-banner-top-bar {
-//     background: linear-gradient(135deg, var(--ghl-header-start) 0%, var(--ghl-header-end) 100%) !important;
-// }
+.notification-banner-top-bar {
+    background: linear-gradient(135deg, var(--ghl-header-start) 0%, var(--ghl-header-end) 100%) !important;
+}
 
-// .crm-opportunities-status .hl-text,
-// .notification-title-message,
-// .sidebar-v2-location .hl_force-block,
-// .sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-placeholder,
-// .sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-icon,
-// .sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-shortcut,
-// .hl_switcher-loc-name,
-// .sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city,
-// .sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
-// .sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title,
-// .sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title {
-//     color: var(--ghl-text-color) !important;
-// }
+.crm-opportunities-status .hl-text,
+.notification-title-message,
+.sidebar-v2-location .hl_force-block,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-placeholder,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-icon,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-shortcut,
+.hl_switcher-loc-name,
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city,
+.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
+.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title,
+.sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title {
+    color: var(--ghl-text-color) !important;
+}
 
-// .hl_switcher-loc-name,
-// .sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city,
-// .sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
-// .sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title,
-// .sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title {
-//     font-family: var(--ghl-font-family) !important;
-//     font-weight: 400 !important;
-// }
+.hl_switcher-loc-name,
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city,
+.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
+.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title,
+.sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title {
+    font-family: var(--ghl-font-family) !important;
+    font-weight: 400 !important;
+}
 
-// .sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2,
-// .sidebar-v2-location #sidebar-v2 #globalSearchOpener,
-// .sidebar-v2-location #sidebar-v2 #quickActions,
-// .sidebar-v2-location #sidebar-v2 #backButtonv2,
-// #sb_conversation_ai_settings_v2 .hl_new_badge,
-// #sb_knowledge-base-settings .hl_new_badge,
-// #sb_objects .hl_new_badge,
-// #sb_labs .hl_new_badge,
-// #sb_brand-boards .hl_new_badge {
-//     background-color: var(--ghl-bg-color) !important;
-// }
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener,
+.sidebar-v2-location #sidebar-v2 #quickActions,
+.sidebar-v2-location #sidebar-v2 #backButtonv2,
+#sb_conversation_ai_settings_v2 .hl_new_badge,
+#sb_knowledge-base-settings .hl_new_badge,
+#sb_objects .hl_new_badge,
+#sb_labs .hl_new_badge,
+#sb_brand-boards .hl_new_badge {
+    background-color: var(--ghl-bg-color) !important;
+}
 
-// #notification_banner-btn-close .h-5 {
-//     background-color: var(--ghl-text-color) !important;
-// }
-//             `;
-//         },
+#notification_banner-btn-close .h-5 {
+    background-color: var(--ghl-text-color) !important;
+}
+            `;
+        },
 
-//         applyThemeCSS(theme) {
-//             // Remove existing theme style
-//             this.removeThemeCSS();
+        applyThemeCSS(theme) {
+            // Remove existing theme style
+            this.removeThemeCSS();
             
-//             if (theme) {
-//                 const css = this.generateCSS(theme);
-//                 const style = document.createElement('style');
-//                 style.id = CONFIG.STYLE_ID;
-//                 style.textContent = css;
-//                 document.head.appendChild(style);
-//                 return true;
-//             }
-//             return false;
-//         },
+            if (theme) {
+                const css = this.generateCSS(theme);
+                const style = document.createElement('style');
+                style.id = CONFIG.STYLE_ID;
+                style.textContent = css;
+                document.head.appendChild(style);
+                return true;
+            }
+            return false;
+        },
 
-//         removeThemeCSS() {
-//             const existingStyle = document.getElementById(CONFIG.STYLE_ID);
-//             if (existingStyle) {
-//                 existingStyle.remove();
-//             }
-//         },
+        removeThemeCSS() {
+            const existingStyle = document.getElementById(CONFIG.STYLE_ID);
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+        },
 
-//         previewThemeCSS(theme) {
-//             // Remove existing preview
-//             this.removePreviewCSS();
+        previewThemeCSS(theme) {
+            // Remove existing preview
+            this.removePreviewCSS();
             
-//             if (theme) {
-//                 const css = this.generateCSS(theme, true);
-//                 const style = document.createElement('style');
-//                 style.id = CONFIG.PREVIEW_STYLE_ID;
-//                 style.textContent = css;
-//                 document.head.appendChild(style);
-//                 state.isPreviewing = true;
-//                 state.previewTheme = theme;
-//             }
-//         },
+            if (theme) {
+                const css = this.generateCSS(theme, true);
+                const style = document.createElement('style');
+                style.id = CONFIG.PREVIEW_STYLE_ID;
+                style.textContent = css;
+                document.head.appendChild(style);
+                state.isPreviewing = true;
+                state.previewTheme = theme;
+            }
+        },
 
-//         removePreviewCSS() {
-//             const previewStyle = document.getElementById(CONFIG.PREVIEW_STYLE_ID);
-//             if (previewStyle) {
-//                 previewStyle.remove();
-//                 state.isPreviewing = false;
-//                 state.previewTheme = null;
-//             }
-//         },
+        removePreviewCSS() {
+            const previewStyle = document.getElementById(CONFIG.PREVIEW_STYLE_ID);
+            if (previewStyle) {
+                previewStyle.remove();
+                state.isPreviewing = false;
+                state.previewTheme = null;
+            }
+        },
 
-//         // Apply current theme (used after preview or on load)
-//         applyCurrentTheme() {
-//             if (state.currentTheme) {
-//                 this.applyThemeCSS(state.currentTheme);
-//             } else {
-//                 this.removeThemeCSS();
-//             }
-//         }
-//     };
+        // Apply current theme (used after preview or on load)
+        applyCurrentTheme() {
+            if (state.currentTheme) {
+                this.applyThemeCSS(state.currentTheme);
+            } else {
+                this.removeThemeCSS();
+            }
+        }
+    };
 
-//     // =========================
-//     // Theme Management Service - Optimized with caching and API fixes
-//     // =========================
-//     const themeManager = {
-//         async loadThemes() {
-//             // Check cache first for speed
-//             const cachedThemes = cacheService.getThemes();
-//             if (cachedThemes) {
-//                 state.themes = cachedThemes;
-//                 return state.themes;
-//             }
+    // =========================
+    // Theme Management Service - Optimized with caching and API fixes
+    // =========================
+    const themeManager = {
+        async loadThemes() {
+            // Check cache first for speed
+            const cachedThemes = cacheService.getThemes();
+            if (cachedThemes) {
+                state.themes = cachedThemes;
+                return state.themes;
+            }
 
-//             try {
-//                 state.isLoading = true;
-//                 const response = await apiService.getAllThemes();
+            try {
+                state.isLoading = true;
+                const response = await apiService.getAllThemes();
 
-//                 if (response.success) {
-//                     // Handle different response structures
-//                     let themesArray = [];
+                if (response.success) {
+                    // Handle different response structures
+                    let themesArray = [];
                     
-//                     if (Array.isArray(response.data)) {
-//                         themesArray = response.data;
-//                     } else if (Array.isArray(response.themes)) {
-//                         themesArray = response.themes;
-//                     } else if (response.data && Array.isArray(response.data.themes)) {
-//                         themesArray = response.data.themes;
-//                     } else {
-//                         themesArray = [response.data || response.theme].filter(Boolean);
-//                     }
+                    if (Array.isArray(response.data)) {
+                        themesArray = response.data;
+                    } else if (Array.isArray(response.themes)) {
+                        themesArray = response.themes;
+                    } else if (response.data && Array.isArray(response.data.themes)) {
+                        themesArray = response.data.themes;
+                    } else {
+                        themesArray = [response.data || response.theme].filter(Boolean);
+                    }
 
-//                     state.themes = themesArray;
-//                     cacheService.setThemes(themesArray);
-//                     console.log(`📦 Loaded ${state.themes.length} themes from backend`);
-//                     return state.themes;
-//                 }
+                    state.themes = themesArray;
+                    cacheService.setThemes(themesArray);
+                    console.log(`📦 Loaded ${state.themes.length} themes from backend`);
+                    return state.themes;
+                }
 
-//                 throw new Error('Invalid themes response from backend');
-//             } catch (error) {
-//                 console.error('❌ Failed to load themes from backend:', error);
-//                 state.themes = [];
-//                 return [];
-//             } finally {
-//                 state.isLoading = false;
-//             }
-//         },
+                throw new Error('Invalid themes response from backend');
+            } catch (error) {
+                console.error('❌ Failed to load themes from backend:', error);
+                state.themes = [];
+                return [];
+            } finally {
+                state.isLoading = false;
+            }
+        },
 
-//         async applyTheme(themeId) {
-//             try {
-//                 if (!state.currentLocation) throw new Error('No current location detected');
+        async applyTheme(themeId) {
+            try {
+                if (!state.currentLocation) throw new Error('No current location detected');
 
-//                 const locationId = state.currentLocation.locationId;
+                const locationId = state.currentLocation.locationId;
 
-//                 // Get theme details from backend
-//                 const response = await apiService.getThemeById(themeId);
-//                 let theme = null;
+                // Get theme details from backend
+                const response = await apiService.getThemeById(themeId);
+                let theme = null;
                 
-//                 if (response.success) {
-//                     theme = response.data || response.theme;
-//                 }
+                if (response.success) {
+                    theme = response.data || response.theme;
+                }
                 
-//                 if (!theme) throw new Error('Theme not found in database');
+                if (!theme) throw new Error('Theme not found in database');
 
-//                 const applyResponse = await apiService.applyThemeToLocation(themeId, locationId);
-//                 if (applyResponse.success) {
-//                     state.currentTheme = theme;
-//                     cacheService.setCurrentTheme(theme);
-//                     themeCSSService.applyThemeCSS(theme);
-//                     console.log(`✅ Theme "${theme.name}" applied to location ${locationId} via backend`);
-//                     return true;
-//                 } else {
-//                     throw new Error('Backend failed to apply theme to location');
-//                 }
-//             } catch (error) {
-//                 console.error('❌ Failed to apply theme:', error);
-//                 throw error;
-//             }
-//         },
+                const applyResponse = await apiService.applyThemeToLocation(themeId, locationId);
+                if (applyResponse.success) {
+                    state.currentTheme = theme;
+                    cacheService.setCurrentTheme(theme);
+                    themeCSSService.applyThemeCSS(theme);
+                    console.log(`✅ Theme "${theme.name}" applied to location ${locationId} via backend`);
+                    return true;
+                } else {
+                    throw new Error('Backend failed to apply theme to location');
+                }
+            } catch (error) {
+                console.error('❌ Failed to apply theme:', error);
+                throw error;
+            }
+        },
 
-//         async removeTheme() {
-//             try {
-//                 if (!state.currentLocation) throw new Error('No current location detected');
-//                 if (!state.currentTheme) {
-//                     console.log('ℹ️ No theme to remove');
-//                     return true;
-//                 }
+        async removeTheme() {
+            try {
+                if (!state.currentLocation) throw new Error('No current location detected');
+                if (!state.currentTheme) {
+                    console.log('ℹ️ No theme to remove');
+                    return true;
+                }
 
-//                 const locationId = state.currentLocation.locationId;
+                const locationId = state.currentLocation.locationId;
 
-//                 const removeResponse = await apiService.removeThemeFromLocation(locationId);
-//                 if (removeResponse.success) {
-//                     state.currentTheme = null;
-//                     cacheService.setCurrentTheme(null);
-//                     themeCSSService.removeThemeCSS();
-//                     console.log(`✅ Theme removed from location ${locationId} via backend`);
-//                     return true;
-//                 } else {
-//                     // If backend fails but we have a 500 error, still remove locally
-//                     if (removeResponse.error && removeResponse.error.includes('500')) {
-//                         console.warn('⚠️ Backend returned 500, but removing theme locally');
-//                         state.currentTheme = null;
-//                         cacheService.setCurrentTheme(null);
-//                         themeCSSService.removeThemeCSS();
-//                         return true;
-//                     }
-//                     throw new Error('Backend failed to remove theme from location');
-//                 }
-//             } catch (error) {
-//                 console.error('❌ Failed to remove theme:', error);
-//                 // Even if backend fails, remove locally
-//                 state.currentTheme = null;
-//                 cacheService.setCurrentTheme(null);
-//                 themeCSSService.removeThemeCSS();
-//                 throw error;
-//             }
-//         },
+                const removeResponse = await apiService.removeThemeFromLocation(locationId);
+                if (removeResponse.success) {
+                    state.currentTheme = null;
+                    cacheService.setCurrentTheme(null);
+                    themeCSSService.removeThemeCSS();
+                    console.log(`✅ Theme removed from location ${locationId} via backend`);
+                    return true;
+                } else {
+                    // If backend fails but we have a 500 error, still remove locally
+                    if (removeResponse.error && removeResponse.error.includes('500')) {
+                        console.warn('⚠️ Backend returned 500, but removing theme locally');
+                        state.currentTheme = null;
+                        cacheService.setCurrentTheme(null);
+                        themeCSSService.removeThemeCSS();
+                        return true;
+                    }
+                    throw new Error('Backend failed to remove theme from location');
+                }
+            } catch (error) {
+                console.error('❌ Failed to remove theme:', error);
+                // Even if backend fails, remove locally
+                state.currentTheme = null;
+                cacheService.setCurrentTheme(null);
+                themeCSSService.removeThemeCSS();
+                throw error;
+            }
+        },
 
-//         async loadCurrentTheme() {
-//             try {
-//                 if (!state.currentLocation) {
-//                     console.log('❌ No current location for theme loading');
-//                     return;
-//                 }
+        async loadCurrentTheme() {
+            try {
+                if (!state.currentLocation) {
+                    console.log('❌ No current location for theme loading');
+                    return;
+                }
 
-//                 // Check cache first for speed
-//                 const cachedTheme = cacheService.getCurrentTheme();
-//                 if (cachedTheme) {
-//                     state.currentTheme = cachedTheme;
-//                     themeCSSService.applyThemeCSS(cachedTheme);
-//                     return;
-//                 }
+                // Check cache first for speed
+                const cachedTheme = cacheService.getCurrentTheme();
+                if (cachedTheme) {
+                    state.currentTheme = cachedTheme;
+                    themeCSSService.applyThemeCSS(cachedTheme);
+                    return;
+                }
 
-//                 const locationId = state.currentLocation.locationId;
-//                 const themeResponse = await apiService.getThemeByLocation(locationId);
+                const locationId = state.currentLocation.locationId;
+                const themeResponse = await apiService.getThemeByLocation(locationId);
                 
-//                 let theme = null;
-//                 if (themeResponse.success) {
-//                     theme = themeResponse.theme || themeResponse.data;
-//                 }
+                let theme = null;
+                if (themeResponse.success) {
+                    theme = themeResponse.theme || themeResponse.data;
+                }
 
-//                 if (theme && theme._id) {
-//                     await this.setCurrentTheme(theme);
-//                 } else {
-//                     state.currentTheme = null;
-//                     cacheService.setCurrentTheme(null);
-//                     themeCSSService.removeThemeCSS();
-//                 }
-//             } catch (error) {
-//                 console.error('❌ Failed to load current theme from backend:', error);
-//                 state.currentTheme = null;
-//                 cacheService.setCurrentTheme(null);
-//                 themeCSSService.removeThemeCSS();
-//             }
-//         },
+                if (theme && theme._id) {
+                    await this.setCurrentTheme(theme);
+                } else {
+                    state.currentTheme = null;
+                    cacheService.setCurrentTheme(null);
+                    themeCSSService.removeThemeCSS();
+                }
+            } catch (error) {
+                console.error('❌ Failed to load current theme from backend:', error);
+                state.currentTheme = null;
+                cacheService.setCurrentTheme(null);
+                themeCSSService.removeThemeCSS();
+            }
+        },
 
-//         async setCurrentTheme(theme) {
-//             if (!theme) return;
-//             state.currentTheme = theme;
-//             cacheService.setCurrentTheme(theme);
-//             themeCSSService.applyThemeCSS(theme);
-//         },
+        async setCurrentTheme(theme) {
+            if (!theme) return;
+            state.currentTheme = theme;
+            cacheService.setCurrentTheme(theme);
+            themeCSSService.applyThemeCSS(theme);
+        },
 
-//         async createCustomTheme(themeData) {
-//             try {
-//                 if (!state.currentLocation) throw new Error('No current location detected');
+        async createCustomTheme(themeData) {
+            try {
+                if (!state.currentLocation) throw new Error('No current location detected');
 
-//                 const locationId = state.currentLocation.locationId;
+                const locationId = state.currentLocation.locationId;
 
-//                 // FIXED: Use backend-compatible payload structure
-//                 const completeThemeData = {
-//                     name: themeData.name,
-//                     description: themeData.description || "Custom theme created through theme builder",
-//                     locationId: locationId,
-//                     userId: CONFIG.AUTH_TOKEN,
-//                     companyId: "default-company", // Fixed: Use string directly
-//                     textColor: themeData.textColor,
-//                     backgroundColor: themeData.backgroundColor,
-//                     fontFamily: themeData.fontFamily,
-//                     sidebarGradientStart: themeData.sidebarGradientStart,
-//                     sidebarGradientEnd: themeData.sidebarGradientEnd,
-//                     headerGradientStart: themeData.headerGradientStart,
-//                     headerGradientEnd: themeData.headerGradientEnd,
-//                     category: "dashboard",
-//                     isActive: true,
-//                     isGlobal: false
-//                 };
+                // FIXED: Use backend-compatible payload structure
+                const completeThemeData = {
+                    name: themeData.name,
+                    description: themeData.description || "Custom theme created through theme builder",
+                    locationId: locationId,
+                    userId: CONFIG.AUTH_TOKEN,
+                    companyId: "default-company", // Fixed: Use string directly
+                    textColor: themeData.textColor,
+                    backgroundColor: themeData.backgroundColor,
+                    fontFamily: themeData.fontFamily,
+                    sidebarGradientStart: themeData.sidebarGradientStart,
+                    sidebarGradientEnd: themeData.sidebarGradientEnd,
+                    headerGradientStart: themeData.headerGradientStart,
+                    headerGradientEnd: themeData.headerGradientEnd,
+                    category: "dashboard",
+                    isActive: true,
+                    isGlobal: false
+                };
 
-//                 const createResponse = await apiService.createTheme(completeThemeData);
-//                 let createdTheme = null;
+                const createResponse = await apiService.createTheme(completeThemeData);
+                let createdTheme = null;
                 
-//                 if (createResponse.success) {
-//                     createdTheme = createResponse.data || createResponse.theme;
-//                 }
+                if (createResponse.success) {
+                    createdTheme = createResponse.data || createResponse.theme;
+                }
 
-//                 if (createdTheme) {
-//                     console.log(`✅ Custom theme created in backend: ${themeData.name}`);
+                if (createdTheme) {
+                    console.log(`✅ Custom theme created in backend: ${themeData.name}`);
 
-//                     // Clear cache and reload
-//                     cacheService.clearCache();
-//                     await this.loadThemes();
-//                     await this.applyTheme(createdTheme._id);
+                    // Clear cache and reload
+                    cacheService.clearCache();
+                    await this.loadThemes();
+                    await this.applyTheme(createdTheme._id);
 
-//                     return createdTheme;
-//                 } else {
-//                     throw new Error('Backend failed to create theme: ' + (createResponse.message || 'Unknown error'));
-//                 }
-//             } catch (error) {
-//                 console.error('❌ Failed to create custom theme in backend:', error);
-//                 throw error;
-//             }
-//         },
+                    return createdTheme;
+                } else {
+                    throw new Error('Backend failed to create theme: ' + (createResponse.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('❌ Failed to create custom theme in backend:', error);
+                throw error;
+            }
+        },
 
-//         // Debounced preview for better performance
-//         previewTheme: debounceService.debounce((theme) => {
-//             themeCSSService.previewThemeCSS(theme);
-//         }, CONFIG.DEBOUNCE_DELAY),
+        // Debounced preview for better performance
+        previewTheme: debounceService.debounce((theme) => {
+            themeCSSService.previewThemeCSS(theme);
+        }, CONFIG.DEBOUNCE_DELAY),
 
-//         cancelPreview() {
-//             themeCSSService.removePreviewCSS();
-//             themeCSSService.applyCurrentTheme();
-//         }
-//     };
+        cancelPreview() {
+            themeCSSService.removePreviewCSS();
+            themeCSSService.applyCurrentTheme();
+        }
+    };
 
-//     // =========================
-//     // UI Service - Updated with better error handling
-//     // =========================
-//     const uiService = {
-//         showNotification(message, type = 'info') {
-//             const notification = document.createElement('div');
-//             notification.className = 'ghl-notification';
-//             notification.innerHTML = `
-//                 <div style="display: flex; align-items: center; gap: 8px;">
-//                     <span>${this.getNotificationIcon(type)}</span>
-//                     <span>${message}</span>
-//                 </div>
-//             `;
+    // =========================
+    // UI Service - Updated with better error handling
+    // =========================
+    const uiService = {
+        showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'ghl-notification';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>${this.getNotificationIcon(type)}</span>
+                    <span>${message}</span>
+                </div>
+            `;
             
-//             Object.assign(notification.style, {
-//                 position: 'fixed',
-//                 top: '20px',
-//                 right: '20px',
-//                 background: this.getNotificationColor(type),
-//                 color: '#ffffff',
-//                 padding: '12px 20px',
-//                 borderRadius: '8px',
-//                 zIndex: 100003,
-//                 fontSize: '14px',
-//                 fontWeight: '500',
-//                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-//                 transform: 'translateX(100%)',
-//                 transition: 'transform 0.3s ease'
-//             });
+            Object.assign(notification.style, {
+                position: 'fixed',
+                top: '20px',
+                right: '20px',
+                background: this.getNotificationColor(type),
+                color: '#ffffff',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                zIndex: 100003,
+                fontSize: '14px',
+                fontWeight: '500',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                transform: 'translateX(100%)',
+                transition: 'transform 0.3s ease'
+            });
             
-//             document.body.appendChild(notification);
+            document.body.appendChild(notification);
             
-//             setTimeout(() => notification.style.transform = 'translateX(0)', 10);
-//             setTimeout(() => {
-//                 notification.style.transform = 'translateX(100%)';
-//                 setTimeout(() => notification.remove(), 300);
-//             }, 3000);
-//         },
+            setTimeout(() => notification.style.transform = 'translateX(0)', 10);
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        },
 
-//         getNotificationIcon(type) {
-//             const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-//             return icons[type] || icons.info;
-//         },
+        getNotificationIcon(type) {
+            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+            return icons[type] || icons.info;
+        },
 
-//         getNotificationColor(type) {
-//             const colors = {
-//                 success: '#10B981',
-//                 error: '#DC2626',
-//                 warning: '#F59E0B',
-//                 info: '#2563EB'
-//             };
-//             return colors[type] || colors.info;
-//         },
+        getNotificationColor(type) {
+            const colors = {
+                success: '#10B981',
+                error: '#DC2626',
+                warning: '#F59E0B',
+                info: '#2563EB'
+            };
+            return colors[type] || colors.info;
+        },
 
-//         createFloatingButton() {
-//             if (state.btnRef) return state.btnRef;
+        createFloatingButton() {
+            if (state.btnRef) return state.btnRef;
             
-//             const button = document.createElement('div');
-//             button.id = CONFIG.BTN_ID;
-//             button.innerHTML = '🎨 Themes';
+            const button = document.createElement('div');
+            button.id = CONFIG.BTN_ID;
+            button.innerHTML = '🎨 Themes';
             
-//             Object.assign(button.style, {
-//                 position: 'fixed',
-//                 top: '20px',
-//                 right: '20px',
-//                 padding: '12px 16px',
-//                 background: '#2563EB',
-//                 color: '#ffffff',
-//                 borderRadius: '8px',
-//                 cursor: 'pointer',
-//                 zIndex: 99999,
-//                 fontSize: '14px',
-//                 fontWeight: '600',
-//                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-//                 transition: 'all 0.2s ease',
-//                 userSelect: 'none'
-//             });
+            Object.assign(button.style, {
+                position: 'fixed',
+                top: '20px',
+                right: '20px',
+                padding: '12px 16px',
+                background: '#2563EB',
+                color: '#ffffff',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                zIndex: 99999,
+                fontSize: '14px',
+                fontWeight: '600',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                transition: 'all 0.2s ease',
+                userSelect: 'none'
+            });
 
-//             button.addEventListener('mouseenter', () => {
-//                 button.style.background = '#1d4ed8';
-//                 button.style.transform = 'translateY(-2px)';
-//             });
+            button.addEventListener('mouseenter', () => {
+                button.style.background = '#1d4ed8';
+                button.style.transform = 'translateY(-2px)';
+            });
             
-//             button.addEventListener('mouseleave', () => {
-//                 button.style.background = '#2563EB';
-//                 button.style.transform = 'translateY(0)';
-//             });
+            button.addEventListener('mouseleave', () => {
+                button.style.background = '#2563EB';
+                button.style.transform = 'translateY(0)';
+            });
 
-//             button.addEventListener('click', (e) => {
-//                 e.stopPropagation();
-//                 this.openPopup();
-//             });
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openPopup();
+            });
             
-//             document.body.appendChild(button);
-//             state.btnRef = button;
-//             return button;
-//         },
+            document.body.appendChild(button);
+            state.btnRef = button;
+            return button;
+        },
 
-//         async openPopup() {
-//             await this.createPopup();
-//             if (state.popupRef) {
-//                 state.popupRef.style.display = 'block';
-//                 await this.updatePopupContent();
-//             }
-//         },
+        async openPopup() {
+            await this.createPopup();
+            if (state.popupRef) {
+                state.popupRef.style.display = 'block';
+                await this.updatePopupContent();
+            }
+        },
 
-//         closePopup() {
-//             if (state.popupRef) {
-//                 state.popupRef.style.display = 'none';
-//                 // Cancel any active preview when closing popup
-//                 themeManager.cancelPreview();
-//             }
-//         },
+        closePopup() {
+            if (state.popupRef) {
+                state.popupRef.style.display = 'none';
+                // Cancel any active preview when closing popup
+                themeManager.cancelPreview();
+            }
+        },
 
-//         async createPopup() {
-//             if (state.popupRef) return state.popupRef;
+        async createPopup() {
+            if (state.popupRef) return state.popupRef;
             
-//             const popup = document.createElement('div');
-//             popup.id = CONFIG.POPUP_ID;
+            const popup = document.createElement('div');
+            popup.id = CONFIG.POPUP_ID;
             
-//             Object.assign(popup.style, {
-//                 display: 'none',
-//                 position: 'fixed',
-//                 top: '50%',
-//                 left: '50%',
-//                 transform: 'translate(-50%, -50%)',
-//                 background: '#ffffff',
-//                 padding: '24px',
-//                 borderRadius: '12px',
-//                 boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-//                 zIndex: 100000,
-//                 maxWidth: '500px',
-//                 width: '90%',
-//                 maxHeight: '80vh',
-//                 overflowY: 'auto',
-//                 border: '1px solid #e5e7eb',
-//                 fontFamily: 'system-ui, -apple-system, sans-serif'
-//             });
+            Object.assign(popup.style, {
+                display: 'none',
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: '#ffffff',
+                padding: '24px',
+                borderRadius: '12px',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+                zIndex: 100000,
+                maxWidth: '500px',
+                width: '90%',
+                maxHeight: '80vh',
+                overflowY: 'auto',
+                border: '1px solid #e5e7eb',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+            });
 
-//             document.body.appendChild(popup);
-//             state.popupRef = popup;
+            document.body.appendChild(popup);
+            state.popupRef = popup;
             
-//             document.addEventListener('click', (event) => {
-//                 if (popup.style.display === 'block' && 
-//                     !popup.contains(event.target) && 
-//                     event.target.id !== CONFIG.BTN_ID) {
-//                     this.closePopup();
-//                 }
-//             });
+            document.addEventListener('click', (event) => {
+                if (popup.style.display === 'block' && 
+                    !popup.contains(event.target) && 
+                    event.target.id !== CONFIG.BTN_ID) {
+                    this.closePopup();
+                }
+            });
 
-//             return popup;
-//         },
+            return popup;
+        },
 
-//         async updatePopupContent() {
-//             if (!state.popupRef) return;
+        async updatePopupContent() {
+            if (!state.popupRef) return;
 
-//             const currentLocationId = state.currentLocation?.locationId;
-//             const currentLocationName = state.currentLocation?.name || 'Detecting...';
-//             const accessStatus = state.accessInfo?.themeBuilderAccess ? '✅ Enabled' : '❌ Disabled';
+            const currentLocationId = state.currentLocation?.locationId;
+            const currentLocationName = state.currentLocation?.name || 'Detecting...';
+            const accessStatus = state.accessInfo?.themeBuilderAccess ? '✅ Enabled' : '❌ Disabled';
 
-//             state.popupRef.innerHTML = `
-//                 <div style="margin-bottom: 24px;">
-//                     <h3 style="margin: 0 0 8px 0; color: #1f2937; font-size: 20px; font-weight: 600;">
-//                         🎨 GHL Theme Builder
-//                     </h3>
-//                     <div style="color: #6b7280; font-size: 14px; line-height: 1.5;">
-//                         <div><strong>Current Location:</strong> ${currentLocationName}</div>
-//                         <div><strong>Location ID:</strong> ${currentLocationId || 'Not detected'}</div>
-//                         <div><strong>Theme Builder Access:</strong> ${accessStatus}</div>
-//                         ${state.currentTheme ? 
-//                             `<div style="color: #10B981; margin-top: 4px;">
-//                                 <strong>Current Theme:</strong> ${state.currentTheme.name}
-//                             </div>` : 
-//                             '<div style="color: #DC2626; margin-top: 4px;">No theme applied to this location</div>'
-//                         }
-//                         ${state.isPreviewing ? 
-//                             '<div style="color: #F59E0B; margin-top: 4px;"><strong>👀 Preview Mode Active</strong></div>' : 
-//                             ''
-//                         }
-//                     </div>
-//                 </div>
+            state.popupRef.innerHTML = `
+                <div style="margin-bottom: 24px;">
+                    <h3 style="margin: 0 0 8px 0; color: #1f2937; font-size: 20px; font-weight: 600;">
+                        🎨 GHL Theme Builder
+                    </h3>
+                    <div style="color: #6b7280; font-size: 14px; line-height: 1.5;">
+                        <div><strong>Current Location:</strong> ${currentLocationName}</div>
+                        <div><strong>Location ID:</strong> ${currentLocationId || 'Not detected'}</div>
+                        <div><strong>Theme Builder Access:</strong> ${accessStatus}</div>
+                        ${state.currentTheme ? 
+                            `<div style="color: #10B981; margin-top: 4px;">
+                                <strong>Current Theme:</strong> ${state.currentTheme.name}
+                            </div>` : 
+                            '<div style="color: #DC2626; margin-top: 4px;">No theme applied to this location</div>'
+                        }
+                        ${state.isPreviewing ? 
+                            '<div style="color: #F59E0B; margin-top: 4px;"><strong>👀 Preview Mode Active</strong></div>' : 
+                            ''
+                        }
+                    </div>
+                </div>
 
-//                 <div style="margin-bottom: 20px;">
-//                     <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">
-//                         Available Themes <small style="color: #6b7280; font-weight: 400;">(Hover to preview)</small>
-//                     </h4>
-//                     <div id="theme-buttons-container" style="min-height: 100px; max-height: 300px; overflow-y: auto;">
-//                         <div style="text-align: center; color: #6b7280; padding: 20px;">
-//                             Loading themes from backend...
-//                         </div>
-//                     </div>
-//                 </div>
+                <div style="margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">
+                        Available Themes <small style="color: #6b7280; font-weight: 400;">(Hover to preview)</small>
+                    </h4>
+                    <div id="theme-buttons-container" style="min-height: 100px; max-height: 300px; overflow-y: auto;">
+                        <div style="text-align: center; color: #6b7280; padding: 20px;">
+                            Loading themes from backend...
+                        </div>
+                    </div>
+                </div>
 
-//                 <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
-//                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-//                         <button id="refresh-data" 
-//                                 style="flex: 1; padding: 12px; background: #059669; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
-//                             🔄 Refresh
-//                         </button>
-//                         <button id="create-custom-theme" 
-//                                 style="flex: 1; padding: 12px; background: #8B5CF6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
-//                             🎨 Create Custom
-//                         </button>
-//                         ${state.currentTheme ? `
-//                             <button id="remove-theme" 
-//                                     style="flex: 1; padding: 12px; background: #DC2626; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
-//                                 🗑️ Remove
-//                             </button>
-//                         ` : ''}
-//                         <button id="close-popup" 
-//                                 style="flex: 1; padding: 12px; background: transparent; color: #6b7280; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
-//                             Close
-//                         </button>
-//                     </div>
-//                 </div>
-//             `;
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button id="refresh-data" 
+                                style="flex: 1; padding: 12px; background: #059669; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                            🔄 Refresh
+                        </button>
+                        <button id="create-custom-theme" 
+                                style="flex: 1; padding: 12px; background: #8B5CF6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                            🎨 Create Custom
+                        </button>
+                        ${state.currentTheme ? `
+                            <button id="remove-theme" 
+                                    style="flex: 1; padding: 12px; background: #DC2626; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                                🗑️ Remove
+                            </button>
+                        ` : ''}
+                        <button id="close-popup" 
+                                style="flex: 1; padding: 12px; background: transparent; color: #6b7280; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
 
-//             this.attachPopupEventListeners();
-//             await this.loadThemesIntoPopup();
-//         },
+            this.attachPopupEventListeners();
+            await this.loadThemesIntoPopup();
+        },
 
-//         attachPopupEventListeners() {
-//             const refreshBtn = document.getElementById('refresh-data');
-//             const createBtn = document.getElementById('create-custom-theme');
-//             const closeBtn = document.getElementById('close-popup');
-//             const removeBtn = document.getElementById('remove-theme');
+        attachPopupEventListeners() {
+            const refreshBtn = document.getElementById('refresh-data');
+            const createBtn = document.getElementById('create-custom-theme');
+            const closeBtn = document.getElementById('close-popup');
+            const removeBtn = document.getElementById('remove-theme');
 
-//             if (refreshBtn) {
-//                 refreshBtn.addEventListener('click', () => this.refreshAllData());
-//             }
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => this.refreshAllData());
+            }
 
-//             if (createBtn) {
-//                 createBtn.addEventListener('click', () => this.openCustomizer());
-//             }
+            if (createBtn) {
+                createBtn.addEventListener('click', () => this.openCustomizer());
+            }
 
-//             if (closeBtn) {
-//                 closeBtn.addEventListener('click', () => this.closePopup());
-//             }
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => this.closePopup());
+            }
 
-//             if (removeBtn) {
-//                 removeBtn.addEventListener('click', () => this.confirmRemoveTheme());
-//             }
-//         },
+            if (removeBtn) {
+                removeBtn.addEventListener('click', () => this.confirmRemoveTheme());
+            }
+        },
 
-//         async refreshAllData() {
-//             this.showNotification('Refreshing data from backend...', 'info');
+        async refreshAllData() {
+            this.showNotification('Refreshing data from backend...', 'info');
             
-//             try {
-//                 // Clear cache on refresh
-//                 cacheService.clearCache();
+            try {
+                // Clear cache on refresh
+                cacheService.clearCache();
                 
-//                 // Re-check access with current URL location
-//                 const accessCheck = await accessService.checkThemeBuilderAccess();
+                // Re-check access with current URL location
+                const accessCheck = await accessService.checkThemeBuilderAccess();
                 
-//                 if (accessCheck.permitted && accessCheck.location) {
-//                     state.currentLocation = accessCheck.location;
-//                     state.accessInfo = accessCheck.accessInfo;
+                if (accessCheck.permitted && accessCheck.location) {
+                    state.currentLocation = accessCheck.location;
+                    state.accessInfo = accessCheck.accessInfo;
                     
-//                     // Load in parallel for better performance
-//                     await Promise.all([
-//                         themeManager.loadThemes(),
-//                         themeManager.loadCurrentTheme()
-//                     ]);
+                    // Load in parallel for better performance
+                    await Promise.all([
+                        themeManager.loadThemes(),
+                        themeManager.loadCurrentTheme()
+                    ]);
                     
-//                     await this.updatePopupContent();
-//                     this.showNotification('Data refreshed from backend!', 'success');
-//                 } else {
-//                     this.showNotification('Access check failed after refresh', 'error');
-//                 }
-//             } catch (error) {
-//                 this.showNotification(`Refresh failed: ${error.message}`, 'error');
-//             }
-//         },
+                    await this.updatePopupContent();
+                    this.showNotification('Data refreshed from backend!', 'success');
+                } else {
+                    this.showNotification('Access check failed after refresh', 'error');
+                }
+            } catch (error) {
+                this.showNotification(`Refresh failed: ${error.message}`, 'error');
+            }
+        },
 
-//         async loadThemesIntoPopup() {
-//             const container = document.getElementById('theme-buttons-container');
-//             if (!container) return;
+        async loadThemesIntoPopup() {
+            const container = document.getElementById('theme-buttons-container');
+            if (!container) return;
 
-//             try {
-//                 await themeManager.loadThemes();
+            try {
+                await themeManager.loadThemes();
                 
-//                 if (state.themes.length === 0) {
-//                     container.innerHTML = `
-//                         <div style="text-align: center; color: #6b7280; padding: 20px;">
-//                             No themes found in backend database.
-//                         </div>
-//                     `;
-//                     return;
-//                 }
+                if (state.themes.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; color: #6b7280; padding: 20px;">
+                            No themes found in backend database.
+                        </div>
+                    `;
+                    return;
+                }
 
-//                 container.innerHTML = state.themes.map(theme => {
-//                     const isActive = state.currentTheme && state.currentTheme._id === theme._id;
-//                     const color = theme.sidebarGradientStart || '#2563EB';
+                container.innerHTML = state.themes.map(theme => {
+                    const isActive = state.currentTheme && state.currentTheme._id === theme._id;
+                    const color = theme.sidebarGradientStart || '#2563EB';
                     
-//                     return `
-//                         <div class="theme-item" data-theme-id="${theme._id}"
-//                              style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 8px 0; padding: 12px; border-radius: 8px; border: ${isActive ? '2px solid #10B981' : '1px solid #e5e7eb'}; background: ${isActive ? '#f0fdf4' : '#f9fafb'}; cursor: pointer; transition: all 0.2s ease;">
-//                             <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-//                                 <div style="width: 16px; height: 16px; border-radius: 50%; background: ${color};"></div>
-//                                 <div style="font-weight: 500;">${theme.name}</div>
-//                             </div>
-//                             ${isActive ? '<span style="color: #10B981; font-weight: 600;">Active</span>' : ''}
-//                         </div>
-//                     `;
-//                 }).join('');
+                    return `
+                        <div class="theme-item" data-theme-id="${theme._id}"
+                             style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 8px 0; padding: 12px; border-radius: 8px; border: ${isActive ? '2px solid #10B981' : '1px solid #e5e7eb'}; background: ${isActive ? '#f0fdf4' : '#f9fafb'}; cursor: pointer; transition: all 0.2s ease;">
+                            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                                <div style="width: 16px; height: 16px; border-radius: 50%; background: ${color};"></div>
+                                <div style="font-weight: 500;">${theme.name}</div>
+                            </div>
+                            ${isActive ? '<span style="color: #10B981; font-weight: 600;">Active</span>' : ''}
+                        </div>
+                    `;
+                }).join('');
 
-//                 // Add event listeners with hover preview
-//                 container.querySelectorAll('.theme-item').forEach(item => {
-//                     const themeId = item.getAttribute('data-theme-id');
-//                     const theme = state.themes.find(t => t._id === themeId);
+                // Add event listeners with hover preview
+                container.querySelectorAll('.theme-item').forEach(item => {
+                    const themeId = item.getAttribute('data-theme-id');
+                    const theme = state.themes.find(t => t._id === themeId);
                     
-//                     // Hover preview
-//                     item.addEventListener('mouseenter', () => {
-//                         themeManager.previewTheme(theme);
-//                     });
+                    // Hover preview
+                    item.addEventListener('mouseenter', () => {
+                        themeManager.previewTheme(theme);
+                    });
 
-//                     item.addEventListener('mouseleave', () => {
-//                         themeManager.cancelPreview();
-//                     });
+                    item.addEventListener('mouseleave', () => {
+                        themeManager.cancelPreview();
+                    });
 
-//                     // Click to apply
-//                     item.addEventListener('click', () => {
-//                         themeManager.applyTheme(themeId)
-//                             .then(() => {
-//                                 this.showNotification(`"${theme.name}" applied to ${state.currentLocation.name}!`, 'success');
-//                                 this.updatePopupContent();
-//                             })
-//                             .catch(error => {
-//                                 this.showNotification(`Failed to apply theme: ${error.message}`, 'error');
-//                             });
-//                     });
-//                 });
+                    // Click to apply
+                    item.addEventListener('click', () => {
+                        themeManager.applyTheme(themeId)
+                            .then(() => {
+                                this.showNotification(`"${theme.name}" applied to ${state.currentLocation.name}!`, 'success');
+                                this.updatePopupContent();
+                            })
+                            .catch(error => {
+                                this.showNotification(`Failed to apply theme: ${error.message}`, 'error');
+                            });
+                    });
+                });
 
-//             } catch (error) {
-//                 container.innerHTML = `
-//                     <div style="text-align: center; color: #DC2626; padding: 20px;">
-//                         Failed to load themes from backend: ${error.message}
-//                     </div>
-//                 `;
-//             }
-//         },
+            } catch (error) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #DC2626; padding: 20px;">
+                        Failed to load themes from backend: ${error.message}
+                    </div>
+                `;
+            }
+        },
 
-//         openCustomizer() {
-//             // Simple custom theme creation for demo
-//             const themeName = `Custom Theme ${new Date().toLocaleDateString()}`;
+        openCustomizer() {
+            // Simple custom theme creation for demo
+            const themeName = `Custom Theme ${new Date().toLocaleDateString()}`;
             
-//             // FIXED: Use backend-compatible values to prevent 400 error
-//             const customThemeData = {
-//                 name: themeName,
-//                 description: "Custom theme created through theme builder",
-//                 textColor: '#ffffff',
-//                 backgroundColor: '#ffffff', // Solid color without alpha for backend
-//                 fontFamily: 'Roboto', // Single font family for backend
-//                 sidebarGradientStart: '#8e2de2',
-//                 sidebarGradientEnd: '#4a00e0',
-//                 headerGradientStart: '#8e2de2',
-//                 headerGradientEnd: '#4a00e0'
-//             };
+            // FIXED: Use backend-compatible values to prevent 400 error
+            const customThemeData = {
+                name: themeName,
+                description: "Custom theme created through theme builder",
+                textColor: '#ffffff',
+                backgroundColor: '#ffffff', // Solid color without alpha for backend
+                fontFamily: 'Roboto', // Single font family for backend
+                sidebarGradientStart: '#8e2de2',
+                sidebarGradientEnd: '#4a00e0',
+                headerGradientStart: '#8e2de2',
+                headerGradientEnd: '#4a00e0'
+            };
 
-//             themeManager.createCustomTheme(customThemeData)
-//                 .then(() => {
-//                     this.showNotification('Custom theme created and applied!', 'success');
-//                     this.updatePopupContent();
-//                 })
-//                 .catch(error => {
-//                     let errorMsg = `Failed to create theme: ${error.message}`;
-//                     if (error.message.includes('400')) {
-//                         errorMsg = 'Invalid theme data. Please check the theme values.';
-//                     }
-//                     this.showNotification(errorMsg, 'error');
-//                 });
-//         },
+            themeManager.createCustomTheme(customThemeData)
+                .then(() => {
+                    this.showNotification('Custom theme created and applied!', 'success');
+                    this.updatePopupContent();
+                })
+                .catch(error => {
+                    let errorMsg = `Failed to create theme: ${error.message}`;
+                    if (error.message.includes('400')) {
+                        errorMsg = 'Invalid theme data. Please check the theme values.';
+                    }
+                    this.showNotification(errorMsg, 'error');
+                });
+        },
 
-//         confirmRemoveTheme() {
-//             if (!state.currentTheme) {
-//                 this.showNotification('No theme to remove', 'warning');
-//                 return;
-//             }
+        confirmRemoveTheme() {
+            if (!state.currentTheme) {
+                this.showNotification('No theme to remove', 'warning');
+                return;
+            }
 
-//             if (confirm(`Are you sure you want to remove the current theme from ${state.currentLocation.name}?`)) {
-//                 themeManager.removeTheme()
-//                     .then(() => {
-//                         this.showNotification('Theme removed from location!', 'success');
-//                         cacheService.clearCache();
-//                         this.updatePopupContent();
-//                     })
-//                     .catch(error => {
-//                         let errorMsg = `Failed to remove theme: ${error.message}`;
-//                         if (error.message.includes('500')) {
-//                             errorMsg = 'Theme removed locally (backend issue)';
-//                             // Still update UI since we removed locally
-//                             this.updatePopupContent();
-//                         }
-//                         this.showNotification(errorMsg, 'error');
-//                     });
-//             }
-//         }
-//     };
+            if (confirm(`Are you sure you want to remove the current theme from ${state.currentLocation.name}?`)) {
+                themeManager.removeTheme()
+                    .then(() => {
+                        this.showNotification('Theme removed from location!', 'success');
+                        cacheService.clearCache();
+                        this.updatePopupContent();
+                    })
+                    .catch(error => {
+                        let errorMsg = `Failed to remove theme: ${error.message}`;
+                        if (error.message.includes('500')) {
+                            errorMsg = 'Theme removed locally (backend issue)';
+                            // Still update UI since we removed locally
+                            this.updatePopupContent();
+                        }
+                        this.showNotification(errorMsg, 'error');
+                    });
+            }
+        }
+    };
 
-//     // =========================
-//     // Initialization - Optimized
-//     // =========================
-//     async function initializeThemeBuilder() {
-//         if (!document.body) {
-//             setTimeout(initializeThemeBuilder, 100);
-//             return;
-//         }
+    // =========================
+    // Initialization - Optimized
+    // =========================
+    async function initializeThemeBuilder() {
+        if (!document.body) {
+            setTimeout(initializeThemeBuilder, 100);
+            return;
+        }
 
-//         if (state.isInitialized) {
-//             return;
-//         }
+        if (state.isInitialized) {
+            return;
+        }
 
-//         console.log(`🚀 Initializing GHL Theme Builder v${CONFIG.VERSION}...`);
+        console.log(`🚀 Initializing GHL Theme Builder v${CONFIG.VERSION}...`);
 
-//         try {
-//             // FIRST: Get current location from URL
-//             const currentLocation = urlLocationService.getCurrentLocation();
-//             if (!currentLocation || !currentLocation.locationId) {
-//                 console.log('❌ No location detected - theme builder requires location context');
-//                 return;
-//             }
+        try {
+            // FIRST: Get current location from URL
+            const currentLocation = urlLocationService.getCurrentLocation();
+            if (!currentLocation || !currentLocation.locationId) {
+                console.log('❌ No location detected - theme builder requires location context');
+                return;
+            }
 
-//             state.currentLocation = currentLocation;
+            state.currentLocation = currentLocation;
 
-//             // SECOND: Immediately load and apply theme for this location
-//             await themeManager.loadCurrentTheme();
+            // SECOND: Immediately load and apply theme for this location
+            await themeManager.loadCurrentTheme();
 
-//             // THIRD: Check access permissions for UI features
-//             const accessCheck = await accessService.checkThemeBuilderAccess();
+            // THIRD: Check access permissions for UI features
+            const accessCheck = await accessService.checkThemeBuilderAccess();
             
-//             if (accessCheck.permitted) {
-//                 // Set application state
-//                 state.accessInfo = accessCheck.accessInfo;
+            if (accessCheck.permitted) {
+                // Set application state
+                state.accessInfo = accessCheck.accessInfo;
                 
-//                 // Create UI only for permitted locations
-//                 uiService.createFloatingButton();
+                // Create UI only for permitted locations
+                uiService.createFloatingButton();
                 
-//                 // Start monitoring URL changes for SPA navigation
-//                 urlLocationService.startUrlChangeMonitoring();
+                // Start monitoring URL changes for SPA navigation
+                urlLocationService.startUrlChangeMonitoring();
                 
-//                 state.isInitialized = true;
-//                 console.log('✅ GHL Theme Builder initialized for location:', state.currentLocation.locationId);
+                state.isInitialized = true;
+                console.log('✅ GHL Theme Builder initialized for location:', state.currentLocation.locationId);
                 
-//             } else {
-//                 console.log('❌ Theme Builder UI not shown - location not permitted, but theme is still applied');
-//                 // Even without access, we still apply the theme for all users
-//                 // Start monitoring URL changes for theme persistence
-//                 urlLocationService.startUrlChangeMonitoring();
-//                 state.isInitialized = true;
-//             }
-//         } catch (error) {
-//             console.error('❌ Failed to initialize Theme Builder:', error);
-//         }
-//     }
+            } else {
+                console.log('❌ Theme Builder UI not shown - location not permitted, but theme is still applied');
+                // Even without access, we still apply the theme for all users
+                // Start monitoring URL changes for theme persistence
+                urlLocationService.startUrlChangeMonitoring();
+                state.isInitialized = true;
+            }
+        } catch (error) {
+            console.error('❌ Failed to initialize Theme Builder:', error);
+        }
+    }
 
-//     // =========================
-//     // Public API
-//     // =========================
-//     window.GHLThemeBuilder = {
-//         init: initializeThemeBuilder,
-//         refresh: () => uiService.refreshAllData(),
-//         open: () => uiService.openPopup(),
-//         close: () => uiService.closePopup(),
+    // =========================
+    // Public API
+    // =========================
+    window.GHLThemeBuilder = {
+        init: initializeThemeBuilder,
+        refresh: () => uiService.refreshAllData(),
+        open: () => uiService.openPopup(),
+        close: () => uiService.closePopup(),
         
-//         getCurrentTheme: () => state.currentTheme,
-//         getCurrentLocation: () => state.currentLocation,
-//         getThemes: () => state.themes,
+        getCurrentTheme: () => state.currentTheme,
+        getCurrentLocation: () => state.currentLocation,
+        getThemes: () => state.themes,
         
-//         applyTheme: (themeId) => themeManager.applyTheme(themeId),
-//         removeTheme: () => themeManager.removeTheme(),
+        applyTheme: (themeId) => themeManager.applyTheme(themeId),
+        removeTheme: () => themeManager.removeTheme(),
         
-//         isInitialized: () => state.isInitialized,
-//         hasAccess: () => state.accessInfo?.themeBuilderAccess === true,
+        isInitialized: () => state.isInitialized,
+        hasAccess: () => state.accessInfo?.themeBuilderAccess === true,
 
-//         // Debug methods
-//         debug: () => {
-//             console.log('🔧 GHL Theme Builder Debug Info:', {
-//                 state: state,
-//                 config: CONFIG,
-//                 currentURL: window.location.href
-//             });
-//         }
-//     };
+        // Debug methods
+        debug: () => {
+            console.log('🔧 GHL Theme Builder Debug Info:', {
+                state: state,
+                config: CONFIG,
+                currentURL: window.location.href
+            });
+        }
+    };
 
-//     // Auto-initialize
-//     if (document.readyState === 'loading') {
-//         document.addEventListener('DOMContentLoaded', initializeThemeBuilder);
-//     } else {
-//         initializeThemeBuilder();
-//     }
+    // Auto-initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeThemeBuilder);
+    } else {
+        initializeThemeBuilder();
+    }
 
-//     console.log(`🎨 GHL Theme Builder v${CONFIG.VERSION} - Optimized with caching and API fixes`);
-// })();
+    console.log(`🎨 GHL Theme Builder v${CONFIG.VERSION} - Optimized with caching and API fixes`);
+})();
 
 
 // /* =========================
@@ -3737,768 +3737,768 @@
 
 
 
-(function(){
-    console.log('🚀 GHL Theme Builder - Optimized Production Version');
+// (function(){
+//     console.log('🚀 GHL Theme Builder - Optimized Production Version');
 
-    // =========================
-    // Configuration
-    // =========================
-    const CONFIG = {
-        BTN_ID: "ghl-theme-builder-btn",
-        POPUP_ID: "ghl-theme-builder-popup", 
-        STYLE_ID: "ghl-theme-style",
-        PREVIEW_STYLE_ID: "ghl-theme-preview",
-        BACKEND_API: "https://ghlengine-production.up.railway.app/api",
-        AUTH_TOKEN: "110",
-        VERSION: "4.0.0",
-        CACHE_DURATION: 5 * 60 * 1000,
-        DEBOUNCE_DELAY: 300
-    };
+//     // =========================
+//     // Configuration
+//     // =========================
+//     const CONFIG = {
+//         BTN_ID: "ghl-theme-builder-btn",
+//         POPUP_ID: "ghl-theme-builder-popup", 
+//         STYLE_ID: "ghl-theme-style",
+//         PREVIEW_STYLE_ID: "ghl-theme-preview",
+//         BACKEND_API: "https://ghlengine-production.up.railway.app/api",
+//         AUTH_TOKEN: "110",
+//         VERSION: "4.0.0",
+//         CACHE_DURATION: 5 * 60 * 1000,
+//         DEBOUNCE_DELAY: 300
+//     };
 
-    // =========================
-    // State Management
-    // =========================
-    const state = {
-        btnRef: null,
-        popupRef: null,
-        currentTheme: null,
-        currentLocation: null,
-        themes: [],
-        accessInfo: null,
-        isInitialized: false,
-        isPreviewing: false
-    };
+//     // =========================
+//     // State Management
+//     // =========================
+//     const state = {
+//         btnRef: null,
+//         popupRef: null,
+//         currentTheme: null,
+//         currentLocation: null,
+//         themes: [],
+//         accessInfo: null,
+//         isInitialized: false,
+//         isPreviewing: false
+//     };
 
-    // =========================
-    // Core Services
-    // =========================
+//     // =========================
+//     // Core Services
+//     // =========================
 
-    // Location Detection
-    const locationService = {
-        detect() {
-            const url = window.location.href;
-            // Match GHL location pattern
-            const match = url.match(/\/location\/([^\/]+)\//);
-            return match ? {
-                locationId: match[1],
-                name: this.getLocationName(),
-                url: url
-            } : null;
-        },
+//     // Location Detection
+//     const locationService = {
+//         detect() {
+//             const url = window.location.href;
+//             // Match GHL location pattern
+//             const match = url.match(/\/location\/([^\/]+)\//);
+//             return match ? {
+//                 locationId: match[1],
+//                 name: this.getLocationName(),
+//                 url: url
+//             } : null;
+//         },
 
-        getLocationName() {
-            const selectors = [
-                '.hl_switcher-loc-name',
-                '[data-location-name]',
-                '.location-name'
-            ];
+//         getLocationName() {
+//             const selectors = [
+//                 '.hl_switcher-loc-name',
+//                 '[data-location-name]',
+//                 '.location-name'
+//             ];
             
-            for (let selector of selectors) {
-                const el = document.querySelector(selector);
-                if (el?.textContent?.trim()) {
-                    return el.textContent.trim();
-                }
-            }
-            return 'GHL Location';
-        }
-    };
+//             for (let selector of selectors) {
+//                 const el = document.querySelector(selector);
+//                 if (el?.textContent?.trim()) {
+//                     return el.textContent.trim();
+//                 }
+//             }
+//             return 'GHL Location';
+//         }
+//     };
 
-    // API Service
-    const apiService = {
-        async call(endpoint, options = {}) {
-            const url = `${CONFIG.BACKEND_API}${endpoint}`;
-            const headers = {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${CONFIG.AUTH_TOKEN}`,
-                ...options.headers
-            };
+//     // API Service
+//     const apiService = {
+//         async call(endpoint, options = {}) {
+//             const url = `${CONFIG.BACKEND_API}${endpoint}`;
+//             const headers = {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `Bearer ${CONFIG.AUTH_TOKEN}`,
+//                 ...options.headers
+//             };
 
-            const config = {
-                method: options.method || 'GET',
-                headers,
-                ...(options.body && { body: JSON.stringify(options.body) })
-            };
+//             const config = {
+//                 method: options.method || 'GET',
+//                 headers,
+//                 ...(options.body && { body: JSON.stringify(options.body) })
+//             };
 
-            try {
-                const response = await fetch(url, config);
-                const data = await response.json();
+//             try {
+//                 const response = await fetch(url, config);
+//                 const data = await response.json();
                 
-                if (!response.ok) {
-                    throw new Error(data.message || `HTTP ${response.status}`);
-                }
+//                 if (!response.ok) {
+//                     throw new Error(data.message || `HTTP ${response.status}`);
+//                 }
                 
-                return data;
-            } catch (error) {
-                console.error(`API Error ${endpoint}:`, error);
-                throw error;
-            }
-        },
+//                 return data;
+//             } catch (error) {
+//                 console.error(`API Error ${endpoint}:`, error);
+//                 throw error;
+//             }
+//         },
 
-        async getThemes(locationId) {
-            return this.call(`/themes/by-location/${locationId}`);
-        },
+//         async getThemes(locationId) {
+//             return this.call(`/themes/by-location/${locationId}`);
+//         },
 
-        async createTheme(themeData) {
-            return this.call('/themes', {
-                method: 'POST',
-                body: themeData
-            });
-        },
+//         async createTheme(themeData) {
+//             return this.call('/themes', {
+//                 method: 'POST',
+//                 body: themeData
+//             });
+//         },
 
-        async applyTheme(themeId, locationId) {
-            return this.call('/themes/apply', {
-                method: 'POST',
-                body: { themeId, locationId }
-            });
-        },
+//         async applyTheme(themeId, locationId) {
+//             return this.call('/themes/apply', {
+//                 method: 'POST',
+//                 body: { themeId, locationId }
+//             });
+//         },
 
-        async deleteTheme(themeId) {
-            return this.call(`/themes/${themeId}`, { method: 'DELETE' });
-        }
-    };
+//         async deleteTheme(themeId) {
+//             return this.call(`/themes/${themeId}`, { method: 'DELETE' });
+//         }
+//     };
 
-    // Theme CSS Service
-    const themeCSSService = {
-        generateCSS(theme) {
-            if (!theme) return '';
+//     // Theme CSS Service
+//     const themeCSSService = {
+//         generateCSS(theme) {
+//             if (!theme) return '';
             
-            return `
-/* GHL Theme Builder */
-.sidebar-container, 
-.transition-slowest .flex-col > .overflow-hidden {
-    background: linear-gradient(135deg, ${theme.sidebarGradientStart} 0%, ${theme.sidebarGradientEnd} 100%) !important;
-}
+//             return `
+// /* GHL Theme Builder */
+// .sidebar-container, 
+// .transition-slowest .flex-col > .overflow-hidden {
+//     background: linear-gradient(135deg, ${theme.sidebarGradientStart} 0%, ${theme.sidebarGradientEnd} 100%) !important;
+// }
 
-.hl_header .container-fluid {
-    background: linear-gradient(135deg, ${theme.headerGradientStart} 0%, ${theme.headerGradientEnd} 100%) !important;
-}
+// .hl_header .container-fluid {
+//     background: linear-gradient(135deg, ${theme.headerGradientStart} 0%, ${theme.headerGradientEnd} 100%) !important;
+// }
 
-.hl-text, .nav-title, .menu-title, .hl_switcher-loc-name {
-    color: ${theme.textColor} !important;
-    font-family: ${theme.fontFamily} !important;
-}
+// .hl-text, .nav-title, .menu-title, .hl_switcher-loc-name {
+//     color: ${theme.textColor} !important;
+//     font-family: ${theme.fontFamily} !important;
+// }
 
-.hl-card, #location-switcher-sidbar-v2 {
-    background-color: ${theme.backgroundColor} !important;
-    border-radius: 8px !important;
-}
-            `;
-        },
+// .hl-card, #location-switcher-sidbar-v2 {
+//     background-color: ${theme.backgroundColor} !important;
+//     border-radius: 8px !important;
+// }
+//             `;
+//         },
 
-        apply(theme) {
-            this.remove();
-            if (!theme) return;
+//         apply(theme) {
+//             this.remove();
+//             if (!theme) return;
             
-            const style = document.createElement('style');
-            style.id = CONFIG.STYLE_ID;
-            style.textContent = this.generateCSS(theme);
-            document.head.appendChild(style);
-        },
+//             const style = document.createElement('style');
+//             style.id = CONFIG.STYLE_ID;
+//             style.textContent = this.generateCSS(theme);
+//             document.head.appendChild(style);
+//         },
 
-        remove() {
-            const style = document.getElementById(CONFIG.STYLE_ID);
-            if (style) style.remove();
-        },
+//         remove() {
+//             const style = document.getElementById(CONFIG.STYLE_ID);
+//             if (style) style.remove();
+//         },
 
-        preview(theme) {
-            this.removePreview();
-            if (!theme) return;
+//         preview(theme) {
+//             this.removePreview();
+//             if (!theme) return;
             
-            const style = document.createElement('style');
-            style.id = CONFIG.PREVIEW_STYLE_ID;
-            style.textContent = this.generateCSS(theme);
-            document.head.appendChild(style);
-            state.isPreviewing = true;
-        },
+//             const style = document.createElement('style');
+//             style.id = CONFIG.PREVIEW_STYLE_ID;
+//             style.textContent = this.generateCSS(theme);
+//             document.head.appendChild(style);
+//             state.isPreviewing = true;
+//         },
 
-        removePreview() {
-            const style = document.getElementById(CONFIG.PREVIEW_STYLE_ID);
-            if (style) style.remove();
-            state.isPreviewing = false;
-        }
-    };
+//         removePreview() {
+//             const style = document.getElementById(CONFIG.PREVIEW_STYLE_ID);
+//             if (style) style.remove();
+//             state.isPreviewing = false;
+//         }
+//     };
 
-    // Theme Manager
-    const themeManager = {
-        presets: [
-            {
-                name: 'Ocean Blue',
-                sidebarGradientStart: '#1e3a8a',
-                sidebarGradientEnd: '#3b82f6', 
-                headerGradientStart: '#1e40af',
-                headerGradientEnd: '#60a5fa',
-                textColor: '#ffffff',
-                backgroundColor: '#1e40af',
-                fontFamily: 'Roboto, sans-serif'
-            },
-            {
-                name: 'Forest Green',
-                sidebarGradientStart: '#065f46',
-                sidebarGradientEnd: '#10b981',
-                headerGradientStart: '#047857',
-                headerGradientEnd: '#34d399',
-                textColor: '#ffffff',
-                backgroundColor: '#047857',
-                fontFamily: 'Inter, sans-serif'
-            },
-            {
-                name: 'Royal Purple',
-                sidebarGradientStart: '#5b21b6',
-                sidebarGradientEnd: '#a855f7',
-                headerGradientStart: '#6b21a8',
-                headerGradientEnd: '#c084fc',
-                textColor: '#ffffff',
-                backgroundColor: '#6b21a8',
-                fontFamily: 'Roboto, sans-serif'
-            }
-        ],
+//     // Theme Manager
+//     const themeManager = {
+//         presets: [
+//             {
+//                 name: 'Ocean Blue',
+//                 sidebarGradientStart: '#1e3a8a',
+//                 sidebarGradientEnd: '#3b82f6', 
+//                 headerGradientStart: '#1e40af',
+//                 headerGradientEnd: '#60a5fa',
+//                 textColor: '#ffffff',
+//                 backgroundColor: '#1e40af',
+//                 fontFamily: 'Roboto, sans-serif'
+//             },
+//             {
+//                 name: 'Forest Green',
+//                 sidebarGradientStart: '#065f46',
+//                 sidebarGradientEnd: '#10b981',
+//                 headerGradientStart: '#047857',
+//                 headerGradientEnd: '#34d399',
+//                 textColor: '#ffffff',
+//                 backgroundColor: '#047857',
+//                 fontFamily: 'Inter, sans-serif'
+//             },
+//             {
+//                 name: 'Royal Purple',
+//                 sidebarGradientStart: '#5b21b6',
+//                 sidebarGradientEnd: '#a855f7',
+//                 headerGradientStart: '#6b21a8',
+//                 headerGradientEnd: '#c084fc',
+//                 textColor: '#ffffff',
+//                 backgroundColor: '#6b21a8',
+//                 fontFamily: 'Roboto, sans-serif'
+//             }
+//         ],
 
-        async loadThemes(locationId) {
-            try {
-                const response = await apiService.getThemes(locationId);
-                state.themes = response.data || [];
-                return state.themes;
-            } catch (error) {
-                console.error('Failed to load themes:', error);
-                state.themes = [];
-                return [];
-            }
-        },
+//         async loadThemes(locationId) {
+//             try {
+//                 const response = await apiService.getThemes(locationId);
+//                 state.themes = response.data || [];
+//                 return state.themes;
+//             } catch (error) {
+//                 console.error('Failed to load themes:', error);
+//                 state.themes = [];
+//                 return [];
+//             }
+//         },
 
-        async applyTheme(themeId, locationId) {
-            try {
-                await apiService.applyTheme(themeId, locationId);
-                const theme = state.themes.find(t => t._id === themeId);
-                if (theme) {
-                    state.currentTheme = theme;
-                    themeCSSService.apply(theme);
-                }
-                return true;
-            } catch (error) {
-                console.error('Failed to apply theme:', error);
-                throw error;
-            }
-        },
+//         async applyTheme(themeId, locationId) {
+//             try {
+//                 await apiService.applyTheme(themeId, locationId);
+//                 const theme = state.themes.find(t => t._id === themeId);
+//                 if (theme) {
+//                     state.currentTheme = theme;
+//                     themeCSSService.apply(theme);
+//                 }
+//                 return true;
+//             } catch (error) {
+//                 console.error('Failed to apply theme:', error);
+//                 throw error;
+//             }
+//         },
 
-        async createTheme(themeData, locationId) {
-            try {
-                const completeData = {
-                    ...themeData,
-                    locationId: locationId,
-                    userId: CONFIG.AUTH_TOKEN,
-                    isActive: true
-                };
+//         async createTheme(themeData, locationId) {
+//             try {
+//                 const completeData = {
+//                     ...themeData,
+//                     locationId: locationId,
+//                     userId: CONFIG.AUTH_TOKEN,
+//                     isActive: true
+//                 };
                 
-                const response = await apiService.createTheme(completeData);
-                return response.data;
-            } catch (error) {
-                console.error('Failed to create theme:', error);
-                throw error;
-            }
-        },
+//                 const response = await apiService.createTheme(completeData);
+//                 return response.data;
+//             } catch (error) {
+//                 console.error('Failed to create theme:', error);
+//                 throw error;
+//             }
+//         },
 
-        async deleteTheme(themeId) {
-            try {
-                await apiService.deleteTheme(themeId);
-                if (state.currentTheme?._id === themeId) {
-                    state.currentTheme = null;
-                    themeCSSService.remove();
-                }
-                return true;
-            } catch (error) {
-                console.error('Failed to delete theme:', error);
-                throw error;
-            }
-        }
-    };
+//         async deleteTheme(themeId) {
+//             try {
+//                 await apiService.deleteTheme(themeId);
+//                 if (state.currentTheme?._id === themeId) {
+//                     state.currentTheme = null;
+//                     themeCSSService.remove();
+//                 }
+//                 return true;
+//             } catch (error) {
+//                 console.error('Failed to delete theme:', error);
+//                 throw error;
+//             }
+//         }
+//     };
 
-    // =========================
-    // UI Components
-    // =========================
+//     // =========================
+//     // UI Components
+//     // =========================
 
-    // Notification System
-    const notification = {
-        show(message, type = 'info') {
-            const notificationEl = document.createElement('div');
-            notificationEl.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span>${this.getIcon(type)}</span>
-                    <span>${message}</span>
-                </div>
-            `;
+//     // Notification System
+//     const notification = {
+//         show(message, type = 'info') {
+//             const notificationEl = document.createElement('div');
+//             notificationEl.innerHTML = `
+//                 <div style="display: flex; align-items: center; gap: 8px;">
+//                     <span>${this.getIcon(type)}</span>
+//                     <span>${message}</span>
+//                 </div>
+//             `;
             
-            Object.assign(notificationEl.style, {
-                position: 'fixed',
-                top: '80px',
-                right: '20px',
-                background: this.getColor(type),
-                color: 'white',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                zIndex: '100000',
-                fontSize: '14px',
-                fontWeight: '500',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-            });
+//             Object.assign(notificationEl.style, {
+//                 position: 'fixed',
+//                 top: '80px',
+//                 right: '20px',
+//                 background: this.getColor(type),
+//                 color: 'white',
+//                 padding: '12px 16px',
+//                 borderRadius: '8px',
+//                 zIndex: '100000',
+//                 fontSize: '14px',
+//                 fontWeight: '500',
+//                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+//             });
             
-            document.body.appendChild(notificationEl);
-            setTimeout(() => notificationEl.remove(), 3000);
-        },
+//             document.body.appendChild(notificationEl);
+//             setTimeout(() => notificationEl.remove(), 3000);
+//         },
 
-        getIcon(type) {
-            const icons = {
-                success: '✅',
-                error: '❌', 
-                warning: '⚠️',
-                info: 'ℹ️'
-            };
-            return icons[type] || icons.info;
-        },
+//         getIcon(type) {
+//             const icons = {
+//                 success: '✅',
+//                 error: '❌', 
+//                 warning: '⚠️',
+//                 info: 'ℹ️'
+//             };
+//             return icons[type] || icons.info;
+//         },
 
-        getColor(type) {
-            const colors = {
-                success: '#10B981',
-                error: '#DC2626',
-                warning: '#F59E0B',
-                info: '#2563EB'
-            };
-            return colors[type] || colors.info;
-        }
-    };
+//         getColor(type) {
+//             const colors = {
+//                 success: '#10B981',
+//                 error: '#DC2626',
+//                 warning: '#F59E0B',
+//                 info: '#2563EB'
+//             };
+//             return colors[type] || colors.info;
+//         }
+//     };
 
-    // Floating Button
-    const createFloatingButton = () => {
-        // Remove existing button
-        const existingBtn = document.getElementById(CONFIG.BTN_ID);
-        if (existingBtn) existingBtn.remove();
+//     // Floating Button
+//     const createFloatingButton = () => {
+//         // Remove existing button
+//         const existingBtn = document.getElementById(CONFIG.BTN_ID);
+//         if (existingBtn) existingBtn.remove();
 
-        const button = document.createElement('button');
-        button.id = CONFIG.BTN_ID;
-        button.innerHTML = '🎨 THEMES';
-        button.title = 'GHL Theme Builder';
+//         const button = document.createElement('button');
+//         button.id = CONFIG.BTN_ID;
+//         button.innerHTML = '🎨 THEMES';
+//         button.title = 'GHL Theme Builder';
         
-        // High-priority styles
-        button.style.cssText = `
-            position: fixed !important;
-            top: 20px !important;
-            right: 20px !important;
-            padding: 12px 16px !important;
-            background: #2563EB !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            cursor: pointer !important;
-            z-index: 2147483647 !important;
-            font-size: 14px !important;
-            font-weight: bold !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
-            font-family: system-ui, -apple-system, sans-serif !important;
-            transition: all 0.2s ease !important;
-        `;
+//         // High-priority styles
+//         button.style.cssText = `
+//             position: fixed !important;
+//             top: 20px !important;
+//             right: 20px !important;
+//             padding: 12px 16px !important;
+//             background: #2563EB !important;
+//             color: white !important;
+//             border: none !important;
+//             border-radius: 8px !important;
+//             cursor: pointer !important;
+//             z-index: 2147483647 !important;
+//             font-size: 14px !important;
+//             font-weight: bold !important;
+//             box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+//             font-family: system-ui, -apple-system, sans-serif !important;
+//             transition: all 0.2s ease !important;
+//         `;
 
-        // Hover effects
-        button.addEventListener('mouseenter', () => {
-            button.style.background = '#1d4ed8';
-            button.style.transform = 'scale(1.05)';
-        });
+//         // Hover effects
+//         button.addEventListener('mouseenter', () => {
+//             button.style.background = '#1d4ed8';
+//             button.style.transform = 'scale(1.05)';
+//         });
         
-        button.addEventListener('mouseleave', () => {
-            button.style.background = '#2563EB';
-            button.style.transform = 'scale(1)';
-        });
+//         button.addEventListener('mouseleave', () => {
+//             button.style.background = '#2563EB';
+//             button.style.transform = 'scale(1)';
+//         });
 
-        // Click handler
-        button.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openPopup();
-        });
+//         // Click handler
+//         button.addEventListener('click', (e) => {
+//             e.stopPropagation();
+//             openPopup();
+//         });
 
-        document.body.appendChild(button);
-        state.btnRef = button;
-        return button;
-    };
+//         document.body.appendChild(button);
+//         state.btnRef = button;
+//         return button;
+//     };
 
-    // Popup Management
-    const openPopup = () => {
-        createPopup();
-        if (state.popupRef) {
-            state.popupRef.style.display = 'block';
-            updatePopupContent();
-        }
-    };
+//     // Popup Management
+//     const openPopup = () => {
+//         createPopup();
+//         if (state.popupRef) {
+//             state.popupRef.style.display = 'block';
+//             updatePopupContent();
+//         }
+//     };
 
-    const closePopup = () => {
-        if (state.popupRef) {
-            state.popupRef.style.display = 'none';
-            themeCSSService.removePreview();
-        }
-    };
+//     const closePopup = () => {
+//         if (state.popupRef) {
+//             state.popupRef.style.display = 'none';
+//             themeCSSService.removePreview();
+//         }
+//     };
 
-    const createPopup = () => {
-        // Remove existing popup
-        const existingPopup = document.getElementById(CONFIG.POPUP_ID);
-        if (existingPopup) existingPopup.remove();
+//     const createPopup = () => {
+//         // Remove existing popup
+//         const existingPopup = document.getElementById(CONFIG.POPUP_ID);
+//         if (existingPopup) existingPopup.remove();
 
-        const popup = document.createElement('div');
-        popup.id = CONFIG.POPUP_ID;
+//         const popup = document.createElement('div');
+//         popup.id = CONFIG.POPUP_ID;
         
-        popup.style.cssText = `
-            position: fixed !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            background: white !important;
-            padding: 24px !important;
-            border-radius: 12px !important;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3) !important;
-            z-index: 2147483646 !important;
-            width: 90vw !important;
-            max-width: 500px !important;
-            max-height: 80vh !important;
-            overflow-y: auto !important;
-            border: 1px solid #e5e7eb !important;
-            font-family: system-ui, -apple-system, sans-serif !important;
-            display: none !important;
-        `;
+//         popup.style.cssText = `
+//             position: fixed !important;
+//             top: 50% !important;
+//             left: 50% !important;
+//             transform: translate(-50%, -50%) !important;
+//             background: white !important;
+//             padding: 24px !important;
+//             border-radius: 12px !important;
+//             box-shadow: 0 20px 60px rgba(0,0,0,0.3) !important;
+//             z-index: 2147483646 !important;
+//             width: 90vw !important;
+//             max-width: 500px !important;
+//             max-height: 80vh !important;
+//             overflow-y: auto !important;
+//             border: 1px solid #e5e7eb !important;
+//             font-family: system-ui, -apple-system, sans-serif !important;
+//             display: none !important;
+//         `;
 
-        document.body.appendChild(popup);
-        state.popupRef = popup;
+//         document.body.appendChild(popup);
+//         state.popupRef = popup;
 
-        // Close popup when clicking outside
-        document.addEventListener('click', (e) => {
-            if (popup.style.display === 'block' && 
-                !popup.contains(e.target) && 
-                e.target.id !== CONFIG.BTN_ID) {
-                closePopup();
-            }
-        });
+//         // Close popup when clicking outside
+//         document.addEventListener('click', (e) => {
+//             if (popup.style.display === 'block' && 
+//                 !popup.contains(e.target) && 
+//                 e.target.id !== CONFIG.BTN_ID) {
+//                 closePopup();
+//             }
+//         });
 
-        return popup;
-    };
+//         return popup;
+//     };
 
-    const updatePopupContent = async () => {
-        if (!state.popupRef) return;
+//     const updatePopupContent = async () => {
+//         if (!state.popupRef) return;
 
-        const currentLocation = state.currentLocation;
-        const currentTheme = state.currentTheme;
+//         const currentLocation = state.currentLocation;
+//         const currentTheme = state.currentTheme;
 
-        state.popupRef.innerHTML = `
-            <div style="margin-bottom: 24px;">
-                <h2 style="margin: 0 0 8px 0; color: #1f2937; font-size: 20px; font-weight: 600;">
-                    🎨 GHL Theme Builder
-                </h2>
-                <div style="color: #6b7280; font-size: 14px;">
-                    <div><strong>Location:</strong> ${currentLocation?.name || 'Unknown'}</div>
-                    <div><strong>Current Theme:</strong> ${currentTheme?.name || 'None'}</div>
-                    ${state.isPreviewing ? '<div style="color: #F59E0B;"><strong>👀 Preview Mode</strong></div>' : ''}
-                </div>
-            </div>
+//         state.popupRef.innerHTML = `
+//             <div style="margin-bottom: 24px;">
+//                 <h2 style="margin: 0 0 8px 0; color: #1f2937; font-size: 20px; font-weight: 600;">
+//                     🎨 GHL Theme Builder
+//                 </h2>
+//                 <div style="color: #6b7280; font-size: 14px;">
+//                     <div><strong>Location:</strong> ${currentLocation?.name || 'Unknown'}</div>
+//                     <div><strong>Current Theme:</strong> ${currentTheme?.name || 'None'}</div>
+//                     ${state.isPreviewing ? '<div style="color: #F59E0B;"><strong>👀 Preview Mode</strong></div>' : ''}
+//                 </div>
+//             </div>
 
-            <div style="margin-bottom: 20px;">
-                <h3 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">
-                    Quick Presets
-                </h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
-                    ${themeManager.presets.map(preset => `
-                        <button class="preset-btn" data-preset="${preset.name}"
-                                style="padding: 12px; background: ${preset.sidebarGradientStart}; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                            ${preset.name}
-                        </button>
-                    `).join('')}
-                </div>
-            </div>
+//             <div style="margin-bottom: 20px;">
+//                 <h3 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">
+//                     Quick Presets
+//                 </h3>
+//                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+//                     ${themeManager.presets.map(preset => `
+//                         <button class="preset-btn" data-preset="${preset.name}"
+//                                 style="padding: 12px; background: ${preset.sidebarGradientStart}; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+//                             ${preset.name}
+//                         </button>
+//                     `).join('')}
+//                 </div>
+//             </div>
 
-            <div style="margin-bottom: 20px;">
-                <h3 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">
-                    Your Themes
-                </h3>
-                <div id="themes-list" style="min-height: 100px; max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px;">
-                    <div style="text-align: center; color: #6b7280; padding: 20px;">
-                        Loading themes...
-                    </div>
-                </div>
-            </div>
+//             <div style="margin-bottom: 20px;">
+//                 <h3 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">
+//                     Your Themes
+//                 </h3>
+//                 <div id="themes-list" style="min-height: 100px; max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px;">
+//                     <div style="text-align: center; color: #6b7280; padding: 20px;">
+//                         Loading themes...
+//                     </div>
+//                 </div>
+//             </div>
 
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="refresh-btn" 
-                        style="flex: 1; padding: 12px; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                    🔄 Refresh
-                </button>
-                <button id="create-custom-btn" 
-                        style="flex: 1; padding: 12px; background: #8B5CF6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                    🎨 Create Custom
-                </button>
-                ${currentTheme ? `
-                    <button id="remove-theme-btn" 
-                            style="flex: 1; padding: 12px; background: #DC2626; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                        🗑️ Remove
-                    </button>
-                ` : ''}
-                <button id="close-popup-btn" 
-                        style="flex: 1; padding: 12px; background: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                    Close
-                </button>
-            </div>
-        `;
+//             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+//                 <button id="refresh-btn" 
+//                         style="flex: 1; padding: 12px; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+//                     🔄 Refresh
+//                 </button>
+//                 <button id="create-custom-btn" 
+//                         style="flex: 1; padding: 12px; background: #8B5CF6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+//                     🎨 Create Custom
+//                 </button>
+//                 ${currentTheme ? `
+//                     <button id="remove-theme-btn" 
+//                             style="flex: 1; padding: 12px; background: #DC2626; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+//                         🗑️ Remove
+//                     </button>
+//                 ` : ''}
+//                 <button id="close-popup-btn" 
+//                         style="flex: 1; padding: 12px; background: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+//                     Close
+//                 </button>
+//             </div>
+//         `;
 
-        // Attach event listeners
-        attachPopupEvents();
+//         // Attach event listeners
+//         attachPopupEvents();
         
-        // Load themes into the list
-        await loadThemesList();
-    };
+//         // Load themes into the list
+//         await loadThemesList();
+//     };
 
-    const attachPopupEvents = () => {
-        // Preset buttons
-        state.popupRef.querySelectorAll('.preset-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const presetName = btn.dataset.preset;
-                const preset = themeManager.presets.find(p => p.name === presetName);
-                if (preset) applyPreset(preset);
-            });
-        });
+//     const attachPopupEvents = () => {
+//         // Preset buttons
+//         state.popupRef.querySelectorAll('.preset-btn').forEach(btn => {
+//             btn.addEventListener('click', () => {
+//                 const presetName = btn.dataset.preset;
+//                 const preset = themeManager.presets.find(p => p.name === presetName);
+//                 if (preset) applyPreset(preset);
+//             });
+//         });
 
-        // Action buttons
-        const refreshBtn = document.getElementById('refresh-btn');
-        const createBtn = document.getElementById('create-custom-btn');
-        const removeBtn = document.getElementById('remove-theme-btn');
-        const closeBtn = document.getElementById('close-popup-btn');
+//         // Action buttons
+//         const refreshBtn = document.getElementById('refresh-btn');
+//         const createBtn = document.getElementById('create-custom-btn');
+//         const removeBtn = document.getElementById('remove-theme-btn');
+//         const closeBtn = document.getElementById('close-popup-btn');
 
-        if (refreshBtn) refreshBtn.addEventListener('click', refreshData);
-        if (createBtn) createBtn.addEventListener('click', createCustomTheme);
-        if (removeBtn) removeBtn.addEventListener('click', removeCurrentTheme);
-        if (closeBtn) closeBtn.addEventListener('click', closePopup);
-    };
+//         if (refreshBtn) refreshBtn.addEventListener('click', refreshData);
+//         if (createBtn) createBtn.addEventListener('click', createCustomTheme);
+//         if (removeBtn) removeBtn.addEventListener('click', removeCurrentTheme);
+//         if (closeBtn) closeBtn.addEventListener('click', closePopup);
+//     };
 
-    const loadThemesList = async () => {
-        const container = document.getElementById('themes-list');
-        if (!container || !state.currentLocation) return;
+//     const loadThemesList = async () => {
+//         const container = document.getElementById('themes-list');
+//         if (!container || !state.currentLocation) return;
 
-        try {
-            await themeManager.loadThemes(state.currentLocation.locationId);
+//         try {
+//             await themeManager.loadThemes(state.currentLocation.locationId);
             
-            if (state.themes.length === 0) {
-                container.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">No themes found</div>';
-                return;
-            }
+//             if (state.themes.length === 0) {
+//                 container.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">No themes found</div>';
+//                 return;
+//             }
 
-            container.innerHTML = state.themes.map(theme => {
-                const isActive = state.currentTheme?._id === theme._id;
-                return `
-                    <div class="theme-item" data-theme-id="${theme._id}"
-                         style="display: flex; align-items: center; justify-content: space-between; padding: 10px; margin: 5px 0; border-radius: 6px; border: 1px solid #e5e7eb; background: ${isActive ? '#f0fdf4' : '#f9fafb'}; cursor: pointer;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="width: 16px; height: 16px; border-radius: 50%; background: ${theme.sidebarGradientStart || '#2563EB'};"></div>
-                            <span style="font-weight: 500;">${theme.name}</span>
-                        </div>
-                        <div>
-                            ${isActive ? '<span style="color: #10B981; font-weight: 600;">Active</span>' : ''}
-                            <button class="delete-theme" data-theme-id="${theme._id}" 
-                                    style="margin-left: 10px; padding: 4px 8px; background: #DC2626; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+//             container.innerHTML = state.themes.map(theme => {
+//                 const isActive = state.currentTheme?._id === theme._id;
+//                 return `
+//                     <div class="theme-item" data-theme-id="${theme._id}"
+//                          style="display: flex; align-items: center; justify-content: space-between; padding: 10px; margin: 5px 0; border-radius: 6px; border: 1px solid #e5e7eb; background: ${isActive ? '#f0fdf4' : '#f9fafb'}; cursor: pointer;">
+//                         <div style="display: flex; align-items: center; gap: 10px;">
+//                             <div style="width: 16px; height: 16px; border-radius: 50%; background: ${theme.sidebarGradientStart || '#2563EB'};"></div>
+//                             <span style="font-weight: 500;">${theme.name}</span>
+//                         </div>
+//                         <div>
+//                             ${isActive ? '<span style="color: #10B981; font-weight: 600;">Active</span>' : ''}
+//                             <button class="delete-theme" data-theme-id="${theme._id}" 
+//                                     style="margin-left: 10px; padding: 4px 8px; background: #DC2626; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">
+//                                 Delete
+//                             </button>
+//                         </div>
+//                     </div>
+//                 `;
+//             }).join('');
 
-            // Add event listeners to theme items
-            container.querySelectorAll('.theme-item').forEach(item => {
-                const themeId = item.dataset.themeId;
-                const theme = state.themes.find(t => t._id === themeId);
+//             // Add event listeners to theme items
+//             container.querySelectorAll('.theme-item').forEach(item => {
+//                 const themeId = item.dataset.themeId;
+//                 const theme = state.themes.find(t => t._id === themeId);
                 
-                // Hover preview
-                item.addEventListener('mouseenter', () => {
-                    themeCSSService.preview(theme);
-                });
+//                 // Hover preview
+//                 item.addEventListener('mouseenter', () => {
+//                     themeCSSService.preview(theme);
+//                 });
 
-                item.addEventListener('mouseleave', () => {
-                    themeCSSService.removePreview();
-                    themeCSSService.apply(state.currentTheme);
-                });
+//                 item.addEventListener('mouseleave', () => {
+//                     themeCSSService.removePreview();
+//                     themeCSSService.apply(state.currentTheme);
+//                 });
 
-                // Click to apply
-                item.addEventListener('click', (e) => {
-                    if (!e.target.classList.contains('delete-theme')) {
-                        applyTheme(themeId);
-                    }
-                });
-            });
+//                 // Click to apply
+//                 item.addEventListener('click', (e) => {
+//                     if (!e.target.classList.contains('delete-theme')) {
+//                         applyTheme(themeId);
+//                     }
+//                 });
+//             });
 
-            // Add delete handlers
-            container.querySelectorAll('.delete-theme').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const themeId = btn.dataset.themeId;
-                    deleteTheme(themeId);
-                });
-            });
+//             // Add delete handlers
+//             container.querySelectorAll('.delete-theme').forEach(btn => {
+//                 btn.addEventListener('click', (e) => {
+//                     e.stopPropagation();
+//                     const themeId = btn.dataset.themeId;
+//                     deleteTheme(themeId);
+//                 });
+//             });
 
-        } catch (error) {
-            container.innerHTML = '<div style="text-align: center; color: #DC2626; padding: 20px;">Failed to load themes</div>';
-        }
-    };
+//         } catch (error) {
+//             container.innerHTML = '<div style="text-align: center; color: #DC2626; padding: 20px;">Failed to load themes</div>';
+//         }
+//     };
 
-    // =========================
-    // Theme Actions
-    // =========================
+//     // =========================
+//     // Theme Actions
+//     // =========================
 
-    const applyPreset = async (preset) => {
-        if (!state.currentLocation) {
-            notification.show('No location detected', 'error');
-            return;
-        }
+//     const applyPreset = async (preset) => {
+//         if (!state.currentLocation) {
+//             notification.show('No location detected', 'error');
+//             return;
+//         }
 
-        try {
-            notification.show(`Creating ${preset.name} theme...`, 'info');
+//         try {
+//             notification.show(`Creating ${preset.name} theme...`, 'info');
             
-            const themeData = {
-                name: `${preset.name} Theme ${new Date().toLocaleDateString()}`,
-                ...preset,
-                locationId: state.currentLocation.locationId
-            };
+//             const themeData = {
+//                 name: `${preset.name} Theme ${new Date().toLocaleDateString()}`,
+//                 ...preset,
+//                 locationId: state.currentLocation.locationId
+//             };
 
-            const newTheme = await themeManager.createTheme(themeData, state.currentLocation.locationId);
-            await themeManager.applyTheme(newTheme._id, state.currentLocation.locationId);
+//             const newTheme = await themeManager.createTheme(themeData, state.currentLocation.locationId);
+//             await themeManager.applyTheme(newTheme._id, state.currentLocation.locationId);
             
-            notification.show(`${preset.name} theme applied!`, 'success');
-            await refreshData();
+//             notification.show(`${preset.name} theme applied!`, 'success');
+//             await refreshData();
             
-        } catch (error) {
-            notification.show(`Failed to apply preset: ${error.message}`, 'error');
-        }
-    };
+//         } catch (error) {
+//             notification.show(`Failed to apply preset: ${error.message}`, 'error');
+//         }
+//     };
 
-    const applyTheme = async (themeId) => {
-        if (!state.currentLocation) return;
+//     const applyTheme = async (themeId) => {
+//         if (!state.currentLocation) return;
 
-        try {
-            await themeManager.applyTheme(themeId, state.currentLocation.locationId);
-            notification.show('Theme applied successfully!', 'success');
-            await refreshData();
-        } catch (error) {
-            notification.show(`Failed to apply theme: ${error.message}`, 'error');
-        }
-    };
+//         try {
+//             await themeManager.applyTheme(themeId, state.currentLocation.locationId);
+//             notification.show('Theme applied successfully!', 'success');
+//             await refreshData();
+//         } catch (error) {
+//             notification.show(`Failed to apply theme: ${error.message}`, 'error');
+//         }
+//     };
 
-    const deleteTheme = async (themeId) => {
-        if (!confirm('Are you sure you want to delete this theme?')) return;
+//     const deleteTheme = async (themeId) => {
+//         if (!confirm('Are you sure you want to delete this theme?')) return;
 
-        try {
-            await themeManager.deleteTheme(themeId);
-            notification.show('Theme deleted successfully!', 'success');
-            await refreshData();
-        } catch (error) {
-            notification.show(`Failed to delete theme: ${error.message}`, 'error');
-        }
-    };
+//         try {
+//             await themeManager.deleteTheme(themeId);
+//             notification.show('Theme deleted successfully!', 'success');
+//             await refreshData();
+//         } catch (error) {
+//             notification.show(`Failed to delete theme: ${error.message}`, 'error');
+//         }
+//     };
 
-    const createCustomTheme = () => {
-        // Simple custom theme creation
-        const customTheme = {
-            name: `Custom Theme ${new Date().toLocaleDateString()}`,
-            sidebarGradientStart: '#8e2de2',
-            sidebarGradientEnd: '#4a00e0',
-            headerGradientStart: '#8e2de2',
-            headerGradientEnd: '#4a00e0',
-            textColor: '#ffffff',
-            backgroundColor: '#FFFFFF',
-            fontFamily: 'Roboto, sans-serif'
-        };
+//     const createCustomTheme = () => {
+//         // Simple custom theme creation
+//         const customTheme = {
+//             name: `Custom Theme ${new Date().toLocaleDateString()}`,
+//             sidebarGradientStart: '#8e2de2',
+//             sidebarGradientEnd: '#4a00e0',
+//             headerGradientStart: '#8e2de2',
+//             headerGradientEnd: '#4a00e0',
+//             textColor: '#ffffff',
+//             backgroundColor: '#FFFFFF',
+//             fontFamily: 'Roboto, sans-serif'
+//         };
 
-        applyPreset(customTheme);
-    };
+//         applyPreset(customTheme);
+//     };
 
-    const removeCurrentTheme = async () => {
-        if (!state.currentTheme) {
-            notification.show('No theme to remove', 'warning');
-            return;
-        }
+//     const removeCurrentTheme = async () => {
+//         if (!state.currentTheme) {
+//             notification.show('No theme to remove', 'warning');
+//             return;
+//         }
 
-        if (!confirm('Remove current theme from this location?')) return;
+//         if (!confirm('Remove current theme from this location?')) return;
 
-        try {
-            state.currentTheme = null;
-            themeCSSService.remove();
-            notification.show('Theme removed!', 'success');
-            await refreshData();
-        } catch (error) {
-            notification.show(`Failed to remove theme: ${error.message}`, 'error');
-        }
-    };
+//         try {
+//             state.currentTheme = null;
+//             themeCSSService.remove();
+//             notification.show('Theme removed!', 'success');
+//             await refreshData();
+//         } catch (error) {
+//             notification.show(`Failed to remove theme: ${error.message}`, 'error');
+//         }
+//     };
 
-    const refreshData = async () => {
-        notification.show('Refreshing data...', 'info');
+//     const refreshData = async () => {
+//         notification.show('Refreshing data...', 'info');
         
-        if (state.currentLocation) {
-            await Promise.all([
-                themeManager.loadThemes(state.currentLocation.locationId),
-                themeManager.loadCurrentTheme?.() // If you have this method
-            ]);
-            await updatePopupContent();
-        }
+//         if (state.currentLocation) {
+//             await Promise.all([
+//                 themeManager.loadThemes(state.currentLocation.locationId),
+//                 themeManager.loadCurrentTheme?.() // If you have this method
+//             ]);
+//             await updatePopupContent();
+//         }
         
-        notification.show('Data refreshed!', 'success');
-    };
+//         notification.show('Data refreshed!', 'success');
+//     };
 
-    // =========================
-    // Initialization
-    // =========================
+//     // =========================
+//     // Initialization
+//     // =========================
 
-    const initialize = async () => {
-        console.log('🎯 Initializing GHL Theme Builder...');
+//     const initialize = async () => {
+//         console.log('🎯 Initializing GHL Theme Builder...');
 
-        try {
-            // 1. Detect location
-            state.currentLocation = locationService.detect();
-            if (!state.currentLocation) {
-                console.log('❌ No GHL location detected');
-                return;
-            }
+//         try {
+//             // 1. Detect location
+//             state.currentLocation = locationService.detect();
+//             if (!state.currentLocation) {
+//                 console.log('❌ No GHL location detected');
+//                 return;
+//             }
 
-            // 2. Create UI immediately
-            createFloatingButton();
+//             // 2. Create UI immediately
+//             createFloatingButton();
             
-            // 3. Load existing theme
-            await themeManager.loadThemes(state.currentLocation.locationId);
+//             // 3. Load existing theme
+//             await themeManager.loadThemes(state.currentLocation.locationId);
             
-            // Find active theme
-            state.currentTheme = state.themes.find(theme => theme.isActive);
-            if (state.currentTheme) {
-                themeCSSService.apply(state.currentTheme);
-            }
+//             // Find active theme
+//             state.currentTheme = state.themes.find(theme => theme.isActive);
+//             if (state.currentTheme) {
+//                 themeCSSService.apply(state.currentTheme);
+//             }
 
-            state.isInitialized = true;
-            console.log('✅ GHL Theme Builder initialized successfully!');
+//             state.isInitialized = true;
+//             console.log('✅ GHL Theme Builder initialized successfully!');
             
-            notification.show('Theme Builder Ready!', 'success');
+//             notification.show('Theme Builder Ready!', 'success');
 
-        } catch (error) {
-            console.error('❌ Initialization failed:', error);
-            notification.show('Theme Builder failed to initialize', 'error');
-        }
-    };
+//         } catch (error) {
+//             console.error('❌ Initialization failed:', error);
+//             notification.show('Theme Builder failed to initialize', 'error');
+//         }
+//     };
 
-    // Multiple initialization strategies
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initialize);
-    } else {
-        initialize();
-    }
+//     // Multiple initialization strategies
+//     if (document.readyState === 'loading') {
+//         document.addEventListener('DOMContentLoaded', initialize);
+//     } else {
+//         initialize();
+//     }
 
-    // Fallback initialization
-    setTimeout(initialize, 1000);
-    window.addEventListener('load', initialize);
+//     // Fallback initialization
+//     setTimeout(initialize, 1000);
+//     window.addEventListener('load', initialize);
 
-    // Export to global scope for debugging
-    window.GHLThemeBuilder = {
-        init: initialize,
-        refresh: refreshData,
-        open: openPopup,
-        close: closePopup,
-        state: state
-    };
+//     // Export to global scope for debugging
+//     window.GHLThemeBuilder = {
+//         init: initialize,
+//         refresh: refreshData,
+//         open: openPopup,
+//         close: closePopup,
+//         state: state
+//     };
 
-})();
+// })();
 
 
