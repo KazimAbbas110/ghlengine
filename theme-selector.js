@@ -5684,6 +5684,66 @@
         //             this.showNotification(errorMsg, 'error');
         //         });
         // },
+// openCustomizer() {
+//     if (!state.currentLocation) {
+//         uiService.showNotification('Cannot create theme: No location detected.', 'error');
+//         return;
+//     }
+
+//     // Generate a unique theme name
+//     const themeName = `Custom Theme ${new Date().toLocaleDateString()} ${Math.floor(Math.random() * 1000)}`;
+
+//     // Random color generator
+//     const getRandomColor = () => {
+//         const letters = '0123456789ABCDEF';
+//         let color = '#';
+//         for (let i = 0; i < 6; i++) {
+//             color += letters[Math.floor(Math.random() * 16)];
+//         }
+//         return color;
+//     };
+
+//     // Random gradient presets
+//     const GRADIENTS = [
+//         { start: '#8e2de2', end: '#4a00e0' },
+//         { start: '#00c6ff', end: '#0072ff' },
+//         { start: '#43e97b', end: '#38f9d7' },
+//         { start: '#f7971e', end: '#ffd200' },
+//         { start: '#ff5f6d', end: '#ffc371' },
+//         { start: '#f00000', end: '#dc281e' }
+//     ];
+//     const randGradient = GRADIENTS[Math.floor(Math.random() * GRADIENTS.length)];
+
+//     // Build complete theme object
+//     const customThemeData = {
+//         name: themeName,
+//         description: 'Custom theme created via Theme Builder',
+//         textColor: getRandomColor(),
+//         backgroundColor: getRandomColor(),
+//         fontFamily: 'Roboto, sans-serif',
+//         sidebarGradientStart: randGradient.start,
+//         sidebarGradientEnd: randGradient.end,
+//         headerGradientStart: randGradient.start,
+//         headerGradientEnd: randGradient.end
+//     };
+
+//     // Create theme via themeManager
+//     themeManager.createCustomTheme(customThemeData)
+//         .then((createdTheme) => {
+//             uiService.showNotification(`🎨 "${createdTheme.name}" created and applied!`, 'success');
+//             uiService.updatePopupContent();
+//         })
+//         .catch((error) => {
+//             let errorMsg = `Failed to create theme: ${error.message}`;
+//             if (error.message.includes('400')) {
+//                 errorMsg = 'Invalid theme data. Please check theme values.';
+//             }
+//             uiService.showNotification(errorMsg, 'error');
+//         });
+// },
+
+
+
 openCustomizer() {
     if (!state.currentLocation) {
         uiService.showNotification('Cannot create theme: No location detected.', 'error');
@@ -5703,7 +5763,7 @@ openCustomizer() {
         return color;
     };
 
-    // Random gradient presets
+    // Gradient presets
     const GRADIENTS = [
         { start: '#8e2de2', end: '#4a00e0' },
         { start: '#00c6ff', end: '#0072ff' },
@@ -5712,7 +5772,9 @@ openCustomizer() {
         { start: '#ff5f6d', end: '#ffc371' },
         { start: '#f00000', end: '#dc281e' }
     ];
-    const randGradient = GRADIENTS[Math.floor(Math.random() * GRADIENTS.length)];
+
+    // Pick a random gradient safely
+    const randGradient = GRADIENTS[Math.floor(Math.random() * GRADIENTS.length)] || { start: '#8e2de2', end: '#4a00e0' };
 
     // Build complete theme object
     const customThemeData = {
@@ -5721,10 +5783,10 @@ openCustomizer() {
         textColor: getRandomColor(),
         backgroundColor: getRandomColor(),
         fontFamily: 'Roboto, sans-serif',
-        sidebarGradientStart: randGradient.start,
-        sidebarGradientEnd: randGradient.end,
-        headerGradientStart: randGradient.start,
-        headerGradientEnd: randGradient.end
+        sidebarGradientStart: randGradient?.start || '#8e2de2',
+        sidebarGradientEnd: randGradient?.end || '#4a00e0',
+        headerGradientStart: randGradient?.start || '#8e2de2',
+        headerGradientEnd: randGradient?.end || '#4a00e0'
     };
 
     // Create theme via themeManager
@@ -5734,8 +5796,9 @@ openCustomizer() {
             uiService.updatePopupContent();
         })
         .catch((error) => {
-            let errorMsg = `Failed to create theme: ${error.message}`;
-            if (error.message.includes('400')) {
+            console.error('Theme creation error:', error);
+            let errorMsg = `Failed to create theme: ${error.message || error}`;
+            if (error.message && error.message.includes('400')) {
                 errorMsg = 'Invalid theme data. Please check theme values.';
             }
             uiService.showNotification(errorMsg, 'error');
