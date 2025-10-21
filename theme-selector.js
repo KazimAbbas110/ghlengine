@@ -2196,7 +2196,7 @@
 
 /* =========================
    Professional GHL Theme Builder
-   Complete Multi-Page Support
+   Debug Version - Find Correct Selectors
 ========================= */
 
 (function(){
@@ -2205,12 +2205,12 @@
     // =========================
     const CONFIG = {
         BTN_ID: "ghl-theme-builder-btn",
-        POPUP_ID: "ghl-theme-builder-popup",
+        POPUP_ID: "ghl-theme-builder-popup", 
         STYLE_ID: "ghl-theme-style",
         PREVIEW_STYLE_ID: "ghl-theme-preview",
         BACKEND_API: "https://ghlengine-production.up.railway.app/api",
         AUTH_TOKEN: "110",
-        VERSION: "4.0.0"
+        VERSION: "4.1.0"
     };
 
     // =========================
@@ -2227,19 +2227,19 @@
         customTheme: {
             name: "",
             // Background Colors
-            sidebarContainerBackground: "#ffffff",
-            sidebarHeaderBackground: "#ffffff",
+            sidebarContainerBackground: "#1e40af",
+            sidebarHeaderBackground: "#1e3a8a", 
             locationSwitcherBackground: "#ffffff",
-            searchBarBackground: "#ffffff", 
+            searchBarBackground: "#ffffff",
             quickActionsBackground: "#ffffff",
             backButtonBackground: "#ffffff",
             cardHeaderBackground: "#000000",
             wrapperContainerBackground: "#ffffff",
             
             // Text Colors
-            menuTextColor: "#000000",
+            menuTextColor: "#ffffff",
             locationSwitcherTextColor: "#000000",
-            searchBarPlaceholderColor: "#000000",
+            searchBarPlaceholderColor: "#000000", 
             backButtonTextColor: "#000000",
             dividerColor: "#000000",
             cursorTextColor: "#000000",
@@ -2247,7 +2247,7 @@
             textMediumColor: "#ffffff",
             
             // Active States
-            activeMenuItemBackground: "rgb(253,250,250)"
+            activeMenuItemBackground: "rgb(59, 130, 246)"
         }
     };
 
@@ -2258,7 +2258,6 @@
         extractLocationIdFromURL() {
             try {
                 const currentURL = window.location.href;
-                // Match various GHL URL patterns
                 const patterns = [
                     /\/location\/([^\/]+)\/launchpad/,
                     /\/location\/([^\/]+)\/dashboard/,
@@ -2296,14 +2295,7 @@
 
         getCurrentLocationName() {
             try {
-                const selectors = [
-                    '.hl_switcher-loc-name',
-                    '[data-location-name]',
-                    '.location-name',
-                    '.current-location',
-                    '.hl-text-lg'
-                ];
-
+                const selectors = ['.hl_switcher-loc-name', '[data-location-name]'];
                 for (let selector of selectors) {
                     const element = document.querySelector(selector);
                     if (element && element.textContent) {
@@ -2321,40 +2313,142 @@
     };
 
     // =========================
-    // Access Control Service
+    // CSS Debug Service - FIND CORRECT SELECTORS
     // =========================
-    const accessService = {
-        async checkThemeBuilderAccess() {
-            try {
-                const currentLocation = urlLocationService.getCurrentLocation();
-                if (!currentLocation || !currentLocation.locationId) {
-                    throw new Error('Could not detect current GHL location from URL');
+    const cssDebugService = {
+        // Test different selector patterns
+        testSelectors() {
+            console.log('🔍 Testing CSS Selectors...');
+            
+            const testSelectors = [
+                // Sidebar container
+                '.transition-slowest .flex-col > .overflow-hidden',
+                '.flex-col > .overflow-hidden',
+                '.overflow-hidden',
+                '[class*="overflow-hidden"]',
+                '.sidebar-container',
+                '[data-testid*="sidebar"]',
+                '.bg-sidebar',
+                
+                // Sidebar header  
+                '.sidebar-v2-location .hl_header .container-fluid',
+                '.hl_header .container-fluid',
+                '.hl_header',
+                '.sidebar-header',
+                '[class*="header"] .container-fluid',
+                
+                // Menu items
+                '.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title',
+                '.nav-title',
+                '[class*="nav-title"]',
+                '.hl_nav-header .nav-title',
+                
+                // Location switcher
+                '.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2',
+                '#location-switcher-sidbar-v2',
+                '[id*="location-switcher"]',
+                '.hl_switcher-loc-name',
+                
+                // Search bar
+                '.sidebar-v2-location #sidebar-v2 #globalSearchOpener',
+                '#globalSearchOpener',
+                '[id*="search"]',
+                '.search-placeholder'
+            ];
+
+            testSelectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                if (elements.length > 0) {
+                    console.log(`✅ Found ${elements.length} element(s) for: ${selector}`);
+                    elements.forEach((el, index) => {
+                        console.log(`   Element ${index + 1}:`, el);
+                        console.log(`   Computed background:`, window.getComputedStyle(el).backgroundColor);
+                        console.log(`   Computed color:`, window.getComputedStyle(el).color);
+                    });
+                } else {
+                    console.log(`❌ No elements found for: ${selector}`);
                 }
+            });
 
-                return {
-                    permitted: true,
-                    location: currentLocation,
-                    accessInfo: {
-                        themeBuilderAccess: true,
-                        userId: CONFIG.AUTH_TOKEN,
-                        companyId: "default-company"
-                    }
-                };
-
-            } catch (error) {
-                console.error('❌ Access check failed:', error);
-                return {
-                    permitted: false,
-                    location: null,
-                    accessInfo: null,
-                    error: error.message
-                };
+            // Also log the entire body to find unique classes/IDs
+            console.log('📋 All unique classes in body:');
+            const allElements = document.body.getElementsByTagName('*');
+            const classes = new Set();
+            for (let element of allElements) {
+                if (element.className) {
+                    const classList = element.className.split(' ');
+                    classList.forEach(className => classes.add(className));
+                }
             }
+            console.log(Array.from(classes).filter(cls => 
+                cls.includes('sidebar') || 
+                cls.includes('nav') || 
+                cls.includes('header') || 
+                cls.includes('menu') ||
+                cls.includes('location') ||
+                cls.includes('search') ||
+                cls.includes('background') ||
+                cls.includes('bg-')
+            ));
+        },
+
+        // Apply test styles to find working selectors
+        applyTestStyles() {
+            const testCSS = `
+                /* Test styles to identify working selectors */
+                .transition-slowest .flex-col > .overflow-hidden {
+                    background-color: #ff0000 !important;
+                    border: 2px solid yellow !important;
+                }
+                
+                .hl_header .container-fluid {
+                    background-color: #00ff00 !important;
+                    border: 2px solid blue !important;
+                }
+                
+                .nav-title {
+                    color: #ff00ff !important;
+                    font-weight: bold !important;
+                }
+                
+                #location-switcher-sidbar-v2 {
+                    background-color: #ffff00 !important;
+                    border: 2px solid red !important;
+                }
+                
+                #globalSearchOpener {
+                    background-color: #00ffff !important;
+                    border: 2px solid green !important;
+                }
+                
+                .hl_switcher-loc-name {
+                    color: #ff0000 !important;
+                    font-weight: bold !important;
+                }
+            `;
+            
+            const style = document.createElement('style');
+            style.id = 'ghl-test-styles';
+            style.textContent = testCSS;
+            document.head.appendChild(style);
+            
+            console.log('🎨 Applied test styles with bright colors. Check which elements change!');
+            console.log('🔴 Red = Sidebar container');
+            console.log('🟢 Green = Header');
+            console.log('🟣 Purple = Menu text');
+            console.log('🟡 Yellow = Location switcher');
+            console.log('🔵 Cyan = Search bar');
+            console.log('🔴 Red text = Location name');
+        },
+
+        removeTestStyles() {
+            const testStyle = document.getElementById('ghl-test-styles');
+            if (testStyle) testStyle.remove();
         }
     };
 
     // =========================
-    // API Service - Enhanced for Complete Theme Data
+    // API Service
     // =========================
     const apiService = {
         async call(endpoint, options = {}) {
@@ -2389,7 +2483,6 @@
             }
         },
 
-        // FIXED: Complete theme creation with all properties
         async createTheme(themeData) {
             const timestamp = new Date().getTime();
             const uniqueName = `${themeData.name} ${timestamp}`;
@@ -2429,23 +2522,18 @@
                 isGlobal: false
             };
 
-            console.log('🎨 Creating complete theme:', validatedData.name);
+            console.log('🎨 Creating theme:', validatedData.name);
             return this.call('/themes', {
                 method: 'POST',
                 body: validatedData
             });
         },
 
-        // Validate and convert to hex format
         validateHexColor(color) {
             if (!color) return '#FFFFFF';
-            
-            // If it's already hex, return it
             if (color.startsWith('#')) {
                 return color.length === 7 ? color : '#FFFFFF';
             }
-            
-            // If it's rgba, convert to hex
             if (color.startsWith('rgba')) {
                 const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
                 if (match) {
@@ -2455,18 +2543,6 @@
                     return `#${r}${g}${b}`.toUpperCase();
                 }
             }
-            
-            // If it's rgb, convert to hex
-            if (color.startsWith('rgb')) {
-                const match = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
-                if (match) {
-                    const r = parseInt(match[1]).toString(16).padStart(2, '0');
-                    const g = parseInt(match[2]).toString(16).padStart(2, '0');
-                    const b = parseInt(match[3]).toString(16).padStart(2, '0');
-                    return `#${r}${g}${b}`.toUpperCase();
-                }
-            }
-            
             return '#FFFFFF';
         },
 
@@ -2513,7 +2589,7 @@
     };
 
     // =========================
-    // Theme CSS Service - COMPLETE GHL CLASSES
+    // Theme CSS Service - DYNAMIC SELECTOR FINDING
     // =========================
     const themeCSSService = {
         generateCSS(theme, isPreview = false) {
@@ -2521,119 +2597,109 @@
             
             const comment = isPreview ? 'PREVIEW' : 'ACTIVE';
             
+            // Use more aggressive selectors that should work
             return `
-/* GHL Theme Builder v${CONFIG.VERSION} - ${comment} */
-/* Applied to Location: ${state.currentLocation?.locationId} */
+/* GHL Theme Builder v${CONFIG.VERSION} - ${comment} - Dynamic Selectors */
 
-/* =========================
-   Sidebar Container
-========================= */
+/* Sidebar Background - Multiple selector attempts */
+[class*="sidebar"], 
+[class*="Sidebar"],
+[data-testid*="sidebar"],
+.bg-sidebar,
 .transition-slowest .flex-col > .overflow-hidden {
     background-color: ${theme.sidebarContainerBackground} !important;
 }
 
-/* =========================
-   Sidebar Header
-========================= */
+/* Header Background */
+[class*="header"] .container-fluid,
+.hl_header .container-fluid,
 .sidebar-v2-location .hl_header .container-fluid {
     background-color: ${theme.sidebarHeaderBackground} !important;
 }
 
-/* =========================
-   Menu Text
-========================= */
-.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title {
-    color: ${theme.menuTextColor} !important;
-}
-
-.sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title {
-    color: ${theme.menuTextColor} !important;
-}
-
-.sidebar-v2-location #sidebar-v2 .menu-title {
-    color: ${theme.menuTextColor} !important;
-}
-
-.sidebar-v2-location #sidebar-v2 #backButtonv2 {
-    color: ${theme.backButtonTextColor} !important;
-}
-
+/* Menu Text Colors */
+[class*="nav-title"],
+.nav-title,
+.sidebar-v2-location #sidebar-v2 .hl_nav-header nav a .nav-title,
+.sidebar-v2-location #sidebar-v2 .hl_nav-settings nav a .nav-title,
+.sidebar-v2-location #sidebar-v2 .menu-title,
 .sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a .nav-title {
     color: ${theme.menuTextColor} !important;
 }
 
-.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a.active {
-    background-color: ${theme.activeMenuItemBackground} !important;
-}
-
-/* =========================
-   Location Switcher
-========================= */
-.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-name {
-    color: ${theme.locationSwitcherTextColor} !important;
-}
-
-.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city {
-    color: ${theme.locationSwitcherTextColor} !important;
-}
-
+/* Location Switcher */
+#location-switcher-sidbar-v2,
+[id*="location-switcher"],
 .sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 {
     background-color: ${theme.locationSwitcherBackground} !important;
 }
 
-/* =========================
-   Search Bar
-========================= */
-.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-placeholder {
-    color: ${theme.searchBarPlaceholderColor} !important;
+/* Location Text */
+.hl_switcher-loc-name,
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-name,
+.sidebar-v2-location #sidebar-v2 #location-switcher-sidbar-v2 .hl_switcher-loc-city {
+    color: ${theme.locationSwitcherTextColor} !important;
 }
 
+/* Search Bar */
+#globalSearchOpener,
+[class*="search"],
 .sidebar-v2-location #sidebar-v2 #globalSearchOpener {
     background-color: ${theme.searchBarBackground} !important;
 }
 
-/* =========================
-   Quick Actions & Buttons
-========================= */
+/* Search Placeholder */
+.search-placeholder,
+.sidebar-v2-location #sidebar-v2 #globalSearchOpener .search-placeholder {
+    color: ${theme.searchBarPlaceholderColor} !important;
+}
+
+/* Active Menu Item */
+[class*="active"],
+.sidebar-v2-location #sidebar-v2 .hl_nav-header-without-footer nav a.active {
+    background-color: ${theme.activeMenuItemBackground} !important;
+}
+
+/* Quick Actions */
+#quickActions,
 .sidebar-v2-location #sidebar-v2 #quickActions {
     background-color: ${theme.quickActionsBackground} !important;
 }
 
+/* Back Button */
+#backButtonv2,
 .sidebar-v2-location #sidebar-v2 #backButtonv2 {
     background-color: ${theme.backButtonBackground} !important;
+    color: ${theme.backButtonTextColor} !important;
 }
 
-/* =========================
-   Divider & Cursor
-========================= */
-.divider {
-    color: ${theme.dividerColor} !important;
-}
-
-.cursor-text {
-    color: ${theme.cursorTextColor} !important;
-}
-
-/* =========================
-   Card Component
-========================= */
-.hl-card .hl-card-header {
+/* Card Header */
+.hl-card .hl-card-header,
+[class*="card-header"] {
     background-color: ${theme.cardHeaderBackground} !important;
     color: ${theme.cardHeaderTextColor} !important;
 }
 
-/* =========================
-   Text Styles
-========================= */
-.hl-text-md-medium {
+/* Medium Text */
+.hl-text-md-medium,
+[class*="text-md"] {
     color: ${theme.textMediumColor} !important;
 }
 
-/* =========================
-   Wrapper / Container
-========================= */
-.hl-wrapper-container {
+/* Wrapper Container */
+.hl-wrapper-container,
+[class*="wrapper"] {
     background-color: ${theme.wrapperContainerBackground} !important;
+}
+
+/* Divider */
+.divider {
+    color: ${theme.dividerColor} !important;
+}
+
+/* Cursor Text */
+.cursor-text {
+    color: ${theme.cursorTextColor} !important;
 }
             `;
         },
@@ -2646,7 +2712,13 @@
                 style.id = CONFIG.STYLE_ID;
                 style.textContent = css;
                 document.head.appendChild(style);
-                console.log('✅ Complete theme CSS applied to all pages');
+                console.log('✅ Theme CSS applied with dynamic selectors');
+                
+                // Log which elements were affected
+                setTimeout(() => {
+                    console.log('🔍 Checking applied styles...');
+                    this.logAppliedStyles();
+                }, 1000);
             }
         },
 
@@ -2669,11 +2741,32 @@
         removePreviewCSS() {
             const previewStyle = document.getElementById(CONFIG.PREVIEW_STYLE_ID);
             if (previewStyle) previewStyle.remove();
+        },
+
+        logAppliedStyles() {
+            const keyElements = [
+                { selector: '[class*="sidebar"]', name: 'Sidebar' },
+                { selector: '[class*="header"] .container-fluid', name: 'Header' },
+                { selector: '.nav-title', name: 'Menu Text' },
+                { selector: '#location-switcher-sidbar-v2', name: 'Location Switcher' },
+                { selector: '#globalSearchOpener', name: 'Search Bar' }
+            ];
+
+            keyElements.forEach(item => {
+                const element = document.querySelector(item.selector);
+                if (element) {
+                    const bgColor = window.getComputedStyle(element).backgroundColor;
+                    const textColor = window.getComputedStyle(element).color;
+                    console.log(`🎯 ${item.name}: BG=${bgColor}, Text=${textColor}`);
+                } else {
+                    console.log(`❌ ${item.name}: Element not found with selector: ${item.selector}`);
+                }
+            });
         }
     };
 
     // =========================
-    // Theme Manager - Complete Implementation
+    // Theme Manager
     // =========================
     const themeManager = {
         async loadThemes() {
@@ -2713,7 +2806,6 @@
                 
                 console.log(`🔄 Applying theme ${themeId} to location ${state.currentLocation.locationId}`);
                 
-                // Get theme details
                 const themeResponse = await apiService.getThemeById(themeId);
                 let theme = null;
                 
@@ -2723,12 +2815,11 @@
                 
                 if (!theme) throw new Error('Theme not found in database');
 
-                // Apply theme to location
                 const applyResponse = await apiService.applyThemeToLocation(themeId, state.currentLocation.locationId);
                 if (applyResponse && applyResponse.success) {
                     state.currentTheme = theme;
                     themeCSSService.applyThemeCSS(theme);
-                    console.log(`✅ Complete theme "${theme.name}" applied to all pages`);
+                    console.log(`✅ Theme "${theme.name}" applied`);
                     return true;
                 } else {
                     throw new Error(applyResponse?.message || 'Failed to apply theme');
@@ -2749,7 +2840,7 @@
                 if (removeResponse && removeResponse.success) {
                     state.currentTheme = null;
                     themeCSSService.removeThemeCSS();
-                    console.log('✅ Theme removed from all pages');
+                    console.log('✅ Theme removed');
                     return true;
                 } else {
                     throw new Error(removeResponse?.message || 'Failed to remove theme');
@@ -2778,7 +2869,7 @@
                 if (theme && theme._id) {
                     state.currentTheme = theme;
                     themeCSSService.applyThemeCSS(theme);
-                    console.log(`✅ Current theme loaded for all pages: ${theme.name}`);
+                    console.log(`✅ Current theme loaded: ${theme.name}`);
                 } else {
                     state.currentTheme = null;
                     themeCSSService.removeThemeCSS();
@@ -2795,7 +2886,7 @@
             try {
                 if (!state.currentLocation) throw new Error('No current location detected');
 
-                console.log('🔄 Creating complete custom theme:', themeData.name);
+                console.log('🔄 Creating custom theme:', themeData.name);
 
                 const completeThemeData = {
                     ...themeData,
@@ -2810,9 +2901,8 @@
                 }
 
                 if (createdTheme && createdTheme._id) {
-                    console.log(`✅ Complete custom theme created: ${createdTheme.name}`);
+                    console.log(`✅ Custom theme created: ${createdTheme.name}`);
                     
-                    // Reload themes and apply the new one
                     await this.loadThemes();
                     await this.applyTheme(createdTheme._id);
                     
@@ -2828,7 +2918,7 @@
     };
 
     // =========================
-    // Professional UI Service - Complete Theme Builder
+    // UI Service with Debug Tools
     // =========================
     const uiService = {
         createFloatingButton() {
@@ -2887,6 +2977,7 @@
             if (state.popupRef) {
                 state.popupRef.style.display = 'none';
                 themeCSSService.removePreviewCSS();
+                cssDebugService.removeTestStyles();
             }
         },
 
@@ -2932,20 +3023,18 @@
             if (!state.popupRef) return;
 
             const currentLocationName = state.currentLocation?.name || 'Detecting...';
-            const currentLocationId = state.currentLocation?.locationId || 'Not detected';
             const currentThemeName = state.currentTheme?.name || 'None';
 
             state.popupRef.innerHTML = `
                 <div style="margin-bottom: 16px;">
                     <h3 style="margin: 0 0 6px 0; color: #1f2937; font-size: 16px; font-weight: 600;">
-                        🎨 Complete Theme Builder
+                        🎨 Theme Builder - DEBUG MODE
                     </h3>
                     <div style="color: #6b7280; font-size: 11px; line-height: 1.4; background: #f8fafc; padding: 8px; border-radius: 4px;">
                         <div><strong>Location:</strong> ${currentLocationName}</div>
-                        <div><strong>Location ID:</strong> ${currentLocationId}</div>
                         <div><strong>Current Theme:</strong> <span style="color: ${state.currentTheme ? '#10B981' : '#DC2626'}">${currentThemeName}</span></div>
-                        <div style="margin-top: 4px; font-size: 10px; color: #059669;">
-                            ✅ Themes apply to ALL sub-account pages
+                        <div style="margin-top: 4px; font-size: 10px; color: #DC2626;">
+                            🔧 Debug Mode Active - Check Console for CSS Issues
                         </div>
                     </div>
                 </div>
@@ -2956,87 +3045,32 @@
                     </h4>
                     <div id="theme-buttons-container" style="min-height: 80px; max-height: 150px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px; padding: 8px; background: #fafafa;">
                         <div style="text-align: center; color: #6b7280; padding: 10px; font-size: 12px;">
-                            Loading themes from database...
+                            Loading themes...
                         </div>
                     </div>
                 </div>
 
                 <div style="border-top: 1px solid #e5e7eb; padding-top: 16px;">
                     <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 14px; font-weight: 600;">
-                        Create Complete Theme
+                        Debug Tools
                     </h4>
                     
-                    <div style="margin-bottom: 12px;">
-                        <label style="display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px;">Theme Name *</label>
-                        <input type="text" id="custom-theme-name" 
-                               placeholder="Enter unique theme name" 
-                               style="width: 100%; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;"
-                               value="My Complete Theme">
-                    </div>
-
-                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px; padding: 12px; background: #fafafa; margin-bottom: 12px;">
-                        <h5 style="margin: 0 0 8px 0; color: #374151; font-size: 12px; font-weight: 600;">Background Colors</h5>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                            <div>
-                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Sidebar Container</label>
-                                <input type="color" id="sidebar-container-bg" value="${state.customTheme.sidebarContainerBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Sidebar Header</label>
-                                <input type="color" id="sidebar-header-bg" value="${state.customTheme.sidebarHeaderBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Location Switcher</label>
-                                <input type="color" id="location-switcher-bg" value="${state.customTheme.locationSwitcherBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Search Bar</label>
-                                <input type="color" id="search-bar-bg" value="${state.customTheme.searchBarBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
-                            </div>
-                        </div>
-
-                        <h5 style="margin: 10px 0 8px 0; color: #374151; font-size: 12px; font-weight: 600;">Text Colors</h5>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                            <div>
-                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Menu Text</label>
-                                <input type="color" id="menu-text-color" value="${state.customTheme.menuTextColor}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Location Text</label>
-                                <input type="color" id="location-text-color" value="${state.customTheme.locationSwitcherTextColor}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Search Placeholder</label>
-                                <input type="color" id="search-placeholder-color" value="${state.customTheme.searchBarPlaceholderColor}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Card Header Text</label>
-                                <input type="color" id="card-header-text-color" value="${state.customTheme.cardHeaderTextColor}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
-                            </div>
-                        </div>
-
-                        <h5 style="margin: 10px 0 8px 0; color: #374151; font-size: 12px; font-weight: 600;">Additional Colors</h5>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <div>
-                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Card Header BG</label>
-                                <input type="color" id="card-header-bg" value="${state.customTheme.cardHeaderBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 10px; color: #6b7280; margin-bottom: 2px;">Wrapper Container</label>
-                                <input type="color" id="wrapper-container-bg" value="${state.customTheme.wrapperContainerBackground}" style="width: 100%; height: 25px; border: 1px solid #d1d5db; border-radius: 3px;">
-                            </div>
-                        </div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
+                        <button id="test-selectors" 
+                                style="flex: 1; padding: 8px 12px; background: #F59E0B; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
+                            🔍 Test Selectors
+                        </button>
+                        <button id="test-styles" 
+                                style="flex: 1; padding: 8px 12px; background: #8B5CF6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
+                            🎨 Test Styles
+                        </button>
+                        <button id="create-theme" 
+                                style="flex: 1; padding: 8px 12px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
+                            ✅ Create Theme
+                        </button>
                     </div>
 
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <button id="preview-theme" 
-                                style="flex: 1; padding: 8px 12px; background: #F59E0B; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
-                            👀 Preview
-                        </button>
-                        <button id="create-theme" 
-                                style="flex: 1; padding: 8px 12px; background: #8B5CF6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
-                            🎨 Create & Apply
-                        </button>
                         ${state.currentTheme ? `
                         <button id="remove-theme" 
                                 style="flex: 1; padding: 8px 12px; background: #DC2626; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
@@ -3044,7 +3078,7 @@
                         </button>
                         ` : ''}
                         <button id="refresh-data" 
-                                style="flex: 1; padding: 8px 12px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
+                                style="flex: 1; padding: 8px 12px; background: #2563EB; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
                             🔄 Refresh
                         </button>
                         <button id="close-popup" 
@@ -3060,83 +3094,49 @@
         },
 
         attachPopupEventListeners() {
-            const previewBtn = document.getElementById('preview-theme');
+            const testSelectorsBtn = document.getElementById('test-selectors');
+            const testStylesBtn = document.getElementById('test-styles');
             const createBtn = document.getElementById('create-theme');
             const closeBtn = document.getElementById('close-popup');
             const removeBtn = document.getElementById('remove-theme');
             const refreshBtn = document.getElementById('refresh-data');
 
-            if (previewBtn) previewBtn.addEventListener('click', () => this.previewCustomTheme());
-            if (createBtn) createBtn.addEventListener('click', () => this.createCustomTheme());
+            if (testSelectorsBtn) testSelectorsBtn.addEventListener('click', () => cssDebugService.testSelectors());
+            if (testStylesBtn) testStylesBtn.addEventListener('click', () => cssDebugService.applyTestStyles());
+            if (createBtn) createBtn.addEventListener('click', () => this.createDebugTheme());
             if (closeBtn) closeBtn.addEventListener('click', () => this.closePopup());
             if (removeBtn) removeBtn.addEventListener('click', () => this.confirmRemoveTheme());
             if (refreshBtn) refreshBtn.addEventListener('click', () => this.refreshData());
-
-            // Real-time preview on color changes
-            const colorInputs = [
-                'sidebar-container-bg', 'sidebar-header-bg', 'location-switcher-bg', 'search-bar-bg',
-                'menu-text-color', 'location-text-color', 'search-placeholder-color', 'card-header-text-color',
-                'card-header-bg', 'wrapper-container-bg'
-            ];
-            colorInputs.forEach(id => {
-                const input = document.getElementById(id);
-                if (input) {
-                    input.addEventListener('input', () => this.updateCustomThemeFromInputs());
-                }
-            });
         },
 
-        updateCustomThemeFromInputs() {
-            const nameInput = document.getElementById('custom-theme-name');
-            
-            // Background Colors
-            const sidebarContainerBg = document.getElementById('sidebar-container-bg');
-            const sidebarHeaderBg = document.getElementById('sidebar-header-bg');
-            const locationSwitcherBg = document.getElementById('location-switcher-bg');
-            const searchBarBg = document.getElementById('search-bar-bg');
-            const cardHeaderBg = document.getElementById('card-header-bg');
-            const wrapperContainerBg = document.getElementById('wrapper-container-bg');
-            
-            // Text Colors
-            const menuTextColor = document.getElementById('menu-text-color');
-            const locationTextColor = document.getElementById('location-text-color');
-            const searchPlaceholderColor = document.getElementById('search-placeholder-color');
-            const cardHeaderTextColor = document.getElementById('card-header-text-color');
-
-            if (nameInput) state.customTheme.name = nameInput.value;
-            
-            // Backgrounds
-            if (sidebarContainerBg) state.customTheme.sidebarContainerBackground = sidebarContainerBg.value;
-            if (sidebarHeaderBg) state.customTheme.sidebarHeaderBackground = sidebarHeaderBg.value;
-            if (locationSwitcherBg) state.customTheme.locationSwitcherBackground = locationSwitcherBg.value;
-            if (searchBarBg) state.customTheme.searchBarBackground = searchBarBg.value;
-            if (cardHeaderBg) state.customTheme.cardHeaderBackground = cardHeaderBg.value;
-            if (wrapperContainerBg) state.customTheme.wrapperContainerBackground = wrapperContainerBg.value;
-            
-            // Text Colors
-            if (menuTextColor) state.customTheme.menuTextColor = menuTextColor.value;
-            if (locationTextColor) state.customTheme.locationSwitcherTextColor = locationTextColor.value;
-            if (searchPlaceholderColor) state.customTheme.searchBarPlaceholderColor = searchPlaceholderColor.value;
-            if (cardHeaderTextColor) state.customTheme.cardHeaderTextColor = cardHeaderTextColor.value;
-        },
-
-        previewCustomTheme() {
-            this.updateCustomThemeFromInputs();
-            themeCSSService.previewThemeCSS(state.customTheme);
-            this.showNotification('Complete theme preview active - applies to ALL pages', 'info');
-        },
-
-        async createCustomTheme() {
-            this.updateCustomThemeFromInputs();
-
-            if (!state.customTheme.name.trim()) {
-                this.showNotification('Please enter a theme name', 'error');
-                return;
-            }
+        async createDebugTheme() {
+            // Create a theme with obvious colors for testing
+            const debugTheme = {
+                name: "Debug Theme",
+                sidebarContainerBackground: "#1e40af", // Bright blue
+                sidebarHeaderBackground: "#1e3a8a", // Dark blue
+                locationSwitcherBackground: "#fbbf24", // Bright yellow
+                searchBarBackground: "#10b981", // Bright green
+                quickActionsBackground: "#8b5cf6", // Purple
+                backButtonBackground: "#ef4444", // Red
+                cardHeaderBackground: "#000000", // Black
+                wrapperContainerBackground: "#ffffff", // White
+                
+                menuTextColor: "#ffffff", // White
+                locationSwitcherTextColor: "#000000", // Black  
+                searchBarPlaceholderColor: "#000000", // Black
+                backButtonTextColor: "#ffffff", // White
+                dividerColor: "#000000", // Black
+                cursorTextColor: "#000000", // Black
+                cardHeaderTextColor: "#ffffff", // White
+                textMediumColor: "#ffffff", // White
+                
+                activeMenuItemBackground: "rgb(59, 130, 246)" // Blue
+            };
 
             try {
-                await themeManager.createCustomTheme(state.customTheme);
-                this.showNotification('Complete theme created and applied to ALL pages!', 'success');
+                await themeManager.createCustomTheme(debugTheme);
+                this.showNotification('Debug theme created! Check for bright colors on the page.', 'success');
                 this.closePopup();
             } catch (error) {
                 this.showNotification(`Failed to create theme: ${error.message}`, 'error');
@@ -3153,7 +3153,7 @@
                 if (state.themes.length === 0) {
                     container.innerHTML = `
                         <div style="text-align: center; color: #6b7280; padding: 20px; font-size: 11px;">
-                            No themes found in database. Create your first complete theme!
+                            No themes found. Create a debug theme first!
                         </div>
                     `;
                     return;
@@ -3176,7 +3176,6 @@
                     `;
                 }).join('');
 
-                // Add event listeners
                 container.querySelectorAll('.theme-item').forEach(item => {
                     const themeId = item.getAttribute('data-theme-id');
                     const theme = state.themes.find(t => t._id === themeId);
@@ -3184,7 +3183,7 @@
                     item.addEventListener('click', () => {
                         themeManager.applyTheme(themeId)
                             .then(() => {
-                                this.showNotification(`"${theme.name}" applied to ALL pages in ${state.currentLocation.name}!`, 'success');
+                                this.showNotification(`"${theme.name}" applied!`, 'success');
                                 this.updatePopupContent();
                             })
                             .catch(error => {
@@ -3203,12 +3202,12 @@
         },
 
         async refreshData() {
-            this.showNotification('Refreshing data from database...', 'info');
+            this.showNotification('Refreshing data...', 'info');
             try {
                 await themeManager.loadThemes();
                 await themeManager.loadCurrentTheme();
                 await this.updatePopupContent();
-                this.showNotification('Data refreshed successfully!', 'success');
+                this.showNotification('Data refreshed!', 'success');
             } catch (error) {
                 this.showNotification(`Refresh failed: ${error.message}`, 'error');
             }
@@ -3217,10 +3216,10 @@
         confirmRemoveTheme() {
             if (!state.currentTheme) return;
             
-            if (confirm(`Remove "${state.currentTheme.name}" from ALL pages in ${state.currentLocation.name}?`)) {
+            if (confirm(`Remove "${state.currentTheme.name}"?`)) {
                 themeManager.removeTheme()
                     .then(() => {
-                        this.showNotification('Theme removed from ALL pages!', 'success');
+                        this.showNotification('Theme removed!', 'success');
                         this.updatePopupContent();
                     })
                     .catch(error => {
@@ -3281,10 +3280,10 @@
             return;
         }
 
-        console.log(`🚀 Initializing Complete GHL Theme Builder v${CONFIG.VERSION}...`);
+        console.log(`🚀 Initializing GHL Theme Builder v${CONFIG.VERSION} - DEBUG MODE`);
+        console.log('🔧 Use the "Test Selectors" and "Test Styles" buttons to debug CSS issues');
 
         try {
-            // Get current location from any GHL page
             const currentLocation = urlLocationService.getCurrentLocation();
             if (!currentLocation || !currentLocation.locationId) {
                 console.log('❌ No GHL location detected in URL');
@@ -3293,7 +3292,6 @@
 
             state.currentLocation = currentLocation;
 
-            // Check access
             const accessCheck = await accessService.checkThemeBuilderAccess();
             if (!accessCheck.permitted) {
                 console.log('❌ Theme Builder access not permitted for this location');
@@ -3302,16 +3300,14 @@
 
             state.accessInfo = accessCheck.accessInfo;
 
-            // Load current theme and available themes
             await Promise.all([
                 themeManager.loadCurrentTheme(),
                 themeManager.loadThemes()
             ]);
 
-            // Create UI
             uiService.createFloatingButton();
             
-            console.log('✅ Complete Theme Builder initialized for ALL pages');
+            console.log('✅ Theme Builder initialized in DEBUG mode');
 
         } catch (error) {
             console.error('❌ Failed to initialize Theme Builder:', error);
@@ -3319,7 +3315,7 @@
     }
 
     // =========================
-    // Public API
+    // Public API with Debug Tools
     // =========================
     window.GHLThemeBuilder = {
         init: initializeThemeBuilder,
@@ -3329,15 +3325,27 @@
         getCurrentTheme: () => state.currentTheme,
         getCurrentLocation: () => state.currentLocation,
         getThemes: () => state.themes,
-        debug: () => console.log('Complete Theme Builder State:', state)
+        
+        // Debug tools
+        testSelectors: () => cssDebugService.testSelectors(),
+        testStyles: () => cssDebugService.applyTestStyles(),
+        removeTestStyles: () => cssDebugService.removeTestStyles(),
+        
+        debug: () => {
+            console.log('🔧 Theme Builder Debug Info:', {
+                state: state,
+                config: CONFIG,
+                currentURL: window.location.href
+            });
+        }
     };
 
-    // Auto-initialize on ALL GHL pages
+    // Auto-initialize
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeThemeBuilder);
     } else {
         initializeThemeBuilder();
     }
 
-    console.log(`🎨 Complete GHL Theme Builder v${CONFIG.VERSION} - Works on ALL Sub-Account Pages`);
+    console.log(`🎨 GHL Theme Builder v${CONFIG.VERSION} - Debug Mode Active`);
 })();
