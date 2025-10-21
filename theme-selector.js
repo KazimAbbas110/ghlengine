@@ -4556,7 +4556,7 @@
 
 
 
-<script>
+
 
 
 
@@ -5925,4 +5925,4 @@ openCustomizer() {
 
     console.log(`🎨 GHL Theme Builder v${CONFIG.VERSION} - Optimized with caching and API fixes`);
 })();
-</script>
+
