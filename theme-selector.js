@@ -6508,15 +6508,15 @@ const themeCSSService = {
         const defaultHeaderStart  = '#8e2de2';
         const defaultHeaderEnd    = '#4a00e0';
 
-        const variables = {
-            textColor: theme?.textColor || '#ffffff',
-            backgroundColor: theme?.backgroundColor || 'rgba(255, 255, 255, 0.33)',
-            fontFamily: theme?.fontFamily || 'Roboto, sans-serif',
-            sidebarGradientStart: (theme && theme.sidebarGradientStart) || defaultSidebarStart,
-            sidebarGradientEnd:   (theme && theme.sidebarGradientEnd)   || defaultSidebarEnd,
-            headerGradientStart:  (theme && theme.headerGradientStart)  || defaultHeaderStart,
-            headerGradientEnd:    (theme && theme.headerGradientEnd)    || defaultHeaderEnd
-        };
+        // const variables = {
+        //     textColor: theme?.textColor || '#ffffff',
+        //     backgroundColor: theme?.backgroundColor || 'rgba(255, 255, 255, 0.33)',
+        //     fontFamily: theme?.fontFamily || 'Roboto, sans-serif',
+        //     sidebarGradientStart: (theme && theme.sidebarGradientStart) || defaultSidebarStart,
+        //     sidebarGradientEnd:   (theme && theme.sidebarGradientEnd)   || defaultSidebarEnd,
+        //     headerGradientStart:  (theme && theme.headerGradientStart)  || defaultHeaderStart,
+        //     headerGradientEnd:    (theme && theme.headerGradientEnd)    || defaultHeaderEnd
+        // };
 
         // detect dashboard page (simple URL containment check)
         const isDashboard = typeof window !== 'undefined' && window.location && window.location.href.includes('/dashboard');
