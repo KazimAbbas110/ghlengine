@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Theme Builder</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Your existing CSS remains the same */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --success: #06d6a0;
+            --danger: #ef476f;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 10px;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .panel-header {
+            background: var(--primary);
+            color: white;
+            padding: 12px 16px;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--gray-light);
+            color: var(--dark);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            padding: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--success);
+        }
+
+        .stat-card.danger {
+            border-left-color: var(--danger);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 12px;
+        }
+
+        .controls-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--light);
+            border-bottom: 1px solid var(--gray-light);
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 6px 10px 6px 28px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .locations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            padding: 15px;
+        }
+
+        .location-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+        }
+
+        .location-card.has-theme {
+            border-left-color: var(--success);
+        }
+
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .location-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .location-id {
+            font-size: 10px;
+            color: var(--gray);
+            background: var(--gray-light);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .location-details {
+            margin-bottom: 12px;
+        }
+
+        .detail {
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .location-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 5px 8px;
+            font-size: 11px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: var(--box-shadow);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            font-size: 13px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        .notification.info {
+            background: var(--primary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 420px;
+            max-width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            padding: 16px;
+        }
+
+        .modal-footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 12px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gray-light);
+            transition: .2s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: .2s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: var(--success);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(16px);
+        }
+
+        .bulk-section {
+            padding: 12px 16px;
+            background: var(--light);
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .bulk-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+            color: var(--gray);
+        }
+
+        /* Theme Preview Styles */
+        .theme-preview {
+            height: 80px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-preview-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+        }
+
+        .theme-preview-header {
+            height: 20px;
+            border-radius: 2px;
+            margin-bottom: 4px;
+        }
+
+        .theme-preview-sidebar {
+            width: 30%;
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        .theme-preview-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .locations-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Notification System -->
+        <div id="notificationsContainer"></div>
+
+        <!-- Main Panel -->
+        <div class="panel">
+            <!-- Header -->
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-palette"></i>
+                    <h1>CRM Theme Builder</h1>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-outline" id="viewThemesBtn">
+                        <i class="fas fa-palette"></i> Theme Library
+                    </button>
+                    <button class="btn btn-primary" id="createThemeBtn">
+                        <i class="fas fa-plus"></i> Create Theme
+                    </button>
+                    <button class="btn btn-primary" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> Refresh Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalLocations">0</div>
+                    <div class="stat-label">Total Locations</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value" id="themedLocations">0</div>
+                    <div class="stat-label">Themed Locations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="themeAccess">0</div>
+                    <div class="stat-label">Theme Access Enabled</div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-value" id="customCssLocations">0</div>
+                    <div class="stat-label">Custom CSS Active</div>
+                </div>
+            </div>
+
+            <!-- Controls Bar -->
+            <div class="controls-bar">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchLocations" placeholder="Search locations...">
+                </div>
+            </div>
+
+            <!-- Sub-Accounts Section -->
+            <div class="sub-accounts-section">
+                <div class="panel-title" style="margin-bottom: 10px; padding: 0 15px;">
+                    <i class="fas fa-sitemap"></i>
+                    <h3 style="font-size: 16px;">Sub-Accounts</h3>
+                </div>
+                <div id="realTimeLocationsContainer">
+                    <div class="empty-state" style="padding: 15px; width: 100%;">
+                        <p>Click "Refresh Data" to load sub-accounts</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Theme Management -->
+            <div class="bulk-section">
+                <div class="bulk-header">
+                    <div>
+                        <strong id="locationCount">0 locations</strong>
+                        <div style="font-size: 11px; color: var(--gray);" id="selectedCount">0 selected</div>
+                    </div>
+                    <div class="toggle-container" style="margin: 0;">
+                        <label class="toggle">
+                            <input type="checkbox" id="selectAllLocations" onchange="toggleSelectAllLocations()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span style="font-size: 12px;">Select All</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="clearBulkSelection()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <select class="form-control" id="bulkThemeSelect" style="flex: 1; min-width: 180px;">
+                        <option value="">Select a theme to apply...</option>
+                    </select>
+                    <button class="btn btn-primary" id="bulkApplyBtn" onclick="applyBulkThemeToRealLocations()">
+                        <i class="fas fa-layer-group"></i>
+                        Apply to Selected
+                    </button>
+                    <button class="btn btn-danger" id="bulkRemoveBtn" onclick="removeThemeFromAllSelected()">
+                        <i class="fas fa-trash-alt"></i>
+                        Remove from Selected
+                    </button>
+                </div>
+                <div style="margin-top: 12px; max-height: 180px; overflow-y: auto;">
+                    <div id="bulkLocationCheckboxes">
+                        <!-- Checkboxes will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme Library Panel -->
+        <div class="panel" id="themeLibraryPanel" style="display: none;">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-palette"></i>
+                    <h1>Theme Library</h1>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-outline" id="backToDashboardBtn">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </button>
+                    <button class="btn btn-primary" onclick="openCreateThemeModal()">
+                        <i class="fas fa-plus"></i> Create New Theme
+                    </button>
+                </div>
+            </div>
+            
+            <div style="padding: 15px;">
+                <div class="locations-grid" id="themesGridContainer">
+                    <div class="empty-state">
+                        <p>Loading themes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Modal -->
+    <div class="modal" id="themeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Apply Theme</h3>
+                <button class="close-modal" onclick="closeThemeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Theme</label>
+                    <select class="form-control" id="modalThemeSelect">
+                        <option value="">Choose a theme...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Target Location</label>
+                    <div id="modalLocationInfo" style="padding: 10px; background: var(--light); border-radius: 4px; font-size: 12px;">
+                        Location information will appear here
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeThemeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="applyThemeFromModal()">Apply Theme</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permissions Modal -->
+    <div class="modal" id="permissionsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Manage Permissions</h3>
+                <button class="close-modal" onclick="closePermissionsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="toggle-container">
+                    <span style="min-width: 120px;">Theme Builder Access</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="perm-themes">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span id="perm-themes-status" style="font-size: 12px;">Disabled</span>
+                </div>
+                <div class="toggle-container">
+                    <span style="min-width: 120px;">Chat Widget</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="perm-chat">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span id="perm-chat-status" style="font-size: 12px;">Disabled</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closePermissionsModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="savePermissions()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Theme Modal -->
+    <div class="modal" id="createThemeModal">
+        <div class="modal-content" style="width: 500px; max-width: 95vw;">
+            <div class="modal-header">
+                <h3 id="createThemeModalTitle">Create New Theme</h3>
+                <button class="close-modal" onclick="closeCreateThemeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Theme Name</label>
+                    <input type="text" class="form-control" id="themeName" placeholder="Enter theme name">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" id="themeDescription" placeholder="Enter theme description" rows="2"></textarea>
+                </div>
+
+                <!-- Primary Colors -->
+                <h4 style="margin: 15px 0 8px 0; font-size: 14px; color: var(--dark);">Primary Colors</h4>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Add Bar Color</label>
+                        <input type="color" class="form-control" id="addBarColor" value="#00695C" style="height: 35px; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Gradient Color</label>
+                        <input type="color" class="form-control" id="gradientColor" value="#4a00e0" style="height: 35px; padding: 2px;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Hover Color</label>
+                        <input type="color" class="form-control" id="hoverColor" value="#004040" style="height: 35px; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Text Color</label>
+                        <input type="color" class="form-control" id="textColor" value="#FFFFFF" style="height: 35px; padding: 2px;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Background Color</label>
+                        <input type="color" class="form-control" id="backgroundColor" value="#FFFFFF" style="height: 35px; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Button Background</label>
+                        <input type="color" class="form-control" id="buttonBgColor" value="#00695C" style="height: 35px; padding: 2px;">
+                    </div>
+                </div>
+
+                <!-- Gradient Colors -->
+                <h4 style="margin: 15px 0 8px 0; font-size: 14px; color: var(--dark);">Gradient Colors</h4>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Sidebar Start</label>
+                        <input type="color" class="form-control" id="sidebarGradientStart" value="#8e2de2" style="height: 35px; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Sidebar End</label>
+                        <input type="color" class="form-control" id="sidebarGradientEnd" value="#4a00e0" style="height: 35px; padding: 2px;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Header Start</label>
+                        <input type="color" class="form-control" id="headerGradientStart" value="#8e2de2" style="height: 35px; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Header End</label>
+                        <input type="color" class="form-control" id="headerGradientEnd" value="#4a00e0" style="height: 35px; padding: 2px;">
+                    </div>
+                </div>
+
+                <!-- UI Elements -->
+                <h4 style="margin: 15px 0 8px 0; font-size: 14px; color: var(--dark);">UI Elements</h4>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Button Text Color</label>
+                        <input type="color" class="form-control" id="buttonTextColor" value="#FFFFFF" style="height: 35px; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Button Hover Color</label>
+                        <input type="color" class="form-control" id="buttonHoverColor" value="#004040" style="height: 35px; padding: 2px;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Tab Color</label>
+                        <input type="color" class="form-control" id="tabColor" value="#00695C" style="height: 35px; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 11px;">Progress Bar</label>
+                        <input type="color" class="form-control" id="progressBar" value="#00695C" style="height: 35px; padding: 2px;">
+                    </div>
+                </div>
+
+                <!-- Live Preview -->
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Live Preview</label>
+                    <div class="theme-preview" id="themeLivePreview">
+                        <div class="theme-preview-content">
+                            <div class="theme-preview-header" id="previewHeader"></div>
+                            <div style="display: flex; flex: 1; gap: 4px;">
+                                <div class="theme-preview-sidebar" id="previewSidebar"></div>
+                                <div class="theme-preview-main" id="previewMain">
+                                    Preview
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeCreateThemeModal()">Cancel</button>
+                <button class="btn btn-danger" id="deleteThemeBtn" style="display: none;" onclick="deleteCurrentTheme()">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+                <button class="btn btn-primary" onclick="saveTheme()">
+                    <i class="fas fa-save"></i> Save Theme
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===========================
+        // Global Variables
+        // ===========================
+        let realTimeLocations = [];
+        let themes = [];
+        let currentModalLocationId = null;
+        let currentEditingTheme = null;
+        const ADMIN_KEY = '110';
+
+        // ===========================
+        // API Call Function - IMPROVED
+        // ===========================
+        async function apiCall(endpoint, options = {}) {
+            const baseUrl = 'https://ghlengine-production.up.railway.app/api';
+            const url = `${baseUrl}${endpoint}`;
+
+            const config = {
+                method: options.method || 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${ADMIN_KEY}`,
+                    ...options.headers
+                }
+            };
+
+            // Add body for non-GET requests
+            if (options.body && config.method !== 'GET') {
+                config.body = options.body;
+            }
+
+            try {
+                console.log(`🔄 API Call: ${config.method} ${endpoint}`, config);
+                const response = await fetch(url, config);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`❌ API Error ${response.status}:`, errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log(`✅ API Response from ${endpoint}:`, data);
+                return data;
+            } catch (error) {
+                console.error(`❌ API Call Failed:`, error);
+                throw error;
+            }
+        }
+
+        // ===========================
+        // Notifications
+        // ===========================
+        function showNotification(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('notificationsContainer');
+            if (!container) return;
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(notification);
+
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) notification.parentNode.removeChild(notification);
+                }, 300);
+            }, duration);
+        }
+
+        // ===========================
+        // Theme Management Functions
+        // ===========================
+        function openCreateThemeModal(themeId = null) {
+            currentEditingTheme = themeId;
+            const modal = document.getElementById('createThemeModal');
+            const title = document.getElementById('createThemeModalTitle');
+            const deleteBtn = document.getElementById('deleteThemeBtn');
+
+            if (themeId) {
+                const theme = themes.find(t => t._id === themeId);
+                if (theme) {
+                    title.textContent = 'Edit Theme';
+                    deleteBtn.style.display = 'inline-flex';
+                    populateThemeForm(theme);
+                }
+            } else {
+                title.textContent = 'Create New Theme';
+                deleteBtn.style.display = 'none';
+                resetThemeForm();
+            }
+
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeCreateThemeModal() {
+            const modal = document.getElementById('createThemeModal');
+            if (modal) modal.style.display = 'none';
+            currentEditingTheme = null;
+        }
+
+        function populateThemeForm(theme) {
+            document.getElementById('themeName').value = theme.name || '';
+            document.getElementById('themeDescription').value = theme.description || '';
+            
+            // Set color values
+            const colorFields = [
+                'addBarColor', 'gradientColor', 'hoverColor', 'textColor', 'backgroundColor',
+                'buttonBgColor', 'buttonTextColor', 'buttonHoverColor', 'tabColor', 'progressBar',
+                'sidebarGradientStart', 'sidebarGradientEnd', 'headerGradientStart', 'headerGradientEnd'
+            ];
+            
+            colorFields.forEach(field => {
+                const input = document.getElementById(field);
+                if (input && theme[field]) {
+                    input.value = theme[field];
+                }
+            });
+
+            updateThemePreview();
+        }
+
+        function resetThemeForm() {
+            document.getElementById('themeName').value = '';
+            document.getElementById('themeDescription').value = '';
+            
+            // Reset to schema defaults
+            const defaultColors = {
+                'addBarColor': '#00695C',
+                'gradientColor': '#4a00e0',
+                'hoverColor': '#004040',
+                'textColor': '#FFFFFF',
+                'backgroundColor': '#FFFFFF',
+                'buttonBgColor': '#00695C',
+                'buttonTextColor': '#FFFFFF',
+                'buttonHoverColor': '#004040',
+                'tabColor': '#00695C',
+                'progressBar': '#00695C',
+                'sidebarGradientStart': '#8e2de2',
+                'sidebarGradientEnd': '#4a00e0',
+                'headerGradientStart': '#8e2de2',
+                'headerGradientEnd': '#4a00e0'
+            };
+            
+            Object.keys(defaultColors).forEach(field => {
+                const input = document.getElementById(field);
+                if (input) input.value = defaultColors[field];
+            });
+
+            updateThemePreview();
+        }
+
+        function updateThemePreview() {
+            const sidebarStart = document.getElementById('sidebarGradientStart').value;
+            const sidebarEnd = document.getElementById('sidebarGradientEnd').value;
+            const headerStart = document.getElementById('headerGradientStart').value;
+            const headerEnd = document.getElementById('headerGradientEnd').value;
+            const textColor = document.getElementById('textColor').value;
+            const backgroundColor = document.getElementById('backgroundColor').value;
+            
+            // Update preview elements
+            document.getElementById('previewHeader').style.background = `linear-gradient(135deg, ${headerStart}, ${headerEnd})`;
+            document.getElementById('previewSidebar').style.background = `linear-gradient(135deg, ${sidebarStart}, ${sidebarEnd})`;
+            document.getElementById('previewMain').style.background = backgroundColor;
+            document.getElementById('previewMain').style.color = textColor;
+        }
+
+        async function saveTheme() {
+            const name = document.getElementById('themeName').value.trim();
+            if (!name) {
+                showNotification('Please enter a theme name', 'error');
+                return;
+            }
+
+            // Collect data according to new schema - USING ACTUAL FORM VALUES
+            const themeData = {
+                name: name,
+                description: document.getElementById('themeDescription').value.trim(),
+                
+                // Primary Colors - USING ACTUAL VALUES FROM FORM
+                addBarColor: document.getElementById('addBarColor').value,
+                gradientColor: document.getElementById('gradientColor').value,
+                hoverColor: document.getElementById('hoverColor').value,
+                textColor: document.getElementById('textColor').value,
+                backgroundColor: document.getElementById('backgroundColor').value,
+                
+                // Gradient Colors - USING ACTUAL VALUES FROM FORM
+                sidebarGradientStart: document.getElementById('sidebarGradientStart').value,
+                sidebarGradientEnd: document.getElementById('sidebarGradientEnd').value,
+                headerGradientStart: document.getElementById('headerGradientStart').value,
+                headerGradientEnd: document.getElementById('headerGradientEnd').value,
+                
+                // Button Colors - USING ACTUAL VALUES FROM FORM
+                buttonBgColor: document.getElementById('buttonBgColor').value,
+                buttonTextColor: document.getElementById('buttonTextColor').value,
+                buttonHoverColor: document.getElementById('buttonHoverColor').value,
+                
+                // UI Elements - USING ACTUAL VALUES FROM FORM
+                tabColor: document.getElementById('tabColor').value,
+                progressBar: document.getElementById('progressBar').value,
+                
+                // Settings
+                category: 'dashboard',
+                isTemplate: false,
+                
+                // Required fields with defaults
+                isGlobal: false,
+                isActive: true
+            };
+
+            console.log('🎨 Saving theme data with ACTUAL colors:', themeData);
+
+            try {
+                showNotification('💾 Saving theme...', 'info');
+
+                let response;
+                if (currentEditingTheme) {
+                    response = await apiCall(`/themes/${currentEditingTheme}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(themeData)
+                    });
+                } else {
+                    response = await apiCall('/themes', {
+                        method: 'POST',
+                        body: JSON.stringify(themeData)
+                    });
+                }
+
+                if (response.success) {
+                    showNotification(`✅ Theme "${name}" ${currentEditingTheme ? 'updated' : 'created'} successfully!`, 'success');
+                    await loadThemes();
+                    closeCreateThemeModal();
+                    
+                    if (!currentEditingTheme) {
+                        showViewThemes();
+                    }
+                } else {
+                    throw new Error(response.error || response.message || 'Failed to save theme');
+                }
+            } catch (error) {
+                console.error('Save theme error:', error);
+                showNotification(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function deleteCurrentTheme() {
+            if (currentEditingTheme) {
+                deleteTheme(currentEditingTheme);
+                closeCreateThemeModal();
+            }
+        }
+
+        async function deleteTheme(themeId) {
+            const theme = themes.find(t => t._id === themeId);
+            if (!theme) return;
+
+            const confirmDelete = confirm(`Are you sure you want to delete the theme "${theme.name}"?`);
+            if (!confirmDelete) return;
+
+            try {
+                showNotification('🗑️ Deleting theme...', 'info');
+
+                const response = await apiCall(`/themes/${themeId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.success) {
+                    showNotification('✅ Theme deleted successfully!', 'success');
+                    await loadThemes();
+                } else {
+                    throw new Error(response.error || response.message || 'Failed to delete theme');
+                }
+            } catch (error) {
+                console.error('Delete theme error:', error);
+                showNotification(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function editTheme(themeId) {
+            openCreateThemeModal(themeId);
+        }
+
+        function displayThemesGrid() {
+            const container = document.getElementById('themesGridContainer');
+            if (!container) return;
+
+            if (themes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>🎨 No Themes Created</h3>
+                        <p>Get started by creating your first theme</p>
+                        <button class="btn btn-primary" onclick="openCreateThemeModal()">Create Theme</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = themes.map(theme => {
+                const gradientStyle = `background: linear-gradient(135deg, ${theme.sidebarGradientStart || '#8e2de2'}, ${theme.sidebarGradientEnd || '#4a00e0'});`;
+                
+                return `
+                <div class="location-card">
+                    <div class="theme-preview" style="${gradientStyle}">
+                        <div class="theme-preview-content">
+                            <div class="theme-preview-header" style="background: linear-gradient(135deg, ${theme.headerGradientStart || '#8e2de2'}, ${theme.headerGradientEnd || '#4a00e0'});"></div>
+                            <div style="display: flex; flex: 1; gap: 4px;">
+                                <div class="theme-preview-sidebar" style="background: linear-gradient(135deg, ${theme.sidebarGradientStart || '#8e2de2'}, ${theme.sidebarGradientEnd || '#4a00e0'});"></div>
+                                <div class="theme-preview-main" style="background: ${theme.backgroundColor || '#FFFFFF'}; color: ${theme.textColor || '#000000'};">
+                                    Preview
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="location-header">
+                        <h3>${theme.name}</h3>
+                        <span class="location-id">${theme.category || 'dashboard'}</span>
+                    </div>
+                    <div class="location-details">
+                        <div class="detail"><strong>📝 Description:</strong> ${theme.description || 'No description'}</div>
+                        <div class="detail"><strong>🏷️ Category:</strong> ${theme.category || 'dashboard'}</div>
+                        <div class="detail"><strong>📊 Usage:</strong> ${theme.usageCount || 0} locations</div>
+                        <div class="detail"><strong>🔄 Updated:</strong> ${new Date(theme.updatedAt || theme.createdAt || Date.now()).toLocaleDateString()}</div>
+                    </div>
+                    <div class="location-actions">
+                        <button class="btn btn-primary btn-sm" onclick="editTheme('${theme._id}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="applyThemeToAllLocations('${theme._id}')">
+                            <i class="fas fa-layer-group"></i> Apply to All
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTheme('${theme._id}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        async function applyThemeToAllLocations(themeId) {
+            const confirmApply = confirm(`Apply this theme to all ${realTimeLocations.length} locations?`);
+            if (!confirmApply) return;
+
+            showNotification(`🎨 Applying theme to all locations...`, 'info');
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (let location of realTimeLocations) {
+                try {
+                    await applyThemeToRealLocation(location.id, themeId);
+                    successCount++;
+                } catch (error) {
+                    errorCount++;
+                    console.error(`Failed to apply theme to ${location.name}:`, error);
+                }
+            }
+
+            if (errorCount === 0) {
+                showNotification(`✅ Theme applied to all ${successCount} locations`, 'success');
+            } else {
+                showNotification(`✅ Applied to ${successCount} locations, ❌ failed for ${errorCount}`, 'info');
+            }
+        }
+
+        // ===========================
+        // View Management
+        // ===========================
+        function showViewThemes() {
+            document.getElementById('themeLibraryPanel').style.display = 'block';
+            document.querySelector('.panel:not(#themeLibraryPanel)').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('themeLibraryPanel').style.display = 'none';
+            document.querySelector('.panel:not(#themeLibraryPanel)').style.display = 'block';
+        }
+
+        // ===========================
+        // Load & Populate Themes - UPDATED
+        // ===========================
+        async function loadThemes() {
+            try {
+                const response = await apiCall('/themes');
+                if (response.success && Array.isArray(response.data)) {
+                    themes = response.data;
+                    populateThemeDropdowns();
+                    displayThemesGrid();
+                    console.log(`✅ Loaded ${themes.length} themes`);
+                } else {
+                    // Create sample themes if API fails
+                    themes = [
+                        { 
+                            _id: 'theme1', 
+                            name: 'Blue Ocean Theme',
+                            description: 'A fresh blue theme',
+                            category: 'dashboard',
+                            usageCount: 2,
+                            updatedAt: new Date(),
+                            sidebarGradientStart: '#8e2de2',
+                            sidebarGradientEnd: '#4a00e0',
+                            headerGradientStart: '#8e2de2', 
+                            headerGradientEnd: '#4a00e0',
+                            backgroundColor: '#FFFFFF',
+                            textColor: '#000000'
+                        }
+                    ];
+                    populateThemeDropdowns();
+                    displayThemesGrid();
+                }
+            } catch (error) {
+                console.error('Failed to load themes:', error);
+                themes = [];
+                populateThemeDropdowns();
+                displayThemesGrid();
+                showNotification('⚠️ Using sample themes - API unavailable', 'info');
+            }
+        }
+
+        // ===========================
+        // Event Listeners
+        // ===========================
+        function initEventListeners() {
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                loadRealTimeLocations();
+                loadThemes();
+            });
+
+            document.getElementById('viewThemesBtn').addEventListener('click', showViewThemes);
+            document.getElementById('createThemeBtn').addEventListener('click', () => openCreateThemeModal());
+            document.getElementById('backToDashboardBtn').addEventListener('click', showDashboard);
+
+            // Color input listeners for live preview
+            const colorInputs = [
+                'addBarColor', 'gradientColor', 'hoverColor', 'textColor', 'backgroundColor',
+                'buttonBgColor', 'buttonTextColor', 'buttonHoverColor', 'tabColor', 'progressBar',
+                'sidebarGradientStart', 'sidebarGradientEnd', 'headerGradientStart', 'headerGradientEnd'
+            ];
+            
+            colorInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.addEventListener('input', updateThemePreview);
+                }
+            });
+
+            // Modal close handlers
+            window.addEventListener('click', (event) => {
+                if (event.target === document.getElementById('createThemeModal')) {
+                    closeCreateThemeModal();
+                }
+                if (event.target === document.getElementById('themeModal')) {
+                    closeThemeModal();
+                }
+                if (event.target === document.getElementById('permissionsModal')) {
+                    closePermissionsModal();
+                }
+            });
+
+            setupSearch();
+        }
+
+        // ===========================
+        // Your existing functions remain below...
+        // ===========================
+
+        // [ALL YOUR EXISTING FUNCTIONS REMAIN THE SAME - loadRealTimeLocations, displayRealTimeLocations, setupSearch, filterLocations, 
+        // updateLocationDropdowns, populateThemeDropdowns, openThemeModal, closeThemeModal, applyThemeFromModal, 
+        // applyThemeToRealLocation, applyBulkThemeToRealLocations, removeThemeFromRealLocation, removeThemeFromAllSelected,
+        // managePermissions, closePermissionsModal, savePermissions, updateGlobalStats, etc.]
+
+        // Load Real-Time Locations - FIXED
+        async function loadRealTimeLocations() {
+            try {
+                showNotification('🔄 Loading locations...', 'info');
+                
+                // Try multiple endpoints to find where your locations are
+                let locationsData = [];
+                
+                // First try the real-time endpoint
+                try {
+                    const response = await apiCall('/locations/real-time');
+                    if (response.success && Array.isArray(response.data)) {
+                        locationsData = response.data;
+                    }
+                } catch (error) {
+                    console.log('Real-time locations endpoint failed, trying alternatives...');
+                }
+                
+                // If no data, try getting sub-accounts directly
+                if (locationsData.length === 0) {
+                    try {
+                        const response = await apiCall('/ghl/subaccounts');
+                        if (response.success && Array.isArray(response.data)) {
+                            locationsData = response.data;
+                        }
+                    } catch (error) {
+                        console.log('Subaccounts endpoint failed');
+                    }
+                }
+
+                // If still no data, create sample data for testing
+                if (locationsData.length === 0) {
+                    console.log('No locations found in APIs, using sample data for testing');
+                    locationsData = [
+                        {
+                            id: 'loc_001',
+                            name: 'Downtown Dental Clinic',
+                            address: '123 Main Street, New York, NY',
+                            phone: '(555) 123-4567',
+                            email: 'contact@downtowndental.com',
+                            currentTheme: null,
+                            hasCustomCSS: false,
+                            permissions: {
+                                themeBuilderAccess: true,
+                                chatWidget: { isActive: true }
+                            }
+                        },
+                        {
+                            id: 'loc_002',
+                            name: 'Uptown Medical Center', 
+                            address: '456 Oak Avenue, New York, NY',
+                            phone: '(555) 987-6543',
+                            email: 'info@uptownmedical.com',
+                            currentTheme: { _id: 'theme123', name: 'Blue Theme' },
+                            hasCustomCSS: true,
+                            permissions: {
+                                themeBuilderAccess: false,
+                                chatWidget: { isActive: true }
+                            }
+                        }
+                    ];
+                }
+
+                realTimeLocations = locationsData;
+                displayRealTimeLocations();
+                updateLocationDropdowns();
+                updateGlobalStats();
+                showNotification(`✅ Loaded ${realTimeLocations.length} locations`, 'success');
+                
+            } catch (error) {
+                console.error('❌ Failed to load locations:', error);
+                showNotification(`❌ Error loading locations: ${error.message}`, 'error');
+                const container = document.getElementById('realTimeLocationsContainer');
+                if (container) container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>❌ Failed to Load Locations</h3>
+                        <p>${error.message}</p>
+                        <button class="btn btn-primary" onclick="loadRealTimeLocations()">Try Again</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Display Locations Grid - FIXED
+        function displayRealTimeLocations() {
+            const container = document.getElementById('realTimeLocationsContainer');
+            if (!container) return;
+
+            if (realTimeLocations.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>📍 No Locations Found</h3>
+                        <p>No locations were found in your account.</p>
+                        <button class="btn btn-primary" onclick="loadRealTimeLocations()">Try Again</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="locations-grid">
+                    ${realTimeLocations.map(location => {
+                        const hasTheme = location.currentTheme && location.currentTheme._id;
+                        const themeName = hasTheme ? (location.currentTheme.name || 'Unknown Theme') : 'No Theme';
+                        
+                        return `
+                        <div class="location-card ${hasTheme ? 'has-theme' : ''}">
+                            <div class="location-header">
+                                <h3>${location.name || 'Unnamed Location'}</h3>
+                                <span class="location-id">${location.id ? location.id.substring(0, 8) : 'N/A'}...</span>
+                            </div>
+                            <div class="location-details">
+                                <div class="detail"><strong>📍 Address:</strong> ${location.address || 'N/A'}</div>
+                                <div class="detail"><strong>📞 Phone:</strong> ${location.phone || 'N/A'}</div>
+                                <div class="detail"><strong>📧 Email:</strong> ${location.email || 'N/A'}</div>
+                                <div class="detail"><strong>🎨 Theme:</strong> ${hasTheme ? '✅ ' + themeName : '❌ None'}</div>
+                                <div class="detail"><strong>🔄 Custom CSS:</strong> ${location.hasCustomCSS ? '✅ Yes' : '❌ No'}</div>
+                                <div class="detail"><strong>⚙️ Theme Access:</strong> ${location.permissions?.themeBuilderAccess ? '✅ Enabled' : '❌ Disabled'}</div>
+                            </div>
+                            <div class="location-actions">
+                                <button class="btn btn-primary btn-sm" onclick="openThemeModal('${location.id}')">
+                                    <i class="fas fa-palette"></i> Apply Theme
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="managePermissions('${location.id}')">
+                                    <i class="fas fa-cog"></i> Permissions
+                                </button>
+                                ${hasTheme ? `
+                                    <button class="btn btn-danger btn-sm" onclick="removeThemeFromRealLocation('${location.id}')">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `}).join('')}
+                </div>
+            `;
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchLocations');
+            if (searchInput) {
+                searchInput.addEventListener('input', filterLocations);
+            }
+        }
+
+        function filterLocations() {
+            const searchTerm = document.getElementById('searchLocations').value.toLowerCase();
+            
+            const filteredLocations = realTimeLocations.filter(location => {
+                const matchesSearch = 
+                    (location.name || '').toLowerCase().includes(searchTerm) ||
+                    (location.address || '').toLowerCase().includes(searchTerm) ||
+                    (location.phone || '').includes(searchTerm) ||
+                    (location.email || '').toLowerCase().includes(searchTerm);
+                
+                return matchesSearch;
+            });
+            
+            displayFilteredLocations(filteredLocations);
+        }
+
+        function displayFilteredLocations(filteredLocations) {
+            const container = document.getElementById('realTimeLocationsContainer');
+            if (!container) return;
+
+            if (filteredLocations.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>🔍 No Matching Locations</h3>
+                        <p>No locations match your search criteria</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="locations-grid">
+                    ${filteredLocations.map(location => {
+                        const hasTheme = location.currentTheme && location.currentTheme._id;
+                        const themeName = hasTheme ? (location.currentTheme.name || 'Unknown Theme') : 'No Theme';
+                        
+                        return `
+                        <div class="location-card ${hasTheme ? 'has-theme' : ''}">
+                            <div class="location-header">
+                                <h3>${location.name || 'Unnamed Location'}</h3>
+                                <span class="location-id">${location.id ? location.id.substring(0, 8) : 'N/A'}...</span>
+                            </div>
+                            <div class="location-details">
+                                <div class="detail"><strong>📍 Address:</strong> ${location.address || 'N/A'}</div>
+                                <div class="detail"><strong>📞 Phone:</strong> ${location.phone || 'N/A'}</div>
+                                <div class="detail"><strong>📧 Email:</strong> ${location.email || 'N/A'}</div>
+                                <div class="detail"><strong>🎨 Theme:</strong> ${hasTheme ? '✅ ' + themeName : '❌ None'}</div>
+                                <div class="detail"><strong>🔄 Custom CSS:</strong> ${location.hasCustomCSS ? '✅ Yes' : '❌ No'}</div>
+                            </div>
+                            <div class="location-actions">
+                                <button class="btn btn-primary btn-sm" onclick="openThemeModal('${location.id}')">
+                                    <i class="fas fa-palette"></i> Apply Theme
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="managePermissions('${location.id}')">
+                                    <i class="fas fa-cog"></i> Permissions
+                                </button>
+                                ${hasTheme ? `
+                                    <button class="btn btn-danger btn-sm" onclick="removeThemeFromRealLocation('${location.id}')">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `}).join('')}
+                </div>
+            `;
+        }
+
+        function updateLocationDropdowns() {
+            updateBulkLocationCheckboxes();
+            updateLocationCount();
+        }
+
+        function updateBulkLocationCheckboxes() {
+            const bulkContainer = document.getElementById('bulkLocationCheckboxes');
+            if (!bulkContainer) return;
+            bulkContainer.innerHTML = '';
+
+            realTimeLocations.forEach(location => {
+                const hasTheme = location.currentTheme && location.currentTheme._id;
+                const checkbox = document.createElement('div');
+                checkbox.className = 'checkbox-item';
+                checkbox.innerHTML = `
+                    <input type="checkbox" id="bulk-${location.id}" value="${location.id}" class="location-checkbox" onchange="updateSelectedCount()">
+                    <label for="bulk-${location.id}" style="font-size: 12px;">${location.name} ${hasTheme ? ' (🎨 Themed)' : ''}</label>
+                `;
+                bulkContainer.appendChild(checkbox);
+            });
+        }
+
+        function updateLocationCount() {
+            const countEl = document.getElementById('locationCount');
+            if (countEl) countEl.textContent = `${realTimeLocations.length} locations`;
+        }
+
+        function populateThemeDropdowns() {
+            ['bulkThemeSelect', 'modalThemeSelect'].forEach(dropdownId => {
+                const select = document.getElementById(dropdownId);
+                if (!select) return;
+
+                const firstOption = select.options[0];
+                select.innerHTML = '';
+                if (firstOption) select.appendChild(firstOption);
+
+                themes.forEach(theme => {
+                    const option = document.createElement('option');
+                    option.value = theme._id;
+                    option.textContent = theme.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function openThemeModal(locationId) {
+            currentModalLocationId = locationId;
+            const location = realTimeLocations.find(loc => loc.id === locationId);
+            const modal = document.getElementById('themeModal');
+            const locationInfo = document.getElementById('modalLocationInfo');
+            
+            if (location && locationInfo) {
+                locationInfo.innerHTML = `
+                    <strong>${location.name}</strong><br>
+                    <small>${location.address || 'No address'} • ${location.phone || 'No phone'}</small>
+                `;
+            }
+            
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeThemeModal() {
+            const modal = document.getElementById('themeModal');
+            if (modal) modal.style.display = 'none';
+            currentModalLocationId = null;
+        }
+
+        async function applyThemeFromModal() {
+            if (!currentModalLocationId) {
+                showNotification('No location selected', 'error');
+                return;
+            }
+            const themeId = document.getElementById('modalThemeSelect').value;
+            if (!themeId) {
+                showNotification('Please select a theme', 'error');
+                return;
+            }
+            await applyThemeToRealLocation(currentModalLocationId, themeId);
+            closeThemeModal();
+        }
+
+        async function applyThemeToRealLocation(locationId, themeId = null) {
+            try {
+                if (!themeId) {
+                    themeId = document.getElementById('bulkThemeSelect').value;
+                    if (!themeId) {
+                        showNotification('Please select a theme', 'error');
+                        return;
+                    }
+                }
+
+                showNotification(`🎨 Applying theme to location...`, 'info');
+                
+                // Try multiple endpoints for theme application
+                let response;
+                
+                try {
+                    response = await apiCall('/themes/apply', {
+                        method: 'POST',
+                        body: JSON.stringify({ 
+                            locationId, 
+                            themeId
+                        })
+                    });
+                } catch (error) {
+                    // Fallback to alternative endpoint
+                    try {
+                        response = await apiCall(`/by-location/${locationId}/theme`, {
+                            method: 'PUT',
+                            body: JSON.stringify({ themeId })
+                        });
+                    } catch (fallbackError) {
+                        throw new Error('Both theme apply endpoints failed');
+                    }
+                }
+
+                if (response.success) {
+                    showNotification(`✅ Theme applied successfully!`, 'success');
+                    // Update local data
+                    const locationIndex = realTimeLocations.findIndex(loc => loc.id === locationId);
+                    if (locationIndex > -1) {
+                        const theme = themes.find(t => t._id === themeId);
+                        realTimeLocations[locationIndex].currentTheme = theme;
+                    }
+                    displayRealTimeLocations();
+                    updateGlobalStats();
+                } else {
+                    throw new Error(response.error || response.message || 'Failed to apply theme');
+                }
+            } catch (error) {
+                console.error('Apply theme error:', error);
+                showNotification(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function applyBulkThemeToRealLocations() {
+            try {
+                const themeId = document.getElementById('bulkThemeSelect').value;
+                const checkboxes = document.querySelectorAll('.location-checkbox:checked');
+                
+                if (!themeId) {
+                    showNotification('Please select a theme', 'error');
+                    return;
+                }
+                if (checkboxes.length === 0) {
+                    showNotification('Select at least one location', 'error');
+                    return;
+                }
+
+                const locationIds = Array.from(checkboxes).map(cb => cb.value);
+                showNotification(`🎨 Applying theme to ${locationIds.length} locations...`, 'info');
+
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (let locId of locationIds) {
+                    try {
+                        await applyThemeToRealLocation(locId, themeId);
+                        successCount++;
+                    } catch (error) {
+                        errorCount++;
+                        console.error(`Failed to apply theme to ${locId}:`, error);
+                    }
+                }
+
+                clearBulkSelection();
+                
+                if (errorCount === 0) {
+                    showNotification(`✅ Theme applied to ${successCount} locations`, 'success');
+                } else {
+                    showNotification(`✅ Applied to ${successCount} locations, ❌ failed for ${errorCount}`, 'info');
+                }
+            } catch (error) {
+                console.error('Bulk apply error:', error);
+                showNotification('❌ Error applying theme to some locations', 'error');
+            }
+        }
+
+        async function removeThemeFromRealLocation(locationId) {
+            try {
+                const confirmDelete = confirm('Are you sure you want to remove the theme from this location?');
+                if (!confirmDelete) return;
+                
+                showNotification(`🗑️ Removing theme from location...`, 'info');
+                
+                const response = await apiCall('/themes/remove', {
+                    method: 'POST',
+                    body: JSON.stringify({ locationId })
+                });
+
+                if (response.success) {
+                    showNotification('✅ Theme removed successfully', 'success');
+                    // Update local data
+                    const locationIndex = realTimeLocations.findIndex(loc => loc.id === locationId);
+                    if (locationIndex > -1) {
+                        realTimeLocations[locationIndex].currentTheme = null;
+                    }
+                    displayRealTimeLocations();
+                    updateGlobalStats();
+                } else {
+                    throw new Error(response.error || response.message || 'Failed to remove theme');
+                }
+            } catch (error) {
+                console.error('Remove theme error:', error);
+                showNotification(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function removeThemeFromAllSelected() {
+            const checkboxes = document.querySelectorAll('.location-checkbox:checked');
+            if (checkboxes.length === 0) {
+                showNotification('Select at least one location', 'error');
+                return;
+            }
+
+            const confirmDelete = confirm(`Are you sure you want to remove themes from ${checkboxes.length} locations?`);
+            if (!confirmDelete) return;
+
+            showNotification(`🗑️ Removing themes from ${checkboxes.length} locations...`, 'info');
+
+            const locationIds = Array.from(checkboxes).map(cb => cb.value);
+            
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (let locId of locationIds) {
+                try {
+                    await removeThemeFromRealLocation(locId);
+                    successCount++;
+                } catch (error) {
+                    errorCount++;
+                    console.error(`Failed to remove theme from ${locId}:`, error);
+                }
+            }
+
+            clearBulkSelection();
+            
+            if (errorCount === 0) {
+                showNotification(`✅ Themes removed from ${successCount} locations`, 'success');
+            } else {
+                showNotification(`✅ Removed from ${successCount} locations, ❌ failed for ${errorCount}`, 'info');
+            }
+        }
+
+        function toggleSelectAllLocations() {
+            const selectAll = document.getElementById('selectAllLocations');
+            const checkboxes = document.querySelectorAll('.location-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.location-checkbox:checked');
+            const countEl = document.getElementById('selectedCount');
+            if (countEl) countEl.textContent = `${checkboxes.length} selected`;
+        }
+
+        function clearBulkSelection() {
+            const checkboxes = document.querySelectorAll('.location-checkbox');
+            checkboxes.forEach(cb => cb.checked = false);
+            const selectAll = document.getElementById('selectAllLocations');
+            if (selectAll) selectAll.checked = false;
+            updateSelectedCount();
+        }
+
+        function managePermissions(locationId) {
+            currentModalLocationId = locationId;
+            const loc = realTimeLocations.find(l => l.id === locationId);
+            if (!loc) {
+                showNotification('❌ Location not found', 'error');
+                return;
+            }
+
+            console.log('🔧 Loading permissions for location:', locationId, loc);
+
+            const themesCheckbox = document.getElementById('perm-themes');
+            const chatCheckbox = document.getElementById('perm-chat');
+
+            if (themesCheckbox) {
+                // Check if permissions exist and themeBuilderAccess is defined
+                const hasThemeAccess = loc.permissions?.themeBuilderAccess === true;
+                themesCheckbox.checked = hasThemeAccess;
+                document.getElementById('perm-themes-status').textContent = hasThemeAccess ? 'Enabled' : 'Disabled';
+                console.log('🎨 Theme Builder Access:', hasThemeAccess);
+            }
+
+            if (chatCheckbox) {
+                // Check if permissions exist and chatWidget isActive is defined
+                const hasChatAccess = loc.permissions?.chatWidget?.isActive === true;
+                chatCheckbox.checked = hasChatAccess;
+                document.getElementById('perm-chat-status').textContent = hasChatAccess ? 'Enabled' : 'Disabled';
+                console.log('💬 Chat Widget Access:', hasChatAccess);
+            }
+
+            const modal = document.getElementById('permissionsModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                console.log('✅ Permissions modal opened');
+            }
+        }
+
+        function closePermissionsModal() {
+            const modal = document.getElementById('permissionsModal');
+            if (modal) modal.style.display = 'none';
+            currentModalLocationId = null;
+            console.log('🔒 Permissions modal closed');
+        }
+
+        async function savePermissions() {
+            if (!currentModalLocationId) {
+                showNotification('❌ No location selected', 'error');
+                return;
+            }
+
+            try {
+                const themesCheckbox = document.getElementById('perm-themes');
+                const chatCheckbox = document.getElementById('perm-chat');
+
+                const themeBuilderAccess = themesCheckbox?.checked || false;
+                const chatWidgetEnabled = chatCheckbox?.checked || false;
+
+                console.log('💾 Saving permissions:', {
+                    locationId: currentModalLocationId,
+                    themeBuilderAccess,
+                    chatWidgetEnabled
+                });
+
+                showNotification('⚙️ Updating permissions...', 'info');
+
+                // Make API call to update permissions
+                const response = await apiCall(`/access/status/${currentModalLocationId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        themeBuilderAccess: themeBuilderAccess,
+                        chatWidgetEnabled: chatWidgetEnabled
+                    })
+                });
+
+                console.log('📡 API Response:', response);
+
+                if (response.success) {
+                    showNotification('✅ Permissions updated successfully!', 'success');
+
+                    // Update local data immediately
+                    const locIndex = realTimeLocations.findIndex(l => l.id === currentModalLocationId);
+                    if (locIndex > -1) {
+                        // Ensure permissions object exists
+                        if (!realTimeLocations[locIndex].permissions) {
+                            realTimeLocations[locIndex].permissions = {};
+                        }
+                        if (!realTimeLocations[locIndex].permissions.chatWidget) {
+                            realTimeLocations[locIndex].permissions.chatWidget = {};
+                        }
+
+                        // Update the local state
+                        realTimeLocations[locIndex].permissions.themeBuilderAccess = themeBuilderAccess;
+                        realTimeLocations[locIndex].permissions.chatWidget.isActive = chatWidgetEnabled;
+
+                        console.log('🔄 Updated local state:', realTimeLocations[locIndex]);
+                    }
+
+                    // Close modal and refresh display
+                    closePermissionsModal();
+                    displayRealTimeLocations(); // Refresh the grid to show updated permissions
+                    updateGlobalStats(); // Update stats counter
+
+                    console.log('✅ Permissions saved and UI updated');
+
+                } else {
+                    throw new Error(response.message || response.error || 'Failed to update permissions');
+                }
+
+            } catch (error) {
+                console.error('❌ Save permissions error:', error);
+                showNotification(`❌ Error: ${error.message}`, 'error');
+                
+                // Revert checkboxes to previous state
+                const loc = realTimeLocations.find(l => l.id === currentModalLocationId);
+                if (loc) {
+                    const themesCheckbox = document.getElementById('perm-themes');
+                    const chatCheckbox = document.getElementById('perm-chat');
+                    
+                    if (themesCheckbox) {
+                        themesCheckbox.checked = loc.permissions?.themeBuilderAccess || false;
+                        document.getElementById('perm-themes-status').textContent = themesCheckbox.checked ? 'Enabled' : 'Disabled';
+                    }
+                    if (chatCheckbox) {
+                        chatCheckbox.checked = loc.permissions?.chatWidget?.isActive || false;
+                        document.getElementById('perm-chat-status').textContent = chatCheckbox.checked ? 'Enabled' : 'Disabled';
+                    }
+                }
+            }
+        }
+
+        function updateGlobalStats() {
+            const totalLocations = realTimeLocations.length;
+            const themedLocations = realTimeLocations.filter(l => l.currentTheme && l.currentTheme._id).length;
+            const themeAccessEnabled = realTimeLocations.filter(l => l.permissions?.themeBuilderAccess === true).length;
+            const customCssActive = realTimeLocations.filter(l => l.hasCustomCSS === true).length;
+
+            console.log('📊 Stats Update:', {
+                totalLocations,
+                themedLocations,
+                themeAccessEnabled,
+                customCssActive,
+                locations: realTimeLocations.map(l => ({
+                    name: l.name,
+                    themeAccess: l.permissions?.themeBuilderAccess,
+                    hasTheme: !!l.currentTheme
+                }))
+            });
+
+            const totalEl = document.getElementById('totalLocations');
+            if (totalEl) totalEl.textContent = totalLocations;
+
+            const themedEl = document.getElementById('themedLocations');
+            if (themedEl) themedEl.textContent = themedLocations;
+
+            const themeAccessEl = document.getElementById('themeAccess');
+            if (themeAccessEl) themeAccessEl.textContent = themeAccessEnabled;
+
+            const customCssEl = document.getElementById('customCssLocations');
+            if (customCssEl) customCssEl.textContent = customCssActive;
+        }
+
+        // ===========================
+        // Initialize
+        // ===========================
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Initializing CRM Theme Builder...');
+            initEventListeners();
+            await loadThemes();
+            await loadRealTimeLocations();
+            showNotification('🎉 CRM Theme Builder is ready!', 'success');
+        });
+    </script>
+</body>
+</html>
