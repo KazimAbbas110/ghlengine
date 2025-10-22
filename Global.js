@@ -1,4 +1,3 @@
-I want this this not check access just show apply theme save location id to db and not reset on browser reload.
 
 
 
