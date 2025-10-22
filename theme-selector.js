@@ -5969,7 +5969,7 @@
         POPUP_ID: "ghl-theme-builder-popup",
         STYLE_ID: "ghl-theme-style",
         PREVIEW_STYLE_ID: "ghl-theme-preview",
-        BACKEND_API: "https://ghlengine-production.up.railway.app/ap",///////////////////////////////////////////////////////
+        BACKEND_API: "https://ghlengine-production.up.railway.app/api",
         AUTH_TOKEN: "110",
         VERSION: "3.2.0", // Updated version
         CACHE_DURATION: 5 * 60 * 1000, // 5 minutes cache
