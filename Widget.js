@@ -1,15 +1,15 @@
-<!-- GHL Widget Loader -->
-    
-
-
+GHL Widget Loader
+    <script
+      src="https://widgets.leadconnectorhq.com/loader.js"
+      data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
+      data-widget-id="68f2b84dc62596ad849806a9">
+    </script>
 
     <!-- Optimized Draggable Enhancement Script -->
  
     (function(){
         console.log('🚀 Starting GHL Chat Widget with Smooth Dragging...');
-    src="https://widgets.leadconnectorhq.com/loader.js"
-      data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
-      data-widget-id="68f2b84dc62596ad849806a9"
+        
         let bubbleDraggable = false;
         let windowDraggable = false;
         let checkCount = 0;
@@ -285,7 +285,7 @@
         }, 1000);
 
     })();
-  
+    
 
 
 
