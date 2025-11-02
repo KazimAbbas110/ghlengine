@@ -1,4 +1,3 @@
-GHL Widget Loader
 
        <script
       src="https://widgets.leadconnectorhq.com/loader.js"
