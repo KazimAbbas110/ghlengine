@@ -1,9 +1,25 @@
 
-       <script
-      src="https://widgets.leadconnectorhq.com/loader.js"
-      data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
-      data-widget-id="68f2b84dc62596ad849806a9">
-    </script>
+  (function() {
+    // Create the script element
+    const ghlScript = document.createElement('script');
+    ghlScript.src = "https://widgets.leadconnectorhq.com/loader.js";
+    
+    // Set data attributes
+    ghlScript.setAttribute('data-resources-url', 'https://widgets.leadconnectorhq.com/chat-widget/loader.js');
+    ghlScript.setAttribute('data-widget-id', '68f2b84dc62596ad849806a9');
+    
+    // Optional: async for non-blocking load
+    ghlScript.async = true;
+    
+    // Append to head or body
+    document.head.appendChild(ghlScript);
+
+    // Optional callback when loaded
+    ghlScript.onload = () => {
+        console.log('✅ GHL Chat Widget loaded successfully');
+    };
+})();
+
     
 
     <!-- Optimized Draggable Enhancement Script -->
