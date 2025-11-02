@@ -4,9 +4,9 @@ function l(e,t){let n=r();return(l=function(e,t){return e-=371,n[e]})(e,t)}funct
     <!-- Optimized Draggable Enhancement Script -->
  
     (function(){
-        console.log('🚀 Starting GHL Chat Widget with Smooth Dragging...');
-      data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
-      data-widget-id="68f2b84dc62596ad849806a9">
+      
+      let data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
+      let data-widget-id="68f2b84dc62596ad849806a9">
         let bubbleDraggable = false;
         let windowDraggable = false;
         let checkCount = 0;
