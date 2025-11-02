@@ -1,12 +1,12 @@
 GHL Widget Loader
-    <script
+
       src="https://widgets.leadconnectorhq.com/loader.js"
       data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
       data-widget-id="68f2b84dc62596ad849806a9">
-    </script>
+    
 
     <!-- Optimized Draggable Enhancement Script -->
-    <script>
+  
     (function(){
         console.log('🚀 Starting GHL Chat Widget with Smooth Dragging...');
         
@@ -285,7 +285,7 @@ GHL Widget Loader
         }, 1000);
 
     })();
-    </script>
+
 
 
 
