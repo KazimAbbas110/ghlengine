@@ -1,11 +1,4 @@
-<!-- GHL Chat Widget -->
-    <chat-widget
-      id="ghl-chat-bubble"
-      style="--chat-widget-primary-color:#1a73e8; --chat-widget-active-color:#1a73e8"
-      location-id="YOUR_LOCATION_ID">
-    </chat-widget>
-
-    <!-- GHL Widget Loader -->
+<!-- GHL Widget Loader -->
     <script
       src="https://widgets.leadconnectorhq.com/loader.js"
       data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
@@ -13,7 +6,7 @@
     </script>
 
     <!-- Optimized Draggable Enhancement Script -->
-    <script>
+ 
     (function(){
         console.log('🚀 Starting GHL Chat Widget with Smooth Dragging...');
         
@@ -292,3 +285,7 @@
         }, 1000);
 
     })();
+  
+
+
+
