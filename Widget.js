@@ -75,7 +75,13 @@
         element.style.willChange = 'transform';
         element.style.transform = 'translateZ(0)';
 
-        if(type === 'bubble'){ element.style.bottom = '20px'; element.style.right = '20px'; }
+        // Force left/top positioning for mobile drag
+        if(type === 'bubble'){
+            element.style.bottom = 'auto';
+            element.style.right = 'auto';
+            element.style.bottom = '20px'; // initial fallback
+            element.style.right = '20px';
+        }
 
         let startX, startY, initX, initY;
         let isDragging = false, hasMoved = false;
@@ -113,7 +119,11 @@
             const dx = point.clientX - startX;
             const dy = point.clientY - startY;
 
-            if(!hasMoved && (Math.abs(dx) > 5 || Math.abs(dy) > 5)){ hasMoved = true; isDragging = true; clearTimeout(clickTimer); }
+            if(!hasMoved && (Math.abs(dx) > 5 || Math.abs(dy) > 5)){
+                hasMoved = true;
+                isDragging = true;
+                clearTimeout(clickTimer);
+            }
 
             if(!isDragging) return;
 
