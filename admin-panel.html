@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - GHL Theme Builder Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #eef2ff;
+            --success: #06d6a0;
+            --success-dark: #05b888;
+            --danger: #ef476f;
+            --danger-dark: #ec335f;
+            --warning: #ffd166;
+            --dark: #2b2d42;
+            --dark-light: #4a4d6d;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --gray-lighter: #f8f9fa;
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --box-shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 20px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .brand-text h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--dark), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .brand-text p {
+            color: var(--gray);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Panel Styles */
+        .panel {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .panel-title h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--success-dark);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gray-light);
+            color: var(--dark);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .btn-xs {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            border-left: 4px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--box-shadow);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--success);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--warning);
+        }
+
+        .stat-card.danger {
+            border-left-color: var(--danger);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-card .stat-icon {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .stat-card.success .stat-icon {
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--success);
+        }
+
+        .stat-card.warning .stat-icon {
+            background: rgba(255, 209, 102, 0.1);
+            color: #e6b400;
+        }
+
+        .stat-card.danger .stat-icon {
+            background: rgba(239, 71, 111, 0.1);
+            color: var(--danger);
+        }
+
+        /* Controls Bar */
+        .controls-bar {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            padding: 20px 24px;
+            background: var(--light);
+            border-bottom: 1px solid var(--gray-light);
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius-sm);
+            font-size: 14px;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius-sm);
+            font-size: 14px;
+            background: white;
+            min-width: 160px;
+            transition: var(--transition);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: var(--light);
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark);
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .data-table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid var(--gray-light);
+            font-size: 14px;
+        }
+
+        .data-table tr:hover {
+            background: var(--gray-lighter);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background: rgba(239, 71, 111, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-warning {
+            background: rgba(255, 209, 102, 0.1);
+            color: #e6b400;
+        }
+
+        .badge-info {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-light);
+            background: white;
+        }
+
+        .tab {
+            padding: 16px 24px;
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab:hover:not(.active) {
+            background: var(--gray-lighter);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--dark-light);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 16px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 600;
+            z-index: 10000;
+            box-shadow: var(--box-shadow-lg);
+            transform: translateX(150%);
+            transition: var(--transition);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 400px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        .notification.info {
+            background: var(--primary);
+        }
+
+        .notification.warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 600px;
+            max-width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--box-shadow-lg);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--gray);
+            padding: 4px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            background: var(--gray-light);
+            color: var(--dark);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius-sm);
+            font-size: 14px;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Toggle Styles */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--gray-lighter);
+            border-radius: var(--border-radius-sm);
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gray);
+            transition: var(--transition);
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: var(--success);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        .toggle-label {
+            flex: 1;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .toggle-status {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: var(--gray-light);
+            color: var(--gray);
+        }
+
+        input:checked + .toggle-slider + .toggle-label + .toggle-status {
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--success);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                flex: 1;
+                min-width: 120px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <div class="header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Admin Dashboard</h1>
+                    <p>GHL Theme Builder Pro - Agency Management</p>
+                </div>
+            </div>
+            <div class="panel-actions">
+                <button class="btn btn-outline" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh Data
+                </button>
+                <button class="btn btn-primary" id="addAgencyBtn">
+                    <i class="fas fa-plus"></i> Add Agency
+                </button>
+            </div>
+        </div>
+
+        <!-- Notification System -->
+        <div id="notificationsContainer"></div>
+
+        <!-- Stats Overview -->
+        <div class="panel">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">
+                        <div class="stat-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <span id="totalAgencies">0</span>
+                    </div>
+                    <div class="stat-label">Total Agencies</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <span id="activeAgencies">0</span>
+                    </div>
+                    <div class="stat-label">Active Agencies</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-value">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <span id="inactiveAgencies">0</span>
+                    </div>
+                    <div class="stat-label">Inactive Agencies</div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-value">
+                        <div class="stat-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        <span id="totalLocations">0</span>
+                    </div>
+                    <div class="stat-label">Total Locations</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <div class="panel">
+            <div class="tabs">
+                <div class="tab active" data-tab="agencies">Agencies</div>
+                <div class="tab" data-tab="subscriptions">Subscriptions</div>
+                <div class="tab" data-tab="locations">All Locations</div>
+            </div>
+
+            <!-- Agencies Tab -->
+            <div class="tab-content active" id="agenciesTab">
+                <!-- Controls Bar -->
+                <div class="controls-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchAgencies" placeholder="Search agencies by name or email...">
+                    </div>
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                    <select class="filter-select" id="subscriptionFilter">
+                        <option value="">All Subscriptions</option>
+                        <option value="active">Active Subscription</option>
+                        <option value="expired">Expired Subscription</option>
+                    </select>
+                </div>
+
+                <!-- Agencies Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Agency Name</th>
+                                <th>Contact Email</th>
+                                <th>Subscription</th>
+                                <th>Locations</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agenciesTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <i class="fas fa-sync-alt spinner"></i>
+                                    <h3>Loading Agencies</h3>
+                                    <p>Fetching agency data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Subscriptions Tab -->
+            <div class="tab-content" id="subscriptionsTab">
+                <!-- Controls Bar -->
+                <div class="controls-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchSubscriptions" placeholder="Search subscriptions...">
+                    </div>
+                    <select class="filter-select" id="subscriptionStatusFilter">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="expired">Expired</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <!-- Subscriptions Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Agency</th>
+                                <th>Plan</th>
+                                <th>Status</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Auto Renew</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subscriptionsTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <i class="fas fa-sync-alt spinner"></i>
+                                    <h3>Loading Subscriptions</h3>
+                                    <p>Fetching subscription data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Locations Tab -->
+            <div class="tab-content" id="locationsTab">
+                <!-- Controls Bar -->
+                <div class="controls-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchAllLocations" placeholder="Search locations by name, address, or email...">
+                    </div>
+                    <select class="filter-select" id="agencyLocationFilter">
+                        <option value="">All Agencies</option>
+                    </select>
+                    <select class="filter-select" id="themeLocationFilter">
+                        <option value="">All Locations</option>
+                        <option value="themed">With Themes</option>
+                        <option value="notheme">Without Themes</option>
+                    </select>
+                </div>
+
+                <!-- Locations Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Location Name</th>
+                                <th>Agency</th>
+                                <th>Address</th>
+                                <th>Theme</th>
+                                <th>Theme Access</th>
+                                <th>Last Active</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="locationsTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <i class="fas fa-sync-alt spinner"></i>
+                                    <h3>Loading Locations</h3>
+                                    <p>Fetching location data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Agency Modal -->
+    <div class="modal" id="agencyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="agencyModalTitle">Add New Agency</h3>
+                <button class="close-modal" onclick="closeAgencyModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Agency Name</label>
+                    <input type="text" class="form-control" id="agencyName" placeholder="Enter agency name">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Contact Email</label>
+                        <input type="email" class="form-control" id="agencyEmail" placeholder="Enter contact email">
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Phone</label>
+                        <input type="text" class="form-control" id="agencyPhone" placeholder="Enter contact phone">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>GHL API Key</label>
+                    <input type="password" class="form-control" id="agencyApiKey" placeholder="Enter GHL API Key">
+                    <div style="font-size: 12px; color: var(--gray); margin-top: 8px;">
+                        This API key will be used to access the agency's GHL account
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Subscription Plan</label>
+                        <select class="form-control" id="agencyPlan">
+                            <option value="basic">Basic</option>
+                            <option value="pro" selected>Professional</option>
+                            <option value="enterprise">Enterprise</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Subscription Duration (months)</label>
+                        <input type="number" class="form-control" id="agencyDuration" value="12" min="1" max="36">
+                    </div>
+                </div>
+                <div class="toggle-container">
+                    <label class="toggle">
+                        <input type="checkbox" id="agencyStatus" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">Active Agency</span>
+                    <span class="toggle-status" id="agencyStatusLabel">Active</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAgencyModal()">Cancel</button>
+                <button class="btn btn-danger" id="deleteAgencyBtn" style="display: none;" onclick="deleteAgency()">
+                    <i class="fas fa-trash"></i> Delete Agency
+                </button>
+                <button class="btn btn-primary" onclick="saveAgency()">
+                    <i class="fas fa-save"></i> Save Agency
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agency Details Modal -->
+    <div class="modal" id="agencyDetailsModal">
+        <div class="modal-content" style="width: 800px; max-width: 95vw;">
+            <div class="modal-header">
+                <h3 id="agencyDetailsTitle">Agency Details</h3>
+                <button class="close-modal" onclick="closeAgencyDetailsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <div class="tab active" data-tab="agency-info">Agency Info</div>
+                    <div class="tab" data-tab="agency-locations">Locations</div>
+                    <div class="tab" data-tab="agency-subscription">Subscription</div>
+                </div>
+
+                <!-- Agency Info Tab -->
+                <div class="tab-content active" id="agencyInfoTab">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Agency Name</label>
+                            <div class="form-control" style="background: var(--gray-lighter);" id="detailAgencyName">-</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Email</label>
+                            <div class="form-control" style="background: var(--gray-lighter);" id="detailAgencyEmail">-</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Contact Phone</label>
+                            <div class="form-control" style="background: var(--gray-lighter);" id="detailAgencyPhone">-</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <div class="form-control" style="background: var(--gray-lighter);" id="detailAgencyStatus">-</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Created Date</label>
+                        <div class="form-control" style="background: var(--gray-lighter);" id="detailAgencyCreated">-</div>
+                    </div>
+                </div>
+
+                <!-- Locations Tab -->
+                <div class="tab-content" id="agencyLocationsTab">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Location Name</th>
+                                    <th>Address</th>
+                                    <th>Theme</th>
+                                    <th>Theme Access</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agencyLocationsTableBody">
+                                <tr>
+                                    <td colspan="5" class="empty-state">
+                                        <i class="fas fa-sync-alt spinner"></i>
+                                        <h3>Loading Locations</h3>
+                                        <p>Fetching location data...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Subscription Tab -->
+                <div class="tab-content" id="agencySubscriptionTab">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Plan</label>
+                            <div class="form-control" style="background: var(--gray-lighter);" id="detailSubscriptionPlan">-</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <div class="form-control" style="background: var(--gray-lighter);" id="detailSubscriptionStatus">-</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <div class="form-control" style="background: var(--gray-lighter);" id="detailSubscriptionStart">-</div>
+                        </div>
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <div class="form-control" style="background: var(--gray-lighter);" id="detailSubscriptionEnd">-</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Auto Renew</label>
+                        <div class="form-control" style="background: var(--gray-lighter);" id="detailSubscriptionRenew">-</div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" onclick="manageSubscription()">
+                            <i class="fas fa-cog"></i> Manage Subscription
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAgencyDetailsModal()">Close</button>
+                <button class="btn btn-primary" onclick="editAgencyFromDetails()">
+                    <i class="fas fa-edit"></i> Edit Agency
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===========================
+        // Global Variables
+        // ===========================
+        let agencies = [];
+        let allLocations = [];
+        let currentEditingAgency = null;
+        const ADMIN_KEY = '110'; // In production, this would be handled securely
+
+        // ===========================
+        // API Call Function
+        // ===========================
+        async function apiCall(endpoint, options = {}) {
+            const baseUrl = 'https://ghlengine-production.up.railway.app/api';
+            const url = `${baseUrl}${endpoint}`;
+
+            const config = {
+                method: options.method || 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${ADMIN_KEY}`,
+                    ...options.headers
+                }
+            };
+
+            if (options.body && config.method !== 'GET') {
+                config.body = JSON.stringify(options.body);
+            }
+
+            try {
+                console.log(`🔄 API Call: ${config.method} ${endpoint}`, config);
+                const response = await fetch(url, config);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`❌ API Error ${response.status}:`, errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log(`✅ API Response from ${endpoint}:`, data);
+                return data;
+            } catch (error) {
+                console.error(`❌ API Call Failed:`, error);
+                throw error;
+            }
+        }
+
+        // ===========================
+        // Notification System
+        // ===========================
+        function showNotification(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('notificationsContainer');
+            if (!container) return;
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(notification);
+
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) notification.parentNode.removeChild(notification);
+                }, 300);
+            }, duration);
+        }
+
+        // ===========================
+        // Load Agencies
+        // ===========================
+        async function loadAgencies() {
+            try {
+                showNotification('🔄 Loading agencies...', 'info');
+                
+                // This would be a real API call in production
+                // const response = await apiCall('/admin/agencies');
+                
+                // Simulate API response
+                setTimeout(() => {
+                    // Mock data for demonstration
+                    agencies = [
+                        {
+                            id: 'agency-1',
+                            name: 'Digital Marketing Pros',
+                            email: 'contact@digitalpros.com',
+                            phone: '+1 (555) 123-4567',
+                            apiKey: '********',
+                            status: 'active',
+                            subscription: {
+                                plan: 'pro',
+                                status: 'active',
+                                startDate: '2023-01-15',
+                                endDate: '2024-01-15',
+                                autoRenew: true
+                            },
+                            locations: 12,
+                            createdAt: '2023-01-15T00:00:00Z'
+                        },
+                        {
+                            id: 'agency-2',
+                            name: 'Web Solutions Inc',
+                            email: 'info@websolutions.com',
+                            phone: '+1 (555) 987-6543',
+                            apiKey: '********',
+                            status: 'active',
+                            subscription: {
+                                plan: 'basic',
+                                status: 'active',
+                                startDate: '2023-03-20',
+                                endDate: '2023-09-20',
+                                autoRenew: false
+                            },
+                            locations: 5,
+                            createdAt: '2023-03-20T00:00:00Z'
+                        },
+                        {
+                            id: 'agency-3',
+                            name: 'Tech Innovators',
+                            email: 'support@techinnovators.com',
+                            phone: '+1 (555) 456-7890',
+                            apiKey: '********',
+                            status: 'inactive',
+                            subscription: {
+                                plan: 'enterprise',
+                                status: 'expired',
+                                startDate: '2022-11-10',
+                                endDate: '2023-05-10',
+                                autoRenew: false
+                            },
+                            locations: 23,
+                            createdAt: '2022-11-10T00:00:00Z'
+                        }
+                    ];
+                    
+                    displayAgencies();
+                    updateGlobalStats();
+                    showNotification(`✅ Loaded ${agencies.length} agencies`, 'success');
+                }, 1000);
+                
+            } catch (error) {
+                console.error('❌ Failed to load agencies:', error);
+                showNotification(`❌ Error loading agencies: ${error.message}`, 'error');
+                const container = document.getElementById('agenciesTableBody');
+                if (container) container.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Failed to Load Agencies</h3>
+                            <p>${error.message}</p>
+                            <button class="btn btn-primary" onclick="loadAgencies()">
+                                <i class="fas fa-sync-alt"></i> Try Again
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // ===========================
+        // Display Agencies
+        // ===========================
+        function displayAgencies() {
+            const container = document.getElementById('agenciesTableBody');
+            if (!container) return;
+
+            if (agencies.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-building"></i>
+                            <h3>No Agencies Found</h3>
+                            <p>No agencies have been registered yet.</p>
+                            <button class="btn btn-primary" onclick="openAgencyModal()">
+                                <i class="fas fa-plus"></i> Add First Agency
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            container.innerHTML = agencies.map(agency => {
+                const statusBadge = agency.status === 'active' 
+                    ? '<span class="badge badge-success">Active</span>' 
+                    : '<span class="badge badge-danger">Inactive</span>';
+                
+                const subscriptionBadge = agency.subscription.status === 'active'
+                    ? '<span class="badge badge-success">Active</span>'
+                    : agency.subscription.status === 'expired'
+                    ? '<span class="badge badge-danger">Expired</span>'
+                    : '<span class="badge badge-warning">Cancelled</span>';
+                
+                return `
+                <tr>
+                    <td>
+                        <div style="font-weight: 600;">${agency.name}</div>
+                        <div style="font-size: 12px; color: var(--gray);">ID: ${agency.id}</div>
+                    </td>
+                    <td>${agency.email}</td>
+                    <td>
+                        <div>${agency.subscription.plan.charAt(0).toUpperCase() + agency.subscription.plan.slice(1)}</div>
+                        <div style="font-size: 12px;">${subscriptionBadge}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">${agency.locations}</div>
+                        <div style="font-size: 12px; color: var(--gray);">locations</div>
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td>${new Date(agency.createdAt).toLocaleDateString()}</td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-outline btn-xs" onclick="viewAgencyDetails('${agency.id}')">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="btn btn-outline btn-xs" onclick="editAgency('${agency.id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-danger btn-xs" onclick="toggleAgencyStatus('${agency.id}')">
+                                <i class="fas fa-power-off"></i> ${agency.status === 'active' ? 'Deactivate' : 'Activate'}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        // ===========================
+        // Update Global Stats
+        // ===========================
+        function updateGlobalStats() {
+            const totalAgencies = agencies.length;
+            const activeAgencies = agencies.filter(a => a.status === 'active').length;
+            const inactiveAgencies = agencies.filter(a => a.status === 'inactive').length;
+            const totalLocations = agencies.reduce((sum, agency) => sum + agency.locations, 0);
+
+            document.getElementById('totalAgencies').textContent = totalAgencies;
+            document.getElementById('activeAgencies').textContent = activeAgencies;
+            document.getElementById('inactiveAgencies').textContent = inactiveAgencies;
+            document.getElementById('totalLocations').textContent = totalLocations;
+        }
+
+        // ===========================
+        // Agency Modal Functions
+        // ===========================
+        function openAgencyModal(agencyId = null) {
+            currentEditingAgency = agencyId;
+            const modal = document.getElementById('agencyModal');
+            const title = document.getElementById('agencyModalTitle');
+            const deleteBtn = document.getElementById('deleteAgencyBtn');
+
+            if (agencyId) {
+                const agency = agencies.find(a => a.id === agencyId);
+                if (agency) {
+                    title.textContent = 'Edit Agency';
+                    deleteBtn.style.display = 'inline-flex';
+                    populateAgencyForm(agency);
+                }
+            } else {
+                title.textContent = 'Add New Agency';
+                deleteBtn.style.display = 'none';
+                resetAgencyForm();
+            }
+
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+            }
+        }
+
+        function closeAgencyModal() {
+            const modal = document.getElementById('agencyModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.style.display = 'none', 300);
+            }
+            currentEditingAgency = null;
+        }
+
+        function populateAgencyForm(agency) {
+            document.getElementById('agencyName').value = agency.name || '';
+            document.getElementById('agencyEmail').value = agency.email || '';
+            document.getElementById('agencyPhone').value = agency.phone || '';
+            document.getElementById('agencyApiKey').value = agency.apiKey || '';
+            document.getElementById('agencyPlan').value = agency.subscription?.plan || 'pro';
+            document.getElementById('agencyDuration').value = 12; // Default duration
+            
+            const statusCheckbox = document.getElementById('agencyStatus');
+            if (statusCheckbox) {
+                statusCheckbox.checked = agency.status === 'active';
+                updateToggleStatus('agencyStatus');
+            }
+        }
+
+        function resetAgencyForm() {
+            document.getElementById('agencyName').value = '';
+            document.getElementById('agencyEmail').value = '';
+            document.getElementById('agencyPhone').value = '';
+            document.getElementById('agencyApiKey').value = '';
+            document.getElementById('agencyPlan').value = 'pro';
+            document.getElementById('agencyDuration').value = 12;
+            
+            const statusCheckbox = document.getElementById('agencyStatus');
+            if (statusCheckbox) {
+                statusCheckbox.checked = true;
+                updateToggleStatus('agencyStatus');
+            }
+        }
+
+        async function saveAgency() {
+            const name = document.getElementById('agencyName').value.trim();
+            const email = document.getElementById('agencyEmail').value.trim();
+            const phone = document.getElementById('agencyPhone').value.trim();
+            const apiKey = document.getElementById('agencyApiKey').value.trim();
+            const plan = document.getElementById('agencyPlan').value;
+            const duration = document.getElementById('agencyDuration').value;
+            const status = document.getElementById('agencyStatus').checked ? 'active' : 'inactive';
+
+            if (!name || !email || !apiKey) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                showNotification('💾 Saving agency...', 'info');
+
+                // This would be a real API call in production
+                // const response = await apiCall(currentEditingAgency ? `/admin/agencies/${currentEditingAgency}` : '/admin/agencies', {
+                //     method: currentEditingAgency ? 'PUT' : 'POST',
+                //     body: { name, email, phone, apiKey, plan, duration, status }
+                // });
+
+                // Simulate API response
+                setTimeout(() => {
+                    if (currentEditingAgency) {
+                        // Update existing agency
+                        const index = agencies.findIndex(a => a.id === currentEditingAgency);
+                        if (index !== -1) {
+                            agencies[index] = {
+                                ...agencies[index],
+                                name,
+                                email,
+                                phone,
+                                apiKey,
+                                status,
+                                subscription: {
+                                    ...agencies[index].subscription,
+                                    plan
+                                }
+                            };
+                        }
+                        showNotification('✅ Agency updated successfully!', 'success');
+                    } else {
+                        // Create new agency
+                        const newAgency = {
+                            id: 'agency-' + (agencies.length + 1),
+                            name,
+                            email,
+                            phone,
+                            apiKey,
+                            status,
+                            subscription: {
+                                plan,
+                                status: 'active',
+                                startDate: new Date().toISOString().split('T')[0],
+                                endDate: new Date(Date.now() + duration * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                                autoRenew: true
+                            },
+                            locations: 0,
+                            createdAt: new Date().toISOString()
+                        };
+                        agencies.push(newAgency);
+                        showNotification('✅ Agency created successfully!', 'success');
+                    }
+
+                    displayAgencies();
+                    updateGlobalStats();
+                    closeAgencyModal();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Save agency error:', error);
+                showNotification(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function editAgency(agencyId) {
+            openAgencyModal(agencyId);
+        }
+
+        async function deleteAgency() {
+            if (!currentEditingAgency) return;
+
+            const agency = agencies.find(a => a.id === currentEditingAgency);
+            if (!agency) return;
+
+            const confirmDelete = confirm(`Are you sure you want to delete the agency "${agency.name}"? This action cannot be undone.`);
+            if (!confirmDelete) return;
+
+            try {
+                showNotification('🗑️ Deleting agency...', 'info');
+
+                // This would be a real API call in production
+                // const response = await apiCall(`/admin/agencies/${currentEditingAgency}`, {
+                //     method: 'DELETE'
+                // });
+
+                // Simulate API response
+                setTimeout(() => {
+                    agencies = agencies.filter(a => a.id !== currentEditingAgency);
+                    showNotification('✅ Agency deleted successfully!', 'success');
+                    displayAgencies();
+                    updateGlobalStats();
+                    closeAgencyModal();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Delete agency error:', error);
+                showNotification(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function toggleAgencyStatus(agencyId) {
+            const agency = agencies.find(a => a.id === agencyId);
+            if (!agency) return;
+
+            const newStatus = agency.status === 'active' ? 'inactive' : 'active';
+            const confirmToggle = confirm(`Are you sure you want to ${newStatus === 'active' ? 'activate' : 'deactivate'} the agency "${agency.name}"?`);
+            if (!confirmToggle) return;
+
+            try {
+                showNotification('⚙️ Updating agency status...', 'info');
+
+                // This would be a real API call in production
+                // const response = await apiCall(`/admin/agencies/${agencyId}/status`, {
+                //     method: 'PUT',
+                //     body: { status: newStatus }
+                // });
+
+                // Simulate API response
+                setTimeout(() => {
+                    const index = agencies.findIndex(a => a.id === agencyId);
+                    if (index !== -1) {
+                        agencies[index].status = newStatus;
+                    }
+                    showNotification(`✅ Agency ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully!`, 'success');
+                    displayAgencies();
+                    updateGlobalStats();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Toggle agency status error:', error);
+                showNotification(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // ===========================
+        // Agency Details Modal
+        // ===========================
+        function viewAgencyDetails(agencyId) {
+            currentEditingAgency = agencyId;
+            const agency = agencies.find(a => a.id === agencyId);
+            if (!agency) return;
+
+            // Set agency info
+            document.getElementById('detailAgencyName').textContent = agency.name;
+            document.getElementById('detailAgencyEmail').textContent = agency.email;
+            document.getElementById('detailAgencyPhone').textContent = agency.phone || 'Not provided';
+            document.getElementById('detailAgencyStatus').textContent = agency.status.charAt(0).toUpperCase() + agency.status.slice(1);
+            document.getElementById('detailAgencyCreated').textContent = new Date(agency.createdAt).toLocaleDateString();
+
+            // Set subscription info
+            document.getElementById('detailSubscriptionPlan').textContent = agency.subscription.plan.charAt(0).toUpperCase() + agency.subscription.plan.slice(1);
+            document.getElementById('detailSubscriptionStatus').textContent = agency.subscription.status.charAt(0).toUpperCase() + agency.subscription.status.slice(1);
+            document.getElementById('detailSubscriptionStart').textContent = new Date(agency.subscription.startDate).toLocaleDateString();
+            document.getElementById('detailSubscriptionEnd').textContent = new Date(agency.subscription.endDate).toLocaleDateString();
+            document.getElementById('detailSubscriptionRenew').textContent = agency.subscription.autoRenew ? 'Yes' : 'No';
+
+            // Load agency locations (mock data)
+            loadAgencyLocations(agencyId);
+
+            const modal = document.getElementById('agencyDetailsModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+            }
+        }
+
+        function closeAgencyDetailsModal() {
+            const modal = document.getElementById('agencyDetailsModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.style.display = 'none', 300);
+            }
+            currentEditingAgency = null;
+        }
+
+        function loadAgencyLocations(agencyId) {
+            // Mock data for agency locations
+            const mockLocations = [
+                {
+                    id: 'loc-1',
+                    name: 'Main Office',
+                    address: '123 Business Ave, New York, NY',
+                    theme: 'Professional Blue',
+                    themeAccess: true
+                },
+                {
+                    id: 'loc-2',
+                    name: 'Downtown Branch',
+                    address: '456 Commerce St, New York, NY',
+                    theme: 'Professional Blue',
+                    themeAccess: true
+                },
+                {
+                    id: 'loc-3',
+                    name: 'Uptown Location',
+                    address: '789 Market Rd, New York, NY',
+                    theme: 'None',
+                    themeAccess: false
+                }
+            ];
+
+            const container = document.getElementById('agencyLocationsTableBody');
+            if (container) {
+                container.innerHTML = mockLocations.map(location => {
+                    const themeBadge = location.theme !== 'None' 
+                        ? `<span class="badge badge-success">${location.theme}</span>`
+                        : `<span class="badge badge-danger">No Theme</span>`;
+                    
+                    const accessBadge = location.themeAccess
+                        ? '<span class="badge badge-success">Enabled</span>'
+                        : '<span class="badge badge-danger">Disabled</span>';
+                    
+                    return `
+                    <tr>
+                        <td>${location.name}</td>
+                        <td>${location.address}</td>
+                        <td>${themeBadge}</td>
+                        <td>${accessBadge}</td>
+                        <td>
+                            <button class="btn btn-outline btn-xs">
+                                <i class="fas fa-cog"></i> Manage
+                            </button>
+                        </td>
+                    </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function editAgencyFromDetails() {
+            closeAgencyDetailsModal();
+            openAgencyModal(currentEditingAgency);
+        }
+
+        function manageSubscription() {
+            showNotification('🔧 Subscription management would open here', 'info');
+        }
+
+        // ===========================
+        // Toggle Status Helper
+        // ===========================
+        function updateToggleStatus(toggleId) {
+            const checkbox = document.getElementById(toggleId);
+            const status = document.getElementById(`${toggleId}Label`);
+            if (checkbox && status) {
+                status.textContent = checkbox.checked ? 'Active' : 'Inactive';
+                status.style.background = checkbox.checked ? 'rgba(6, 214, 160, 0.1)' : 'var(--gray-light)';
+                status.style.color = checkbox.checked ? 'var(--success)' : 'var(--gray)';
+            }
+        }
+
+        // ===========================
+        // Tab Management
+        // ===========================
+        function setupTabs() {
+            // Main tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Update active content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+
+            // Modal tabs
+            document.querySelectorAll('#agencyDetailsModal .tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    document.querySelectorAll('#agencyDetailsModal .tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Update active content
+                    document.querySelectorAll('#agencyDetailsModal .tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+        }
+
+        // ===========================
+        // Event Listeners & Initialization
+        // ===========================
+        function initEventListeners() {
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                loadAgencies();
+            });
+
+            document.getElementById('addAgencyBtn').addEventListener('click', () => {
+                openAgencyModal();
+            });
+
+            // Toggle status listeners
+            document.getElementById('agencyStatus').addEventListener('change', () => {
+                updateToggleStatus('agencyStatus');
+            });
+
+            // Modal close on backdrop click
+            window.addEventListener('click', (event) => {
+                const modals = ['agencyModal', 'agencyDetailsModal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (modal && event.target === modal) {
+                        if (modalId === 'agencyModal') closeAgencyModal();
+                        if (modalId === 'agencyDetailsModal') closeAgencyDetailsModal();
+                    }
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Initializing Admin Dashboard...');
+            initEventListeners();
+            setupTabs();
+            loadAgencies();
+            showNotification('🎉 Admin Dashboard is ready!', 'success');
+        });
+    </script>
+</body>
+</html>
