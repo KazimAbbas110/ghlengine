@@ -890,152 +890,91 @@
             color: var(--primary);
         }
 
-        /* GHL Theme Preview Styles */
-        .ghl-preview-container {
-            border: 1px solid var(--gray-light);
-            border-radius: var(--border-radius-sm);
-            overflow: hidden;
-            margin-top: 8px;
-            background: white;
-            height: 300px;
-        }
-
-        .ghl-live-preview {
+        /* Access Restricted Overlay */
+        .access-restricted {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            z-index: 9999;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
             font-family: 'Inter', sans-serif;
         }
 
-        .ghl-sidebar {
-            width: 280px;
-            display: flex;
-            flex-direction: column;
-            background: #f8f9fa;
-            border-right: 1px solid #e9ecef;
+        .access-restricted.hidden {
+            display: none;
         }
 
-        .ghl-sidebar-header {
-            padding: 20px;
-            background: white;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .access-restricted i {
+            font-size: 60px;
+            color: #ef476f;
+            margin-bottom: 20px;
         }
 
-        .ghl-sidebar-nav {
-            flex: 1;
-            padding: 16px 0;
-        }
-
-        .ghl-nav-item {
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: var(--transition);
-            margin: 4px 12px;
-            border-radius: 6px;
-        }
-
-        .ghl-nav-item:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-
-        .ghl-nav-item.active {
-            background: rgba(67, 97, 238, 0.1);
-        }
-
-        .ghl-nav-title {
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .ghl-main-content {
-            flex: 1;
-            padding: 24px;
-            background: white;
-            overflow-y: auto;
-        }
-
-        .ghl-card {
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
-        .ghl-card-header {
-            padding: 16px 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .ghl-card-body {
-            padding: 20px;
-        }
-
-        .ghl-btn {
-            padding: 10px 20px;
-            border-radius: 6px;
-            border: none;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 14px;
-        }
-
-        .ghl-btn-primary {
-            background: #4361ee;
+        .access-restricted h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
             color: white;
         }
 
-        .ghl-btn-primary:hover {
-            background: #3a56d4;
-        }
-
-        .ghl-search-bar {
-            padding: 12px 16px;
-            background: white;
-            border-radius: 6px;
-            margin: 12px;
-            border: 1px solid #e9ecef;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .ghl-search-placeholder {
-            color: #6c757d;
-            font-size: 14px;
-        }
-
-        .ghl-location-switcher {
-            padding: 16px;
-            background: white;
-            margin: 12px;
-            border-radius: 6px;
-            border: 1px solid #e9ecef;
-        }
-
-        .ghl-switcher-loc-name {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .ghl-switcher-loc-city {
-            font-size: 12px;
-            color: #6c757d;
+        .access-restricted p {
+            font-size: 16px;
+            color: #e9ecef;
+            margin-bottom: 25px;
+            max-width: 500px;
+            line-height: 1.5;
         }
     </style>
 </head>
 <body>
-    <div class="dashboard">
+    <!-- ===========================
+    🔒 Access Restricted Overlay
+    =========================== -->
+    <div id="accessRestrictedOverlay" class="access-restricted">
+        <i class="fas fa-lock"></i>
+        <h1>Access Restricted</h1>
+        <p id="accessRestrictedMessage">Your subscription is inactive. Please enter your API key to regain access.</p>
+        <div style="max-width: 500px; width: 100%; margin-top: 20px;">
+            <!-- API Key Form -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-key"></i>
+                        <h2>Connect Your GHL Account</h2>
+                    </div>
+                </div>
+                <div style="padding: 24px;">
+                    <div class="form-group">
+                        <label style="color: var(--dark);">Agency Name</label>
+                        <input type="text" class="form-control" id="agencyNameInput" placeholder="Enter your agency name">
+                    </div>
+                    <div class="form-group">
+                        <label style="color: var(--dark);">GHL API Key</label>
+                        <input type="password" class="form-control" id="ghlApiKeyInput" placeholder="Enter your GHL API Key">
+                        <div style="font-size: 12px; color: var(--gray); margin-top: 8px;">
+                            You can find your API key in your GHL dashboard under Settings > API
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center; margin-top: 20px;">
+                        <button class="btn btn-primary" onclick="saveGhlApiKey()">
+                            <i class="fas fa-save"></i> Save API Key
+                        </button>
+                        <span id="saveKeyMessage" style="font-size: 14px;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard" id="mainDashboard" style="display: none;">
         <!-- Header -->
         <div class="header">
             <div class="brand">
@@ -1057,40 +996,11 @@
             </div>
         </div>
 
-        <!-- API Key Setup Section -->
-        <div class="panel" id="apiKeyPanel" style="display: none;">
-            <div class="panel-header">
-                <div class="panel-title">
-                    <i class="fas fa-key"></i>
-                    <h2>Connect Your GHL Account</h2>
-                </div>
-            </div>
-            <div style="padding: 24px;">
-                <div class="form-group">
-                    <label>Agency Name</label>
-                    <input type="text" class="form-control" id="agencyNameInput" placeholder="Enter your agency name">
-                </div>
-                <div class="form-group">
-                    <label>GHL API Key</label>
-                    <input type="password" class="form-control" id="ghlApiKeyInput" placeholder="Enter your GHL API Key">
-                    <div style="font-size: 12px; color: var(--gray); margin-top: 8px;">
-                        You can find your API key in your GHL dashboard under Settings > API
-                    </div>
-                </div>
-                <div style="display: flex; gap: 12px; align-items: center; margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="saveGhlApiKey()">
-                        <i class="fas fa-save"></i> Save API Key
-                    </button>
-                    <span id="saveKeyMessage" style="font-size: 14px;"></span>
-                </div>
-            </div>
-        </div>
-
         <!-- Notification System -->
         <div id="notificationsContainer"></div>
 
         <!-- Stats Overview -->
-        <div class="panel" id="mainPanel" style="display: none;">
+        <div class="panel">
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value">
@@ -1132,7 +1042,7 @@
         </div>
 
         <!-- Main Content Tabs -->
-        <div class="panel" id="dashboardPanel" style="display: none;">
+        <div class="panel">
             <div class="panel-header">
                 <div class="panel-title">
                     <i class="fas fa-cogs"></i>
@@ -1490,37 +1400,6 @@
         </div>
     </div>
 
-    <!-- ===========================
-    🔒 Access Restricted Overlay
-    =========================== -->
-    <div id="accessRestrictedOverlay" style="
-        display: none; 
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        width: 100%; 
-        height: 100%; 
-        background: rgba(0,0,0,0.9); 
-        color: white; 
-        z-index: 9999; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        justify-content: center; 
-        text-align: center; 
-        padding: 40px; 
-        font-family: 'Inter', sans-serif;">
-        
-        <i class="fas fa-lock" style="font-size: 60px; color: #ef476f; margin-bottom: 20px;"></i>
-        <h1 style="font-size: 28px; margin-bottom: 10px; color: white;">Access Restricted</h1>
-        <p id="accessRestrictedMessage" style="font-size: 16px; color: #e9ecef; margin-bottom: 25px; max-width: 500px; line-height: 1.5;">
-            Your subscription is inactive. Please renew to regain access.
-        </p>
-        <button onclick="location.reload()" class="btn btn-primary" style="padding: 12px 24px; font-size: 15px;">
-            <i class="fas fa-sync-alt"></i> Retry Connection
-        </button>
-    </div>
-
     <script>
         // ===========================
         // Global Variables
@@ -1534,7 +1413,7 @@
         // API Call Function (with agency authentication)
         // ===========================
         async function apiCall(endpoint, options = {}) {
-            const baseUrl = 'crm-theme-production.up.railway.app/api';
+            const baseUrl = 'https://ghlengine-production.up.railway.app/api';
             const url = `${baseUrl}${endpoint}`;
 
             // Get agency API key from localStorage
@@ -1616,13 +1495,16 @@
         }
 
         // ===========================
-        // Lock Screen Helper
+        // Access Restricted Functions
         // ===========================
-        function showAccessRestricted(message = 'Access restricted. Please contact support.') {
+        function showAccessRestricted(message = 'Your subscription is inactive. Please enter your API key to regain access.') {
             const overlay = document.getElementById('accessRestrictedOverlay');
             const msgEl = document.getElementById('accessRestrictedMessage');
+            const mainDashboard = document.getElementById('mainDashboard');
+            
             if (msgEl) msgEl.textContent = message;
-            if (overlay) overlay.style.display = 'flex';
+            if (overlay) overlay.classList.remove('hidden');
+            if (mainDashboard) mainDashboard.style.display = 'none';
 
             // Disable scrolling and interactions
             document.body.style.overflow = 'hidden';
@@ -1630,7 +1512,11 @@
 
         function hideAccessRestricted() {
             const overlay = document.getElementById('accessRestrictedOverlay');
-            if (overlay) overlay.style.display = 'none';
+            const mainDashboard = document.getElementById('mainDashboard');
+            
+            if (overlay) overlay.classList.add('hidden');
+            if (mainDashboard) mainDashboard.style.display = 'block';
+            
             document.body.style.overflow = '';
         }
 
@@ -1667,10 +1553,8 @@
                     localStorage.setItem('agency_api_key', ghlApiKey);
                     localStorage.setItem('agency_name', agencyName);
 
-                    // Hide API key panel and show main dashboard
-                    document.getElementById('apiKeyPanel').style.display = 'none';
-                    document.getElementById('mainPanel').style.display = 'block';
-                    document.getElementById('dashboardPanel').style.display = 'block';
+                    // Hide access restricted and show main dashboard
+                    hideAccessRestricted();
                     
                     showNotification('✅ GHL account connected! Loading your locations...', 'success');
                     
@@ -1696,26 +1580,13 @@
             const agencyApiKey = localStorage.getItem('agency_api_key');
             const agencyName = localStorage.getItem('agency_name');
             
-            const apiKeyPanel = document.getElementById('apiKeyPanel');
-            const mainPanel = document.getElementById('mainPanel');
-            const dashboardPanel = document.getElementById('dashboardPanel');
-            
             if (agencyApiKey && agencyName) {
-                // We have credentials, hide API key panel
-                if (apiKeyPanel) apiKeyPanel.style.display = 'none';
-                if (mainPanel) mainPanel.style.display = 'block';
-                if (dashboardPanel) dashboardPanel.style.display = 'block';
-                
-                // Pre-fill the form if they need to update
-                document.getElementById('agencyNameInput').value = agencyName;
-                document.getElementById('ghlApiKeyInput').value = agencyApiKey;
-                
+                // We have credentials, hide API key panel and show main dashboard
+                hideAccessRestricted();
                 return true;
             } else {
-                // No credentials, show API key panel
-                if (apiKeyPanel) apiKeyPanel.style.display = 'block';
-                if (mainPanel) mainPanel.style.display = 'none';
-                if (dashboardPanel) dashboardPanel.style.display = 'none';
+                // No credentials, show access restricted overlay
+                showAccessRestricted();
                 return false;
             }
         }
@@ -1837,7 +1708,7 @@
                                 ` : ''}
                             </div>
                         </div>
-                    `}).join('')}
+                    `}).join('');
                 </div>
             `;
         }
@@ -1959,7 +1830,7 @@
                                 ` : ''}
                             </div>
                         </div>
-                    `}).join('')}
+                    `}).join('');
                 </div>
             `;
         }
